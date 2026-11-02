@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1070" width="1120" height="1070" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B6862"/></marker></defs>
+<rect x="0" y="0" width="1120" height="1070" rx="18" fill="#FFFFFF"/>
+<text x="310.0" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#7A4B00">You <tspan font-weight="400" fill="#8A867F">· 你</tspan></text>
+<text x="670.0" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#7A3418">Claude (desktop app) <tspan font-weight="400" fill="#8A867F">· Claude 桌面端</tspan></text>
+<text x="1000.0" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#23426E">Services <tspan font-weight="400" fill="#8A867F">· 外部服务</tspan></text>
+<rect x="12" y="64" width="1096" height="288" rx="12" fill="#FAF9F7"/>
+<text x="28" y="94" font-size="14" font-weight="700" fill="#3B3934">1</text>
+<text x="28" y="116" font-size="13" font-weight="600" fill="#3B3934">Set up once</text>
+<text x="28" y="137" font-size="12" fill="#8A867F">一次性配置</text>
+<rect x="12" y="364" width="1096" height="184" rx="12" fill="#F4F2EE"/>
+<text x="28" y="394" font-size="14" font-weight="700" fill="#3B3934">2</text>
+<text x="28" y="416" font-size="13" font-weight="600" fill="#3B3934">Every morning</text>
+<text x="28" y="433" font-size="13" font-weight="600" fill="#3B3934">automatic</text>
+<text x="28" y="454" font-size="12" fill="#8A867F">每天早上 · 自动</text>
+<rect x="12" y="560" width="1096" height="376" rx="12" fill="#FAF9F7"/>
+<text x="28" y="590" font-size="14" font-weight="700" fill="#3B3934">3</text>
+<text x="28" y="612" font-size="13" font-weight="600" fill="#3B3934">Apply session</text>
+<text x="28" y="629" font-size="13" font-weight="600" fill="#3B3934">with you</text>
+<text x="28" y="650" font-size="12" fill="#8A867F">投递 · 你在场</text>
+<rect x="12" y="948" width="1096" height="92" rx="12" fill="#F4F2EE"/>
+<text x="28" y="978" font-size="14" font-weight="700" fill="#3B3934">4</text>
+<text x="28" y="1000" font-size="13" font-weight="600" fill="#3B3934">Every week</text>
+<text x="28" y="1021" font-size="12" fill="#8A867F">每周</text>
+<path d="M450,113 L510,113" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M450,208 L510,208" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M830,208 L890,208" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M450,303 L510,303" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M670,148 L670,173" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M670,243 L670,268" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M670,338 L670,376" fill="none" stroke="#6B6862" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+<text x="678" y="361" font-size="11" fill="#6B6862" text-anchor="start" font-style="italic">schedule</text>
+<path d="M830,411 L890,411" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M670,446 L670,467" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M890,502 L830,502" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M670,537 L670,585" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M510,610 L450,610" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M450,624 L480,624 L480,689 L510,689" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M510,703 L450,703" fill="none" stroke="#6B6862" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arr)"/>
+<text x="480" y="720" font-size="11" fill="#6B6862" text-anchor="middle" font-style="italic">if needed</text>
+<path d="M670,738 L670,771" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M510,796 L450,796" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M450,810 L480,810 L480,872 L510,872" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M830,886 L890,886" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M830,994 L890,994" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<rect x="170" y="78" width="280" height="70" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="310.0" y="101" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Drop CVs + certificates,</text>
+<text x="310.0" y="117" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">answer the questionnaire</text>
+<text x="310.0" y="134" text-anchor="middle" font-size="11.5" fill="#6F6B64">上传简历证书，回答问卷</text>
+<rect x="510" y="78" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="101" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Build knowledge base</text>
+<text x="670.0" y="117" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">+ config/profile.yaml</text>
+<text x="670.0" y="134" text-anchor="middle" font-size="11.5" fill="#6F6B64">建立知识库与个人档案</text>
+<rect x="170" y="173" width="280" height="70" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="310.0" y="196" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Create Notion token +</text>
+<text x="310.0" y="212" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Gmail app password</text>
+<text x="310.0" y="229" text-anchor="middle" font-size="11.5" fill="#6F6B64">创建 Notion token 与 Gmail 应用密码</text>
+<rect x="510" y="173" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="196" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Create tracker database,</text>
+<text x="670.0" y="212" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Gmail label "applications"</text>
+<text x="670.0" y="229" text-anchor="middle" font-size="11.5" fill="#6F6B64">建 Notion 表、Gmail 标签</text>
+<rect x="890" y="183" width="220" height="50" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
+<text x="1000.0" y="212" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">Notion · Gmail</text>
+<rect x="170" y="268" width="280" height="70" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="310.0" y="291" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Log in to job sites in</text>
+<text x="310.0" y="307" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Claude's browser, allow uploads</text>
+<text x="310.0" y="324" text-anchor="middle" font-size="11.5" fill="#6F6B64">在 Claude 浏览器登录各平台，开上传权限</text>
+<rect x="510" y="268" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="291" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Check setup, schedule</text>
+<text x="670.0" y="307" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">daily + weekly tasks</text>
+<text x="670.0" y="324" text-anchor="middle" font-size="11.5" fill="#6F6B64">检查配置，创建定时任务</text>
+<rect x="510" y="376" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="399" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Mail sync: classify emails,</text>
+<text x="670.0" y="415" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">update status, add label</text>
+<text x="670.0" y="432" text-anchor="middle" font-size="11.5" fill="#6F6B64">邮件同步：分类、更新状态、打标签</text>
+<rect x="890" y="386" width="220" height="50" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
+<text x="1000.0" y="407" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">Gmail → Notion</text>
+<text x="1000.0" y="424" text-anchor="middle" font-size="11.5" fill="#6F6B64">确认信 · 面试 · 拒信</text>
+<rect x="510" y="467" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="490" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Scan · dedupe · filter</text>
+<text x="670.0" y="506" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">(company size, cover letter …)</text>
+<text x="670.0" y="523" text-anchor="middle" font-size="11.5" fill="#6F6B64">扫描、去重、按规则筛选</text>
+<rect x="890" y="471" width="220" height="62" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
+<text x="1000.0" y="498" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">LinkedIn · StepStone</text>
+<text x="1000.0" y="514" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">Indeed · Xing</text>
+<rect x="510" y="585" width="320" height="50" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="606" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Shortlist table in chat</text>
+<text x="670.0" y="623" text-anchor="middle" font-size="11.5" fill="#6F6B64">聊天里给出精选岗位表</text>
+<rect x="170" y="585" width="280" height="50" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="310.0" y="606" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Pick jobs  ("1, 3, 5")</text>
+<text x="310.0" y="623" text-anchor="middle" font-size="11.5" fill="#6F6B64">选择要投的岗位</text>
+<rect x="510" y="668" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="691" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Prefill each job to its review</text>
+<text x="670.0" y="707" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">page: CV choice, answers, uploads</text>
+<text x="670.0" y="724" text-anchor="middle" font-size="11.5" fill="#6F6B64">逐个填到确认页：选简历、答题、上传</text>
+<rect x="170" y="678" width="280" height="50" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="310.0" y="699" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">CAPTCHA · account · missing file</text>
+<text x="310.0" y="716" text-anchor="middle" font-size="11.5" fill="#6F6B64">验证码 / 注册 / 缺材料 → 你来</text>
+<rect x="510" y="771" width="320" height="50" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="792" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Ready list</text>
+<text x="670.0" y="809" text-anchor="middle" font-size="11.5" fill="#6F6B64">待提交清单</text>
+<rect x="170" y="771" width="280" height="50" rx="10" fill="#E9F6EE" stroke="#2E9650" stroke-width="2.4"/>
+<text x="310.0" y="792" text-anchor="middle" font-size="13" font-weight="600" fill="#145A2B">Confirm once  ✓</text>
+<text x="310.0" y="809" text-anchor="middle" font-size="11.5" fill="#6F6B64">确认一次</text>
+<rect x="510" y="861" width="320" height="50" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="882" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Submit all, log each row</text>
+<text x="670.0" y="899" text-anchor="middle" font-size="11.5" fill="#6F6B64">全部提交并逐条记录</text>
+<rect x="890" y="851" width="220" height="70" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
+<text x="1000.0" y="874" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">Platforms + company portals</text>
+<text x="1000.0" y="890" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">Notion tracker</text>
+<text x="1000.0" y="907" text-anchor="middle" font-size="11.5" fill="#6F6B64">平台与公司官网 · Notion</text>
+<rect x="510" y="959" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="670.0" y="982" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Refresh Notion charts +</text>
+<text x="670.0" y="998" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">interactive dashboard</text>
+<text x="670.0" y="1015" text-anchor="middle" font-size="11.5" fill="#6F6B64">刷新 Notion 图表与交互看板</text>
+<rect x="890" y="969" width="220" height="50" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
+<text x="1000.0" y="998" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">Notion page · claude.ai</text>
+</svg>

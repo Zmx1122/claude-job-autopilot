@@ -1,0 +1,360 @@
+<meta name="dash-one-writer">
+<style>
+/* Layout: one column of cards on a quiet panel grid; serif for the headline numbers, sans for everything else. */
+.js-page{display:grid;gap:var(--cds-gap-md);font-family:var(--font-anthropic-sans)}
+.js-head h1{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0}
+.js-head p{margin:var(--cds-gap-xs) 0 0;color:var(--color-fg-muted);max-width:60ch}
+.js-page b{font-weight:var(--cds-font-weight-medium);color:var(--color-fg)}
+.js-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr));gap:var(--cds-gap-md)}
+.js-tile{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);min-width:0}
+.js-label{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);letter-spacing:.03em;text-transform:uppercase}
+.js-num{font-family:var(--font-anthropic-serif);font-weight:400;font-size:2rem;line-height:1.2;font-variant-numeric:tabular-nums}
+.js-sub{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.js-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:var(--cds-gap-md)}
+.js-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);min-width:0;position:relative}
+.js-card h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0}
+.js-note{font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);margin:0 0 var(--cds-gap-sm)}
+.js-wide{grid-column:1/-1}
+.js-chart{min-height:280px;position:relative}
+.js-chart.js-short{min-height:220px}
+.js-chart svg{display:block;width:100%;height:auto;overflow:visible}
+.js-chart text{font-family:var(--font-anthropic-sans);font-size:12px;fill:var(--color-fg-muted)}
+.js-chart text.js-strong{fill:var(--color-fg)}
+.js-legend{display:flex;flex-wrap:wrap;gap:var(--cds-gap-xs) var(--cds-gap-md);font-size:var(--cds-font-size-caption);margin-top:var(--cds-gap-sm);color:var(--color-fg-muted)}
+.js-legend span::before{content:"";display:inline-block;width:.6rem;height:.6rem;border-radius:2px;margin-right:.35rem;background:var(--sw);vertical-align:-1px}
+.js-tip{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);max-width:18rem;z-index:2}
+.js-tip b{display:block;color:var(--cds-text-secondary);font-weight:var(--cds-font-weight-medium)}
+.js-scroll{max-height:30rem;overflow:auto}
+table.js-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-body)}
+.js-table th,.js-table td{text-align:left;padding:var(--cds-pad-xs) var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);vertical-align:top}
+.js-table th{position:sticky;top:0;background:var(--color-panel);font-weight:var(--cds-font-weight-medium);white-space:nowrap}
+.js-table th button{all:unset;cursor:pointer}
+.js-table th button:focus-visible{outline:2px solid var(--color-fg);outline-offset:2px}
+.js-table .js-n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.js-table a{color:inherit}
+.js-pill{display:inline-block;padding:0 .5em;border-radius:999px;font-size:var(--cds-font-size-caption);border:1px solid var(--color-border-line);white-space:nowrap}
+.js-pill.js-good{color:var(--color-ok);border-color:currentColor}
+.js-pill.js-warn{color:var(--color-warn);border-color:currentColor}
+.js-search{display:block;width:100%;max-width:22rem;margin:0 0 var(--cds-gap-sm);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg);font:inherit}
+.js-hide-narrow{display:none}
+@media (min-width:48rem){.js-hide-narrow{display:table-cell}}
+[data-dash-source-state=empty]{color:transparent}
+[data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+</style>
+
+<div class="js-page">
+  <header class="js-head" id="overview">
+    <h1>Job search</h1>
+    <p><b data-draw="k-total" data-source="kpis" data-field="total">—</b> applications tracked. <b data-draw="k-open" data-source="kpis" data-field="open">—</b> are still open, <b data-draw="k-interview-now" data-source="kpis" data-field="interview_now">—</b> at interview stage, <b data-draw="k-offer" data-source="kpis" data-field="offer">—</b> offer. Companies that answered took a median of <b data-draw="k-median" data-source="kpis" data-field="median_days">—</b> days.</p>
+  </header>
+
+  <section class="js-tiles" id="figures">
+    <div class="js-tile"><div class="js-label">Applications</div><div class="js-num" data-draw="t-total" data-source="kpis" data-field="total">—</div><div class="js-sub">tracked in total</div></div>
+    <div class="js-tile"><div class="js-label">Open</div><div class="js-num" data-draw="t-open" data-source="kpis" data-field="open">—</div><div class="js-sub">no final answer yet</div></div>
+    <div class="js-tile"><div class="js-label">Reached interview</div><div class="js-num" data-draw="t-interview" data-source="kpis" data-field="interview">—</div><div class="js-sub">at any point</div></div>
+    <div class="js-tile"><div class="js-label">Offers</div><div class="js-num" data-draw="t-offer" data-source="kpis" data-field="offer">—</div><div class="js-sub">accepted or pending</div></div>
+    <div class="js-tile"><div class="js-label">Rejection rate</div><div class="js-num" data-draw="t-rej" data-source="kpis" data-field="rejection_rate">—</div><div class="js-sub">of all applications</div></div>
+    <div class="js-tile"><div class="js-label">First reply</div><div class="js-num" data-draw="t-median" data-source="kpis" data-field="median_days">—</div><div class="js-sub">median days to a decision</div></div>
+  </section>
+
+  <section class="js-grid">
+    <div class="js-card" id="stages">
+      <h2>Where every application stands</h2>
+      <p class="js-note">Applied means only the platform receipt arrived; Confirmed means the company acknowledged it.</p>
+      <div class="js-chart dash-skeleton" data-draw="pie" data-source="status_counts"></div>
+    </div>
+    <div class="js-card" id="platforms">
+      <h2>Outcome by platform</h2>
+      <p class="js-note">Rejection rate counts rejections over all applications on that platform, open ones included.</p>
+      <div class="js-scroll">
+      <table class="js-table" data-source="by_platform" data-row-key="platform">
+        <thead><tr><th data-field="platform">Platform</th><th class="js-n" data-field="applications">Applications</th><th class="js-n" data-field="confirmed">Confirmed</th><th class="js-n" data-field="interviews">Interviews</th><th class="js-n" data-field="rejected">Rejected</th><th class="js-n" data-field="rejection_rate">Rejection rate</th></tr></thead>
+        <tbody data-draw="platform-rows"></tbody>
+      </table>
+      </div>
+    </div>
+    <div class="js-card js-wide" id="flow">
+      <h2>How applications flow</h2>
+      <p class="js-note">Each band is a group of applications. Width is the number of applications. Hover a band for the count.</p>
+      <div class="js-chart dash-skeleton" data-draw="sankey" data-source="flow"></div>
+    </div>
+    <div class="js-card js-wide" id="weekly">
+      <h2>Applications per week by platform</h2>
+      <p class="js-note">ISO weeks, by the platform the application was sent through. Other means directly on the company site or through a recruiter.</p>
+      <div class="js-chart js-short dash-skeleton" data-draw="weekly" data-source="weekly"></div>
+    </div>
+    <div class="js-card js-wide" id="pipeline">
+      <h2>Open pipeline</h2>
+      <p class="js-note">Every application without a final answer, newest first. Quiet days counts from the last email in its thread. The company link opens the row in Notion.</p>
+      <input class="js-search" id="pipeline-search" type="search" placeholder="Filter by company, title or platform" aria-label="Filter the open pipeline">
+      <div class="js-scroll">
+      <table class="js-table" data-source="open_pipeline" data-row-key="id">
+        <thead><tr><th data-field="company"><button type="button" data-sort="company">Company</button></th><th data-field="title"><button type="button" data-sort="title">Title</button></th><th class="js-hide-narrow" data-field="platform"><button type="button" data-sort="platform">Platform</button></th><th data-field="status"><button type="button" data-sort="status">Status</button></th><th class="js-n" data-field="applied"><button type="button" data-sort="applied">Applied</button></th><th class="js-n" data-field="quiet_days"><button type="button" data-sort="quiet_days">Quiet days</button></th></tr></thead>
+        <tbody data-draw="pipeline-rows"></tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---- calculations (readers can inspect these in Sources) ----
+dash.calc('status_counts', {
+  inputs: ['applications'], title: 'Applications by status',
+  description: 'Count of applications per current status, in pipeline order.',
+  fn: (applications) => {
+    const order = ['Applied', 'Confirmed', 'Interview', 'Offer', 'Rejected', 'Withdrawn', 'Skipped'];
+    const n = {}; applications.forEach((r) => { n[r.status] = (n[r.status] || 0) + 1; });
+    const total = applications.length;
+    return order.filter((s) => n[s]).map((s) => ({ status: s, n: n[s], share: n[s] / total }));
+  },
+});
+dash.calc('kpis', {
+  inputs: ['applications'], title: 'Headline figures',
+  description: 'Totals, cumulative stage counts, rejection rate and median days to the first decision, from every application row.',
+  fn: (applications) => {
+    const ended = (s) => s === 'Rejected' || s === 'Withdrawn' || s === 'Skipped';
+    const ev = (r) => r.events || '';
+    const reachedInterview = (r) => r.status === 'Interview' || r.status === 'Offer' || /interview|offer/.test(ev(r));
+    const firstDecision = (r) => {
+      const m = ev(r).match(/(\d\d)-(\d\d) (rejection|interview|offer)/);
+      if (!m || !r.applied) return null;
+      const d1 = new Date(r.applied + 'T00:00:00Z'); const d2 = new Date(Date.UTC(d1.getUTCFullYear(), +m[1] - 1, +m[2]));
+      const days = Math.round((d2 - d1) / 86400000); return days >= 0 && days <= 120 ? days : null;
+    };
+    const days = applications.map(firstDecision).filter((d) => d !== null).sort((a, b) => a - b);
+    const median = days.length ? days[Math.floor(days.length / 2)] : null;
+    const total = applications.length;
+    const rejected = applications.filter((r) => r.status === 'Rejected').length;
+    return [{
+      total, open: applications.filter((r) => !ended(r.status)).length,
+      interview: applications.filter(reachedInterview).length,
+      interview_now: applications.filter((r) => r.status === 'Interview').length,
+      offer: applications.filter((r) => r.status === 'Offer').length,
+      rejected, rejection_rate: total ? rejected / total : 0, median_days: median, decided: days.length,
+    }];
+  },
+});
+dash.calc('flow', {
+  inputs: ['applications'], title: 'Application flow',
+  description: 'Bands between stages: from each stage, how many went on to the next stage, are still waiting there, or were rejected, withdrawn or skipped.',
+  fn: (applications) => {
+    const stages = ['Applied', 'Confirmed', 'Interview', 'Offer'];
+    const ended = (s) => s === 'Rejected' || s === 'Withdrawn' || s === 'Skipped';
+    const reached = (r, stage) => {
+      const i = stages.indexOf(stage); const ev = r.events || '';
+      if (stages.includes(r.status)) return stages.indexOf(r.status) >= i;
+      if (stage === 'Applied') return true;
+      if (stage === 'Confirmed') return /ats confirmation|interview|offer/.test(ev);
+      if (stage === 'Interview') return /interview|offer/.test(ev);
+      return /offer/.test(ev);
+    };
+    const waitLabel = { Applied: 'No reply yet', Confirmed: 'Waiting after confirmation', Interview: 'Interview pending' };
+    const links = {};
+    const add = (source, target, kind, column) => { const k = source + '>' + target; links[k] = links[k] || { source, target, kind, column, value: 0 }; links[k].value += 1; };
+    applications.forEach((r) => {
+      const path = stages.filter((s) => reached(r, s));
+      path.forEach((s, i) => { if (i < path.length - 1) add(s, path[i + 1], 'progress', i + 1); });
+      const last = path[path.length - 1]; const col = path.length;
+      if (ended(r.status)) add(last, r.status + ' after ' + last.toLowerCase(), r.status.toLowerCase(), col);
+      else if (last !== 'Offer') add(last, waitLabel[last], 'waiting', col);
+    });
+    const rank = { progress: 0, waiting: 1, rejected: 2, withdrawn: 3, skipped: 4 };
+    return Object.values(links).sort((a, b) => a.column - b.column || rank[a.kind] - rank[b.kind]);
+  },
+});
+dash.calc('weekly', {
+  inputs: ['applications'], title: 'Applications per week',
+  description: 'Applications counted by ISO week of the application date and by platform.',
+  fn: (applications) => {
+    const isoWeek = (iso) => { const d = new Date(iso + 'T00:00:00Z'); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day + 3); const y = d.getUTCFullYear(); const jan4 = new Date(Date.UTC(y, 0, 4)); const w = 1 + Math.round(((d - jan4) / 86400000 - 3 + ((jan4.getUTCDay() + 6) % 7)) / 7); return y + '-W' + String(w).padStart(2, '0'); };
+    const n = {};
+    applications.forEach((r) => { if (!r.applied) return; const k = isoWeek(r.applied) + '|' + (r.platform || 'Other'); n[k] = (n[k] || 0) + 1; });
+    return Object.keys(n).sort().map((k) => ({ week: k.split('|')[0], platform: k.split('|')[1], n: n[k] }));
+  },
+});
+dash.calc('by_platform', {
+  inputs: ['applications'], title: 'Outcome by platform',
+  description: 'Per platform: applications, how many the company confirmed, how many reached an interview, rejections and the rejection rate.',
+  fn: (applications) => {
+    const by = {};
+    applications.forEach((r) => {
+      const p = r.platform || 'Other'; const b = by[p] = by[p] || { platform: p, applications: 0, confirmed: 0, interviews: 0, rejected: 0 };
+      const ev = r.events || '';
+      b.applications += 1;
+      if (r.status !== 'Applied' && (r.status !== 'Rejected' || /ats confirmation|interview/.test(ev)) && r.status !== 'Skipped') b.confirmed += 1;
+      if (r.status === 'Interview' || r.status === 'Offer' || /interview|offer/.test(ev)) b.interviews += 1;
+      if (r.status === 'Rejected') b.rejected += 1;
+    });
+    return Object.values(by).map((b) => ({ ...b, rejection_rate: b.rejected / b.applications })).sort((a, b) => b.applications - a.applications);
+  },
+});
+dash.calc('open_pipeline', {
+  inputs: ['applications'], title: 'Open pipeline',
+  description: 'Applications without a final answer, with days since the last email in their thread, newest application first.',
+  fn: (applications) => {
+    const today = new Date(); const t0 = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    return applications.filter((r) => !['Rejected', 'Withdrawn', 'Skipped'].includes(r.status))
+      .map((r) => ({ id: r.id, company: r.company || '(company not in email)', title: r.title || '(title unknown)', platform: r.platform, status: r.status, applied: r.applied, last_email: r.last_email, quiet_days: r.last_email ? Math.round((t0 - new Date(r.last_email + 'T00:00:00Z')) / 86400000) : null, notion_url: r.notion_url }))
+      .sort((a, b) => (b.applied || '').localeCompare(a.applied || ''));
+  },
+});
+</script>
+
+<script>
+// ---- drawing helpers ----
+window.jsColor = (kind) => ({
+  Applied: dash.colors[0], Confirmed: dash.colors[1], Interview: dash.colors[2], Offer: 'var(--color-ok)',
+  Rejected: 'var(--color-bad)', Withdrawn: 'var(--cds-chart-muted)', Skipped: 'var(--cds-chart-muted)',
+  progress: dash.colors[0], waiting: 'var(--cds-chart-muted)', rejected: 'var(--color-bad)', withdrawn: 'var(--cds-chart-muted)', skipped: 'var(--cds-chart-muted)',
+}[kind] || dash.colors[7]);
+window.jsPlatformColor = (p) => ({ LinkedIn: dash.colors[0], StepStone: dash.colors[1], Indeed: dash.colors[2], Xing: dash.colors[3], Other: dash.colors[4] }[p] || dash.colors[5]);
+window.jsTip = (card) => {
+  const tip = document.createElement('div'); tip.className = 'js-tip'; tip.hidden = true; card.appendChild(tip);
+  return {
+    show: (event, head, lines) => {
+      tip.replaceChildren(); const b = document.createElement('b'); b.textContent = head; tip.appendChild(b);
+      lines.forEach((l) => { const d = document.createElement('div'); d.textContent = l; tip.appendChild(d); });
+      tip.hidden = false; const r = card.getBoundingClientRect(); let x = event.clientX - r.left + 12, y = event.clientY - r.top + 12;
+      if (x + tip.offsetWidth > card.clientWidth - 8) x = Math.max(8, event.clientX - r.left - tip.offsetWidth - 12);
+      if (y + tip.offsetHeight > card.clientHeight - 8) y = Math.max(8, y - tip.offsetHeight - 24);
+      tip.style.left = x + 'px'; tip.style.top = y + 'px';
+    },
+    hide: () => { tip.hidden = true; },
+  };
+};
+window.jsFmt = d3.format(','); window.jsPct = d3.format('.0%');
+window.jsSkeleton = (el, g) => { el.classList.toggle('dash-skeleton', g.status === 'loading'); };
+
+// ---- headline numbers ----
+[['k-total', 'total'], ['t-total', 'total'], ['k-open', 'open'], ['t-open', 'open'], ['k-interview-now', 'interview_now'], ['t-interview', 'interview'], ['k-offer', 'offer'], ['t-offer', 'offer']].forEach(([name, field]) => {
+  dash.draw(name, (el) => { const g = dash.data('kpis'); el.textContent = g.status === 'ok' && g.data.length ? jsFmt(g.data[0][field]) : '—'; });
+});
+dash.draw('t-rej', (el) => { const g = dash.data('kpis'); el.textContent = g.status === 'ok' && g.data.length ? jsPct(g.data[0].rejection_rate) : '—'; });
+[['k-median'], ['t-median']].forEach(([name]) => {
+  dash.draw(name, (el) => { const g = dash.data('kpis'); const v = g.status === 'ok' && g.data.length ? g.data[0].median_days : null; el.textContent = v === null ? '—' : String(v); });
+});
+
+// ---- donut by status ----
+dash.draw('pie', (el) => {
+  const g = dash.data('status_counts'); jsSkeleton(el, g); el.replaceChildren();
+  if (g.status !== 'ok') { if (g.status !== 'loading') el.textContent = '—'; return; }
+  const rows = g.data; const total = d3.sum(rows, (d) => d.n);
+  const W = Math.max(240, el.clientWidth), size = Math.min(W, 280), R = size / 2 - 8;
+  const svg = d3.create('svg').attr('viewBox', [0, 0, size, size]).attr('width', '100%').style('max-width', size + 'px').style('margin', '0 auto');
+  const gg = svg.append('g').attr('transform', `translate(${size / 2},${size / 2})`);
+  const pie = d3.pie().value((d) => d.n).sort(null).padAngle(0.012);
+  const arc = d3.arc().innerRadius(R * 0.58).outerRadius(R).cornerRadius(3);
+  const tip = jsTip(el);
+  gg.selectAll('path').data(pie(rows)).join('path').attr('d', arc).attr('fill', (d) => jsColor(d.data.status)).attr('stroke', 'var(--color-panel)').attr('stroke-width', 2)
+    .on('pointermove', (event, d) => tip.show(event, d.data.status, [jsFmt(d.data.n) + ' applications', jsPct(d.data.share) + ' of all'])).on('pointerleave', tip.hide);
+  gg.selectAll('text.js-slice').data(pie(rows).filter((d) => d.data.share >= 0.08)).join('text').attr('class', 'js-slice js-strong').attr('transform', (d) => `translate(${arc.centroid(d)})`).attr('text-anchor', 'middle').attr('dy', '0.35em').style('fill', 'var(--color-bg)').style('font-weight', 500).text((d) => d.data.n);
+  gg.append('text').attr('text-anchor', 'middle').attr('dy', '-0.2em').attr('class', 'js-strong').style('font-family', 'var(--font-anthropic-serif)').style('font-size', '28px').text(jsFmt(total));
+  gg.append('text').attr('text-anchor', 'middle').attr('dy', '1.3em').text('applications');
+  el.appendChild(svg.node());
+  const legend = document.createElement('div'); legend.className = 'js-legend';
+  rows.forEach((r) => { const s = document.createElement('span'); s.style.setProperty('--sw', jsColor(r.status)); s.textContent = `${r.status} ${jsFmt(r.n)} (${jsPct(r.share)})`; legend.appendChild(s); });
+  el.appendChild(legend);
+});
+
+// ---- flow (Sankey drawn by hand: children of a stage stack from the stage's top edge, so bands never cross) ----
+dash.draw('sankey', (el) => {
+  const g = dash.data('flow'); jsSkeleton(el, g); el.replaceChildren();
+  if (g.status !== 'ok') { if (g.status !== 'loading') el.textContent = '—'; return; }
+  const links = g.data; const W = Math.max(320, el.clientWidth); const narrow = W < 560;
+  const padL = 8, padR = narrow ? 120 : 190, padT = 24, padB = 8, nodeW = 10, gap = 6;
+  const total = d3.sum(links.filter((l) => l.source === 'Applied'), (l) => l.value);
+  const H = Math.max(260, Math.min(420, total * 2.4 + padT + padB + gap * 4));
+  const scale = (H - padT - padB - gap * 4) / total;
+  const colX = (c) => padL + c * ((W - padL - padR - nodeW) / 3);
+  const nodes = new Map([['Applied', { name: 'Applied', col: 0, kind: 'progress', y: padT, h: total * scale, out: 0 }]]);
+  links.forEach((l) => { const n = nodes.get(l.target) || { name: l.target, col: l.column, kind: l.kind, h: 0, out: 0 }; n.h += l.value * scale; nodes.set(l.target, n); });
+  // position children under their source, in link order
+  const bySource = d3.group(links, (l) => l.source);
+  ['Applied', 'Confirmed', 'Interview'].forEach((s) => {
+    const src = nodes.get(s); if (!src || !bySource.get(s)) return; let y = src.y;
+    bySource.get(s).forEach((l) => { const n = nodes.get(l.target); n.y = y; y += n.h + gap; });
+  });
+  const svg = d3.create('svg').attr('viewBox', [0, 0, W, H]).attr('width', '100%').attr('role', 'img').attr('aria-label', 'Flow of applications between stages');
+  const tip = jsTip(el);
+  const path = (l) => {
+    const s = nodes.get(l.source), t = nodes.get(l.target); const x0 = colX(s.col) + nodeW, x1 = colX(t.col);
+    const y0 = s.y + s.out + (l.value * scale) / 2; s.out += l.value * scale; const y1 = t.y + t.h / 2; const xm = (x0 + x1) / 2;
+    return `M${x0},${y0}C${xm},${y0} ${xm},${y1} ${x1},${y1}`;
+  };
+  svg.append('g').attr('fill', 'none').selectAll('path').data(links).join('path').attr('d', path).attr('stroke', (l) => jsColor(l.kind)).attr('stroke-opacity', (l) => l.kind === 'progress' ? 0.45 : 0.3).attr('stroke-width', (l) => Math.max(1, l.value * scale))
+    .on('pointermove', (event, l) => tip.show(event, `${l.source} → ${l.target}`, [jsFmt(l.value) + ' applications'])).on('pointerleave', tip.hide);
+  const nodeArr = [...nodes.values()];
+  svg.append('g').selectAll('rect').data(nodeArr).join('rect').attr('x', (n) => colX(n.col)).attr('y', (n) => n.y).attr('width', nodeW).attr('height', (n) => Math.max(2, n.h)).attr('rx', 2).attr('fill', (n) => jsColor(n.kind));
+  // keep side labels at least 14px apart within a column: push each one below the previous label
+  [1, 2, 3].forEach((c) => { let last = -Infinity; nodeArr.filter((n) => n.col === c && n.kind !== 'progress').sort((a, b) => a.y - b.y).forEach((n) => { n.ly = Math.max(n.y + Math.max(2, n.h) / 2, last + 14); last = n.ly; }); });
+  svg.append('g').selectAll('text').data(nodeArr).join('text').attr('class', (n) => n.kind === 'progress' ? 'js-strong' : '')
+    .attr('x', (n) => n.kind === 'progress' ? colX(n.col) : colX(n.col) + nodeW + 6).attr('y', (n) => n.kind === 'progress' ? n.y - 8 : n.ly).attr('dy', (n) => n.kind === 'progress' ? 0 : '0.35em')
+    .text((n) => { const label = narrow && n.kind !== 'progress' ? n.name.replace(/ after .*/, '').replace('Waiting after confirmation', 'Waiting').replace('Interview pending', 'Pending') : n.name; return `${label} ${jsFmt(Math.round(n.h / scale))}`; });
+  el.appendChild(svg.node());
+});
+
+// ---- weekly stacked bars ----
+dash.draw('weekly', (el) => {
+  const g = dash.data('weekly'); jsSkeleton(el, g); el.replaceChildren();
+  if (g.status !== 'ok') { if (g.status !== 'loading') el.textContent = '—'; return; }
+  const rows = g.data; const platforms = ['LinkedIn', 'StepStone', 'Indeed', 'Xing', 'Other'].filter((p) => rows.some((r) => r.platform === p));
+  const weeks = [...new Set(rows.map((r) => r.week))].sort();
+  const byWeek = weeks.map((w) => { const o = { week: w }; platforms.forEach((p) => { o[p] = d3.sum(rows.filter((r) => r.week === w && r.platform === p), (r) => r.n); }); return o; });
+  const W = Math.max(320, el.clientWidth), H = 220, m = { t: 8, r: 8, b: 28, l: 32 };
+  const x = d3.scaleBand(weeks, [m.l, W - m.r]).paddingInner(0.25).paddingOuter(0.1);
+  const y = d3.scaleLinear([0, d3.max(byWeek, (d) => d3.sum(platforms, (p) => d[p])) || 1], [H - m.b, m.t]).nice();
+  const svg = d3.create('svg').attr('viewBox', [0, 0, W, H]).attr('width', '100%');
+  svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+  svg.append('g').selectAll('text').data(y.ticks(4)).join('text').attr('x', m.l - 6).attr('y', y).attr('dy', '0.35em').attr('text-anchor', 'end').text(jsFmt);
+  const stacked = d3.stack().keys(platforms)(byWeek); const tip = jsTip(el);
+  svg.append('g').selectAll('g').data(stacked).join('g').attr('fill', (s) => jsPlatformColor(s.key)).selectAll('rect').data((s) => s.map((d) => ({ ...d, key: s.key }))).join('rect')
+    .attr('x', (d) => x(d.data.week)).attr('y', (d) => y(d[1])).attr('height', (d) => Math.max(0, y(d[0]) - y(d[1]) - (d[1] > d[0] ? 1 : 0))).attr('width', x.bandwidth()).attr('rx', 2)
+    .on('pointermove', (event, d) => tip.show(event, 'Week ' + d.data.week.slice(6) + ' (' + d.data.week.slice(0, 4) + ')', platforms.filter((p) => d.data[p]).map((p) => `${p}: ${d.data[p]}`).concat(['Total: ' + d3.sum(platforms, (p) => d.data[p])]))).on('pointerleave', tip.hide);
+  const every = Math.ceil(weeks.length / Math.max(3, Math.floor((W - m.l - m.r) / 44)));
+  svg.append('g').selectAll('text').data(weeks.filter((w, i) => i % every === 0)).join('text').attr('x', (w) => x(w) + x.bandwidth() / 2).attr('y', H - m.b + 16).attr('text-anchor', 'middle').text((w) => 'W' + w.slice(6));
+  el.appendChild(svg.node());
+  const legend = document.createElement('div'); legend.className = 'js-legend';
+  platforms.forEach((p) => { const s = document.createElement('span'); s.style.setProperty('--sw', jsPlatformColor(p)); s.textContent = `${p} ${jsFmt(d3.sum(rows.filter((r) => r.platform === p), (r) => r.n))}`; legend.appendChild(s); });
+  el.appendChild(legend);
+});
+
+// ---- platform table ----
+dash.draw('platform-rows', (tb) => {
+  const g = dash.data('by_platform'); tb.replaceChildren();
+  if (g.status !== 'ok') return;
+  g.data.forEach((r) => {
+    const tr = document.createElement('tr'); tr.dataset.key = r.platform;
+    const cells = [[r.platform, ''], [jsFmt(r.applications), 'js-n'], [jsFmt(r.confirmed), 'js-n'], [jsFmt(r.interviews), 'js-n'], [jsFmt(r.rejected), 'js-n'], [jsPct(r.rejection_rate), 'js-n']];
+    cells.forEach(([v, c]) => { const td = document.createElement('td'); td.className = c; td.textContent = v; tr.appendChild(td); });
+    tb.appendChild(tr);
+  });
+});
+
+// ---- open pipeline table with search and sort ----
+window.jsPipeline = { q: '', sort: 'applied', dir: -1 };
+document.querySelectorAll('#pipeline-search').forEach((inp) => inp.addEventListener('input', () => { jsPipeline.q = inp.value.trim().toLowerCase(); dash.draw('pipeline-rows'); }));
+document.querySelectorAll('#pipeline [data-sort]').forEach((btn) => btn.addEventListener('click', () => {
+  const k = btn.dataset.sort; jsPipeline.dir = jsPipeline.sort === k ? -jsPipeline.dir : (k === 'applied' || k === 'quiet_days' ? -1 : 1); jsPipeline.sort = k;
+  document.querySelectorAll('#pipeline th').forEach((th) => th.removeAttribute('aria-sort')); btn.closest('th').setAttribute('aria-sort', jsPipeline.dir > 0 ? 'ascending' : 'descending');
+  dash.draw('pipeline-rows');
+}));
+dash.draw('pipeline-rows', (tb) => {
+  const g = dash.data('open_pipeline'); tb.replaceChildren();
+  if (g.status !== 'ok') return;
+  const q = jsPipeline.q; const k = jsPipeline.sort, dir = jsPipeline.dir;
+  const rows = g.data.filter((r) => !q || `${r.company} ${r.title} ${r.platform}`.toLowerCase().includes(q))
+    .sort((a, b) => { const va = a[k], vb = b[k]; if (va === vb) return 0; if (va === null || va === undefined) return 1; if (vb === null || vb === undefined) return -1; return (typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb))) * dir; });
+  const fmtDate = (d) => d ? d.slice(5).replace('-', '/') : '';
+  rows.forEach((r) => {
+    const tr = document.createElement('tr'); tr.dataset.key = r.id;
+    const tdC = document.createElement('td'); const a = document.createElement('a'); a.href = r.notion_url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.company; tdC.appendChild(a); tr.appendChild(tdC);
+    const tdT = document.createElement('td'); tdT.textContent = r.title; tr.appendChild(tdT);
+    const tdP = document.createElement('td'); tdP.className = 'js-hide-narrow'; tdP.textContent = r.platform; tr.appendChild(tdP);
+    const tdS = document.createElement('td'); const pill = document.createElement('span'); pill.className = 'js-pill' + (r.status === 'Offer' ? ' js-good' : r.status === 'Interview' ? ' js-warn' : ''); pill.textContent = r.status; tdS.appendChild(pill); tr.appendChild(tdS);
+    const tdA = document.createElement('td'); tdA.className = 'js-n'; tdA.textContent = fmtDate(r.applied); tr.appendChild(tdA);
+    const tdQ = document.createElement('td'); tdQ.className = 'js-n'; tdQ.textContent = r.quiet_days === null ? '' : String(r.quiet_days); tr.appendChild(tdQ);
+    tb.appendChild(tr);
+  });
+});
+</script>

@@ -1,0 +1,24 @@
+# Written by Claude during setup; one entry per file. Used to pick the right document for each form field.
+documents:
+  - path: knowledge/cv/CV-AI-Engineer.pdf
+    kind: cv
+    language: en
+    pages: 2
+    summary: "AI engineer CV focused on LLM agents and voice"
+    use_for: ["ai engineer", "llm", "agent", "conversational", "voice"]
+  - path: knowledge/cv/CV-Digitalization.pdf
+    kind: cv
+    language: en
+    pages: 2
+    summary: "Digitalization / automation profile"
+    use_for: ["digitalization", "automation", "process", "industrial"]
+  - path: knowledge/certificates/Master-Degree.pdf
+    kind: degree_certificate
+    language: de
+    pages: 3
+    summary: "M.Sc. certificate and transcript"
+  - path: knowledge/cover_letters/Letter-Example.pdf
+    kind: cover_letter_sample
+    language: en
+    pages: 1
+    summary: "letter that led to an offer; style reference only"

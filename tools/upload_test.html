@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Upload test</title>
+<style>body{font:16px system-ui,sans-serif;margin:2rem;background:#fff;color:#1f1e1c}label{display:inline-block;padding:.6rem 1rem;border:1px solid #888;border-radius:6px;cursor:pointer}#out{margin-top:1rem;font-weight:600}</style>
+</head><body>
+<h1>File upload test</h1>
+<p>Claude clicks the button, then runs <code>tools/upload_file.sh &lt;file&gt;</code>. The chosen file name appears below.</p>
+<label for="f">Choose file</label><input id="f" type="file" hidden>
+<div id="out">No file yet.</div>
+<script>document.getElementById('f').addEventListener('change',e=>{const f=e.target.files[0];document.getElementById('out').textContent=f?`Received: ${f.name} (${Math.round(f.size/1024)} KB)`:'No file yet.'})</script>
+</body></html>

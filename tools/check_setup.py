@@ -1,0 +1,64 @@
+"""One-shot health check of everything the autopilot needs. Prints a checklist; exits 1 if a required item fails.
+
+usage: python3 tools/check_setup.py
+"""
+import os, sys, subprocess, importlib
+from common import ROOT, env_path
+
+ok_all = True
+def line(ok, what, hint=''):
+    global ok_all
+    ok_all &= bool(ok) or ok is None
+    mark = '✅' if ok else ('⚠️ ' if ok is None else '❌')
+    print(f'{mark} {what}' + (f'\n     → {hint}' if hint and not ok else ''))
+
+# 1. python packages
+for mod, pkg in (('requests', 'requests'), ('yaml', 'pyyaml'), ('PIL', 'pillow')):
+    try: importlib.import_module(mod); line(True, f'python package {pkg}')
+    except ImportError: line(False, f'python package {pkg}', 'python3 -m pip install -r requirements.txt')
+
+# 2. config files
+line(os.path.exists(env_path()), '.env exists', 'cp .env.example .env')
+prof = os.path.join(ROOT, 'config', 'profile.yaml')
+line(os.path.exists(prof), 'config/profile.yaml exists', 'answer the questionnaire (setup skill, step 1)')
+
+env = {}
+if os.path.exists(env_path()):
+    from common import load_env; env = load_env()
+for k in ('NOTION_TOKEN', 'NOTION_PARENT_PAGE_ID', 'NOTION_DATABASE_ID', 'IMAP_USER', 'IMAP_APP_PASSWORD'):
+    line(bool(env.get(k)), f'.env has {k}', 'see docs/credentials.md')
+
+# 3. knowledge base files referenced by the profile
+if os.path.exists(prof):
+    import yaml
+    p = yaml.safe_load(open(prof)) or {}
+    cvs = (p.get('candidate') or {}).get('cv_variants') or []
+    line(bool(cvs), 'profile lists at least one CV', 'put a PDF in knowledge/cv/ and list it under candidate.cv_variants')
+    for cv in cvs:
+        f = os.path.join(ROOT, cv.get('file', ''))
+        line(os.path.exists(f), f"CV file {cv.get('file')}", 'file missing; check the path in config/profile.yaml')
+    man = os.path.join(ROOT, 'knowledge', 'manifest.yaml')
+    line(os.path.exists(man) or None, 'knowledge/manifest.yaml (index of your documents)', 'the setup skill writes it after you add files')
+
+# 4. Notion
+if env.get('NOTION_TOKEN') and env.get('NOTION_DATABASE_ID'):
+    import requests
+    from common import notion_headers
+    r = requests.get(f"https://api.notion.com/v1/databases/{env['NOTION_DATABASE_ID']}", headers=notion_headers(env))
+    line(r.status_code == 200, 'Notion database reachable', f'HTTP {r.status_code}: share the page with your integration, then run tools/notion_setup.py')
+
+# 5. Gmail
+if env.get('IMAP_USER') and env.get('IMAP_APP_PASSWORD'):
+    out = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'gmail_setup.py')], capture_output=True, text=True)
+    txt = (out.stdout + out.stderr).strip()
+    line('login ok' in txt, 'Gmail IMAP login', txt.splitlines()[-1] if txt else '')
+    line('exists' in txt or 'created' in txt, f"Gmail label \"{env.get('GMAIL_LABEL', 'applications')}\"", 'python3 tools/gmail_setup.py --create')
+
+# 6. macOS file-upload permission (optional, needed only for company-site uploads)
+if sys.platform == 'darwin':
+    r = subprocess.run(['osascript', '-e', 'tell application "System Events" to count processes'], capture_output=True, text=True)
+    line(r.returncode == 0 or None, 'macOS Accessibility for file uploads (optional)',
+         'System Settings → Privacy & Security → Accessibility → turn on "Claude". See docs/macos-permissions.md')
+
+print('\nAll required checks passed.' if ok_all else '\nFix the ❌ items above, then run this check again.')
+sys.exit(0 if ok_all else 1)

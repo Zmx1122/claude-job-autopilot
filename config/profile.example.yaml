@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Job Autopilot profile · 求职自动驾驶 个人档案
+# You do not need to edit this by hand. Open the repo in the Claude desktop app and say
+# "set up job autopilot" / "帮我配置 job autopilot". Claude asks these questions one block at a time,
+# pre-fills what it can read from your CV, and writes config/profile.yaml for you.
+# config/profile.yaml is git-ignored: your answers never leave your machine.
+# ─────────────────────────────────────────────────────────────────────────────
+
+candidate:                     # Q1 · Who you are / 基本信息 (most of this is read from your CV)
+  full_name: ""
+  email: ""                    # the inbox you apply with; should be the Gmail you connect below / 投递用邮箱
+  phone: ""                    # international format, e.g. +49 151 ...
+  street: ""                   # many company portals require a postal address / 很多官网表单要求地址
+  postal_code: ""
+  city: ""
+  country: ""
+  nationality: ""
+  salutation: "Keine Angabe"   # what to pick in Anrede/Title dropdowns; neutral option by default
+  linkedin_url: ""
+  xing_url: ""
+  portfolio_url: ""
+  current_title: ""
+  cv_variants:                 # Q2 · Which CV for which kind of role / 简历版本与适用岗位
+    - file: "knowledge/cv/CV.pdf"
+      use_for: ["ai engineer", "machine learning"]     # keywords in a job title that select this CV
+      note: "default"
+
+documents:                     # Q3 · Other documents in the knowledge base / 其他材料（证书、推荐信等）
+  degree_certificate: ""       # e.g. knowledge/certificates/Master-Degree.pdf (asked for by e.g. Porsche, banks)
+  work_references: []          # Arbeitszeugnisse, one PDF each
+  other: []                    # anything else a form may ask for
+  cover_letter_samples: []     # past letters, used only as style reference
+
+search:                        # Q4 · What to look for / 搜索条件
+  titles: ["AI Engineer", "Machine Learning Engineer"]
+  exclude_titles: ["Intern", "Praktikant", "Werkstudent", "Working Student", "Trainee"]
+  locations: ["Munich", "Remote Germany"]
+  remote: "hybrid_ok"          # onsite_only | hybrid_ok | remote_only
+  seniority: ["Mid", "Senior"]
+  min_salary_eur: 0            # skip postings that state less than this / 低于此薪资的岗位跳过
+  posted_within_days: 2
+  max_applications_per_day: 10 # hard daily cap / 每日上限
+  company_size: "established"  # established = large or mature companies only, skip startups / any
+  skip_title_keywords: ["Founding"]
+  blacklist_companies: []      # e.g. your current employer / 例如当前雇主
+  nice_to_have_keywords: ["LLM", "Python"]
+
+rules:                         # Q5 · How Claude applies for you / 投递规则（我们实测后定下的默认值）
+  confirm_mode: "batch"        # batch = shortlist table → you pick → Claude prefills all → you confirm once → all submitted
+                               # each  = confirm every single submit
+                               # direct = you said "submit when filled" for this batch (asked per batch, never stored as default)
+  cover_letter_required: "skip"    # skip jobs whose form REQUIRES a cover letter / 必须求职信的岗位跳过 (or: generate)
+  certificate_required: "ask"      # form requires a certificate that is not in the knowledge base → pause and ask you
+  upload_only_requested: true      # upload only what the form asks for; CV only when only a CV is required
+  follow_external_redirects: true  # also complete applications on company career sites / ATS
+  stepstone_one_click: "confirm_first"  # "Ich bin interessiert" submits instantly; list it and wait for your OK first
+
+screening_answers:             # Q6 · Standard form answers / 表单常见问题
+  work_authorization: ""       # e.g. "EU Blue Card, no sponsorship needed" / "EU citizen"
+  needs_visa_sponsorship: "no"
+  notice_period: ""            # e.g. "3 months"
+  earliest_start_date: ""      # YYYY-MM-DD
+  salary_expectation_eur: ""   # yearly gross
+  willing_to_relocate: "no"
+  languages: {german: "", english: "", other: ""}   # CEFR levels, e.g. C1
+  years_of_experience: ""
+  highest_degree: ""
+  how_did_you_hear: "LinkedIn"     # default answer for "where did you find us"
+  voluntary_diversity_questions: "prefer_not_to_say"
+
+platforms:                     # Q7 · Where to search / 平台（需要在 Claude 浏览器里登录）
+  linkedin: {enabled: true}
+  stepstone: {enabled: true}
+  indeed: {enabled: true}
+  xing: {enabled: true}
+
+schedule:                      # Q8 · When / 定时
+  timezone: "Europe/Berlin"
+  daily_run: "08:00"           # mail sync + scan + shortlist
+  weekly_dashboard: "Mon 08:00"
+  backfill_from: ""            # YYYY-MM-DD: import older applications from Gmail once (optional)

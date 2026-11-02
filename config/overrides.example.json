@@ -1,0 +1,11 @@
+{
+  "_comment": "Optional. Copy to config/overrides.json. aliases: different spellings that mean the same employer. not_same: pairs that must never be merged. email_fixes: fill in company/title for a specific email whose text omits it.",
+  "aliases": {
+    "ACME Solutions GmbH": "ACME",
+    "Auto Scout24": "AutoScout24"
+  },
+  "not_same": [["siemens", "siemens energy"]],
+  "email_fixes": [
+    {"date": "2026-07-28", "subject": "AI Automation Engineer", "from": "Stepstone", "company": "Example GmbH"}
+  ]
+}

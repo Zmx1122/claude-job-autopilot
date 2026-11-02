@@ -1,0 +1,15 @@
+# secrets and personal data — never commit
+.env
+config/profile.yaml
+config/overrides.json
+knowledge/**
+!knowledge/README.md
+!knowledge/manifest.example.yaml
+!knowledge/*/
+!knowledge/*/.gitkeep
+data/**
+!data/.gitkeep
+# system
+.DS_Store
+__pycache__/
+*.pyc
