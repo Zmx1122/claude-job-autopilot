@@ -8,6 +8,7 @@ plan.json is written by Claude after reading data/kb/extract.json (and the scann
                              "title": "M.Sc. certificate (Urkunde)", "issuer": "TU X", "date": "2021-10",
                              "language": "de", "summary": "...", "facts": {"grade": "1.8"},
                              "proves": ["Master-level engineering degree", "grade 1.8"],
+                             "visual_notes": "university seal and two signatures; clean scan",
                              "use_for": [], "sensitive": false,
                              "filename": "Degree_TU-X_MSc-Urkunde_2021.pdf"}]}]}
 kinds: cv, cover_letter, degree, transcript, work_reference, certificate, language_certificate, award, publication,
@@ -63,7 +64,7 @@ def main():
             with open(out, 'wb') as f: w.write(f)
             entry = {k: d.get(k) for k in ('id', 'kind', 'title', 'issuer', 'date', 'language', 'summary') if d.get(k) is not None}
             entry.update(file=os.path.relpath(out, ROOT), pages=len(d['pages']), size_kb=os.path.getsize(out) // 1024,
-                         source=None, source_pages=d['pages'], facts=d.get('facts') or {}, proves=d.get('proves') or [], use_for=d.get('use_for') or [],
+                         source=None, source_pages=d['pages'], facts=d.get('facts') or {}, proves=d.get('proves') or [], visual_notes=d.get('visual_notes') or '', use_for=d.get('use_for') or [],
                          sensitive=bool(d.get('sensitive') or d['kind'] in SENSITIVE_KINDS), sha256=sha(out))
             man['documents'].append(entry); made.append(entry); ids.add(d['id'])
         # move the original out of the inbox so the next run does not see it again

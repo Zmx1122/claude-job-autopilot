@@ -3,11 +3,16 @@
 usage: python3 tools/kb_extract.py [file or folder ...]      default: knowledge/inbox/
 Accepts PDF and images (jpg/png/heic are converted to one-page PDFs first).
 Writes data/kb/extract.json:
-  [{source, sha256, pages: [{n, chars, text, needs_visual, preview}]}]
-- text: first 700 characters of the page's text layer.
-- needs_visual: the page has (almost) no text layer — a scan or photo. Claude must look at it:
-  Read the preview PNG if one was rendered, otherwise Read the PDF with pages="<n>".
-- preview: data/kb/preview/<file>-p<n>.png, rendered when poppler's pdftoppm is installed (brew install poppler).
+  [{source, sha256, pages: [{n, chars, text, ocr, scan_only, preview}]}]
+Dual review — EVERY page is checked twice, never by text alone:
+- text: first 700 characters of the page's text layer (empty for scans).
+- preview: data/kb/preview/<file>-p<n>.png for every page (needs poppler's pdftoppm: brew install poppler).
+  Claude must look at every preview: medals, seals, stamps, logos, signatures, handwriting and tables carry meaning the
+  text layer misses (e.g. a "1st" medal on a certificate whose text says "participating").
+  Without pdftoppm, Claude Reads the PDF itself with pages="<n>" instead.
+- ocr: tesseract output (deu+eng) for the page image when tesseract is installed (brew install tesseract tesseract-lang);
+  a third signal for scans and for checking the text layer.
+- scan_only: no text layer at all; the visual read is the only source of the content.
 Files whose sha256 already appears in knowledge/manifest.yaml are skipped, so re-running is cheap.
 """
 import hashlib, json, os, shutil, subprocess, sys
@@ -56,7 +61,7 @@ def targets(args):
 
 def main():
     from pypdf import PdfReader
-    have = known_hashes(); out = []; pdftoppm = shutil.which('pdftoppm')
+    have = known_hashes(); out = []; pdftoppm = shutil.which('pdftoppm'); tesseract = shutil.which('tesseract')
     for path in targets(sys.argv[1:]):
         ext = os.path.splitext(path)[1].lower()
         if ext in ('.jpg', '.jpeg', '.png', '.heic', '.tif', '.tiff'):
@@ -70,17 +75,23 @@ def main():
         stem = os.path.splitext(os.path.basename(path))[0].replace(' ', '_')
         for i, pg in enumerate(r.pages, 1):
             t = ' '.join((pg.extract_text() or '').split())
-            prev = ''
-            if len(t) < 80 and pdftoppm:
+            prev, ocr = '', ''
+            if pdftoppm:
                 base = os.path.join(PREV, f'{stem}-p{i}')
-                subprocess.run([pdftoppm, '-png', '-r', '80', '-f', str(i), '-l', str(i), '-singlefile', path, base], capture_output=True)
-                if os.path.exists(base + '.png'): prev = os.path.relpath(base + '.png', ROOT)
-            pages.append(dict(n=i, chars=len(t), text=t[:700], needs_visual=len(t) < 80, preview=prev))
+                subprocess.run([pdftoppm, '-png', '-r', '90', '-f', str(i), '-l', str(i), '-singlefile', path, base], capture_output=True)
+                if os.path.exists(base + '.png'):
+                    prev = os.path.relpath(base + '.png', ROOT)
+                    if tesseract:
+                        o = subprocess.run([tesseract, base + '.png', '-', '-l', 'deu+eng'], capture_output=True, text=True)
+                        ocr = ' '.join(o.stdout.split())[:700]
+            pages.append(dict(n=i, chars=len(t), text=t[:700], ocr=ocr, scan_only=len(t) < 80, preview=prev))
         out.append(dict(source=os.path.relpath(path, ROOT), sha256=h, size_kb=os.path.getsize(path) // 1024, pages=pages))
-        vis = sum(p['needs_visual'] for p in pages)
-        print(f"{os.path.relpath(path, ROOT)}: {len(pages)} pages, {vis} need a visual read")
+        scans = sum(p['scan_only'] for p in pages)
+        print(f"{os.path.relpath(path, ROOT)}: {len(pages)} pages ({scans} scan-only) — review every preview")
     json.dump(out, open(os.path.join(OUT, 'extract.json'), 'w'), ensure_ascii=False, indent=1)
-    print(f'{len(out)} new file(s) → data/kb/extract.json' + ('' if pdftoppm else '  (no pdftoppm: Read scanned pages directly from the PDF)'))
+    note = '' if pdftoppm else '  (no pdftoppm: Read every page directly from the PDF for the visual check)'
+    note += '' if tesseract else '  (no tesseract: OCR signal off; the visual read still covers scans)'
+    print(f'{len(out)} new file(s) → data/kb/extract.json' + note)
 
 
 if __name__ == '__main__':

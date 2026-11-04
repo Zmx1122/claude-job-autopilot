@@ -20,8 +20,14 @@ knowledge/PROFILE.md    ← human-readable knowledge profile (written by you)
 
 ## A. Build or update (after the user adds files)
 1. Put new files in `knowledge/inbox/` (copy files the user attached in chat; keep their names).
-2. `python3 tools/kb_extract.py` → `data/kb/extract.json`: text per page, `needs_visual` pages with a PNG preview.
-3. **Read every page.** Text pages from the JSON; for `needs_visual` pages Read the preview PNG (or the PDF with `pages`).
+2. `python3 tools/kb_extract.py` → `data/kb/extract.json`: per page the text layer, OCR text (if tesseract is installed)
+   and a PNG preview of **every** page.
+3. **Dual review of every page — text and image, never one alone.** Read the page's text from the JSON *and* look at its
+   preview PNG (or Read the PDF with `pages` when there is no preview). The image shows what text cannot: medals and
+   placements, seals and stamps, signatures, logos, photos, handwritten notes, table layout. Example from real use: an AWS
+   hackathon certificate whose text says "for successfully participating" carries a "1st" medal in the corner — it is a
+   first-place certificate. When text, OCR and image disagree, trust what is visibly printed and record the difference
+   in `facts` (e.g. `placement: 1st (medal)`, `body_wording: participating`) and in `visual_notes`.
    Decide where each document starts and ends. Typical bundles: a scan with Urkunde + Zeugnis + Notenspiegel;
    "Bewerbungsmaterialien.pdf" with several certificates; a 10-page "all documents" PDF. Blank pages and exact duplicates → `discard_pages`.
 4. Write `data/kb/plan.json` (format in the docstring of `tools/kb_build.py`). For each document:
@@ -34,6 +40,7 @@ knowledge/PROFILE.md    ← human-readable knowledge profile (written by you)
      "German C1 officially certified", "led a 5-person team for 2 years — reference rates performance 'stets zu unserer vollsten Zufriedenheit'").
      Read Arbeitszeugnisse in their coded language and state the grade it implies.
    - `use_for`: job-title keywords where this document helps (CVs and topic certificates).
+   - `visual_notes`: what only the image shows (medal, seal, signature present, scan quality, rotation), "" if nothing.
    - `sensitive: true` for ID cards, passports, residence permits, payslips, anything with tax or social-security numbers.
 5. `python3 tools/kb_build.py data/kb/plan.json` — it refuses plans that leave pages unassigned or use a page twice.
 6. Rewrite `knowledge/PROFILE.md` (template below) from `knowledge/manifest.yaml`.

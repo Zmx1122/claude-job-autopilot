@@ -33,6 +33,8 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
     **Porsche 上传没反应**：需要手动触发开始上传；第一次上传后下拉框失效就刷新页面。
 13. **Forms that demand documents we do not have** (cover letter, merged certificate PDF). → Skip on cover letter; ask the user for missing certificates; build merged PDFs from unit files with `tools/kb_bundle.py`; never upload something unrelated.
     **表单要求没有的材料**：要求求职信就跳过；缺证书就问用户要；需要合并 PDF 时用单元文件现拼。
+13a. **Reading a certificate by its text alone missed a 1st-place medal** — the AWS hackathon certificate says "for successfully participating", the "1st" medal is only in the image. → Dual review: every page is read as text *and* looked at as an image (plus OCR when tesseract is installed); disagreements are recorded.
+    **只读文字层漏掉了第一名奖牌**：证书正文写"参加"，"1st"奖牌只在图上。→ 每页都做文字 + 图像双重审核，不一致时记录下来。
 13b. **Scanned certificates have no text layer** — text extraction returns nothing, so a script alone cannot tell what a page is. → `kb_extract.py` flags those pages and renders previews; Claude reads them visually before splitting.
     **扫描件没有文字层**：脚本识别不了，标记出来让 Claude 看图判断。
 
