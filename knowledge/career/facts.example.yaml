@@ -15,6 +15,7 @@ entries:
     location: Munich
     start: 2023-04                  # YYYY-MM
     end: present                    # YYYY-MM or present
+    # duration_wording: {en: "about 2.5 years", de: "rund 2,5 Jahre"}   # only if the user chose a wording; used everywhere
     evidence: [ref-acme-2025]
     confirmed: true
     achievements:

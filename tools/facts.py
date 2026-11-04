@@ -148,7 +148,8 @@ if __name__ == '__main__':
     elif cmd == 'durations':
         for e, n in durations():
             en, de, zh = say(n)
-            print(f"{e['id']:<28} {e.get('start')}–{e.get('end')}  {n:>3} months · {en} · {de} · {zh}")
+            chosen = ' · '.join(f'{k}: "{v}"' for k, v in (e.get('duration_wording') or {}).items())
+            print(f"{e['id']:<28} {e.get('start')}–{e.get('end')}  {n:>3} months · {en} · {de} · {zh}" + (f"  → use {chosen}" if chosen else ''))
     elif cmd == 'check':
         errors, warns, unconfirmed, openq = check(load())
         for x in errors: print('❌', x)

@@ -14,7 +14,8 @@ rules, this skill is the procedure. Rule numbers below refer to them.
    first: write their answer verbatim to `knowledge/career/interviews/YYYY-MM-DD.md`, add or update the fact with
    `evidence: [interview:YYYY-MM-DD]`, read the wording back, set `confirmed: true` when they agree. Then use it.
 2. **Exact numbers and durations.** Quote durations from `python3 tools/facts.py durations` (never round "2 years 3 months"
-   up to "two and a half years"). No number available → range or adoption, never a guess (CV rule 7).
+   up to "two and a half years"). If the user chose a wording for an entry (`duration_wording`, e.g. "about 2.5 years"),
+   use exactly that, in every document. No number available → range or adoption, never a guess (CV rule 7).
 3. **The user decides contested content.** Plus/minus judgement and every cut that changes the story is proposed, not done (CV rule 13).
 4. **Language** = the posting's language (CV rule 2). Writing German: natural business German, not translated English.
 5. **Never** put a salary in a CV; in a letter only when the posting asks for a Gehaltsvorstellung, with the user's figure.

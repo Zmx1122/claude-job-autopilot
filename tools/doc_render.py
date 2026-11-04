@@ -39,7 +39,8 @@ import yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSS = os.path.join(ROOT, 'templates', 'document.css')
-E = lambda s: html.escape(str(s or ''))
+# escape for HTML; keep a number together with its unit ("60 %", "200 k€") — never break the line between them
+E = lambda s: html.escape(re.sub(r'(\d) (%|€|\$|k\b|Mio\.?|Tsd\.?)', '\\1\u00a0\\2', str(s or '')))
 BROWSERS = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
             '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
             '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',

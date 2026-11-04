@@ -168,9 +168,15 @@ def main():
                 for _, _, e in near[:1]:
                     true = months(e)
                     at_least = '(at least)' in phrase
-                    if (at_least and true < mo) or (not at_least and abs(true - mo) >= 2):
+                    # "about / rund / ca. 2.5 years" is an approximation: allow ±3 months; the entry's own duration_wording is always fine
+                    approx = re.search(r'\b(about|around|approximately|roughly|nearly|almost|over|more than|rund|etwa|ca\.?|circa|knapp|über|mehr als)\s*$',
+                                       low[max(0, p - 20):p])
+                    chosen = [str(w).lower() for w in (e.get('duration_wording') or {}).values()]
+                    if any(w and w in low for w in chosen):
+                        continue
+                    if (at_least and true < mo) or (not at_least and abs(true - mo) >= (4 if approx else 2)):
                         bad.append(f'{name} says "{phrase.strip()}" about {e.get("org")}, fact bank: {e.get("start")}–{e.get("end")} = '
-                                   f'{say(true)[0]} — use the exact duration (letter rule 12 / CV rule 16)')
+                                   f'{say(true)[0]} — use ' + (' / '.join(f'"{w}"' for w in (e.get('duration_wording') or {}).values()) or 'the exact duration') + ' (letter rule 12 / CV rule 16)')
     # numbers CV vs letter
     if letter:
         nc, nl = numbers_in(flow(cv)), numbers_in(flow(letter))
