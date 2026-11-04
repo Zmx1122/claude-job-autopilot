@@ -79,10 +79,12 @@ def flatten(p):
     def sel(k): return ((pr.get(k) or {}).get('select') or {}).get('name', '')
     def dt(k): return (((pr.get(k) or {}).get('date') or {}).get('start') or '')
     def url(k): return (pr.get(k) or {}).get('url') or ''
+    def chk(k): return bool((pr.get(k) or {}).get('checkbox'))
     return dict(id=p['id'], notion_url=p.get('url', ''), title=ttl('Title'), company=txt('Company'), city=txt('City'), salary=txt('Salary Range'),
                 platform=sel('Platform'), status=sel('Status'), source=sel('Source'), applied=dt('Applied On'), first_seen=dt('First Seen'),
                 last_email=dt('Last Email'), url=url('URL'), evidence=url('Email Evidence'), thread=url('Email Thread'),
-                job_id=txt('Job ID'), events=txt('Events'), notes=txt('Notes'))
+                job_id=txt('Job ID'), events=txt('Events'), notes=txt('Notes'),
+                mode=sel('Mode'), cv_version=txt('CV Version'), cover_letter=chk('Cover Letter'), posted=dt('Posted'))
 
 
 def rt(s):

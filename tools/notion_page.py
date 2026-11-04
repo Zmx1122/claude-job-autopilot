@@ -40,6 +40,17 @@ children = [
 ]
 if DASH_URL:
     children.append({'object': 'block', 'type': 'paragraph', 'paragraph': {'rich_text': [t('Interactive version with hover details, open pipeline table and search: '), {'type': 'text', 'text': {'content': 'Job Search Dashboard', 'link': {'url': DASH_URL}}}]}})
+# strategy review table: only once applications carry a mode or a posting date
+def table(head, body):
+    row = lambda cells: {'type': 'table_row', 'table_row': {'cells': [[t(str(c))] for c in cells]}}
+    return {'object': 'block', 'type': 'table', 'table': {'table_width': len(head), 'has_column_header': True, 'has_row_header': False,
+            'children': [row(head)] + [row(b) for b in body]}}
+known = [(f'Mode: {k}', v) for k, v in d.get('by_mode', {}).items() if k != 'unknown'] + \
+        [(f'Posting age: {k}', v) for k, v in d.get('by_age', {}).items() if k != 'unknown']
+if known:
+    children += [{'object': 'block', 'type': 'heading_2', 'heading_2': {'rich_text': [t('Which applications get interviews')]}},
+                 table(['Group', 'Applied', 'Interview', 'Rate'], [[k, v['applied'], v['interview'], f"{v['rate']:.0%}"] for k, v in known]),
+                 {'object': 'block', 'type': 'paragraph', 'paragraph': {'rich_text': [t('Tailored vs template and how old the posting was when you applied (standards/de/apply-strategy.md). Shift effort to the groups with the higher rate.', italic=True)]}}]
 # Mermaid blocks render natively in Notion (pie, sankey-beta, xychart-beta)
 order = ['Applied', 'Confirmed', 'Interview', 'Offer', 'Rejected', 'Withdrawn', 'Skipped']
 pie = 'pie showData\n    title Where every application stands\n' + ''.join(f'    "{k}" : {s[k]}\n' for k in order if s.get(k))

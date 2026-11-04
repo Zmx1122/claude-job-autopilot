@@ -13,7 +13,7 @@ def line(ok, what, hint=''):
     print(f'{mark} {what}' + (f'\n     → {hint}' if hint and not ok else ''))
 
 # 1. python packages
-for mod, pkg in (('requests', 'requests'), ('yaml', 'pyyaml'), ('PIL', 'pillow')):
+for mod, pkg in (('requests', 'requests'), ('yaml', 'pyyaml'), ('PIL', 'pillow'), ('pypdf', 'pypdf')):
     try: importlib.import_module(mod); line(True, f'python package {pkg}')
     except ImportError: line(False, f'python package {pkg}', 'python3 -m pip install -r requirements.txt')
 
@@ -42,6 +42,22 @@ if os.path.exists(prof):
     line(os.path.exists(os.path.join(ROOT, 'knowledge', 'PROFILE.md')), 'knowledge/PROFILE.md (knowledge profile)', 'job-knowledge-base skill, step A6')
     inbox = [f for f in os.listdir(os.path.join(ROOT, 'knowledge', 'inbox')) if not f.startswith('.')] if os.path.isdir(os.path.join(ROOT, 'knowledge', 'inbox')) else []
     line(not inbox or None, 'knowledge/inbox/ is processed', f'{len(inbox)} file(s) waiting: run the job-knowledge-base skill')
+
+    facts = os.path.join(ROOT, 'knowledge', 'career', 'facts.yaml')
+    if os.path.exists(facts):
+        r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'facts.py'), 'check'], capture_output=True, text=True)
+        line(r.returncode == 0, 'knowledge/career/facts.yaml (fact bank for CVs and cover letters)', (r.stdout or r.stderr).strip().splitlines()[-1] if (r.stdout or r.stderr) else '')
+    else:
+        line(None, 'knowledge/career/facts.yaml (fact bank, needed for tailored CVs and cover letters)',
+             'no CV → job-career-coach skill; CVs exist → setup skill step 1b')
+
+# 3b. PDF writer for generated CVs / cover letters (optional)
+try:
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    from doc_render import browser
+    line(bool(browser()), 'Chromium browser for writing CV / cover-letter PDFs')
+except SystemExit as e:
+    line(None, 'Chromium browser for writing CV / cover-letter PDFs (optional)', str(e))
 
 # 4. Notion
 if env.get('NOTION_TOKEN') and env.get('NOTION_DATABASE_ID'):

@@ -1,0 +1,48 @@
+# knowledge/career/facts.yaml — the fact bank (one source of truth for every CV and cover letter)
+# 事实库：简历和求职信里的每一句话都必须来自这里。The real file is git-ignored.
+# Written by Claude (skills job-career-coach and job-application-writer); checked by `python3 tools/facts.py check`.
+#
+# evidence: manifest ids from knowledge/manifest.yaml, or interview:YYYY-MM-DD (raw answers in knowledge/career/interviews/)
+# confirmed: true only after the user read the wording back and agreed. Unconfirmed facts are never used in documents.
+version: 1
+headline_options: ["AI Engineer", "Machine Learning Engineer"]
+entries:
+  - id: exp-acme
+    type: work                      # work | internship | working_student | research | teaching | project | education | volunteering | award | publication | certificate
+    role: Machine Learning Engineer
+    org: ACME GmbH
+    org_note: "B2B software, 120 employees, Munich"   # one line for small or foreign organisations
+    location: Munich
+    start: 2023-04                  # YYYY-MM
+    end: present                    # YYYY-MM or present
+    evidence: [ref-acme-2025]
+    confirmed: true
+    achievements:
+      - id: acme-forecast
+        text: "Built a demand-forecasting service (Python, LightGBM) used by 40 sales managers; cut forecast error by 18%."
+        skills: [Python, LightGBM, forecasting]
+        metrics: ["40 users", "-18% MAPE"]
+        evidence: [interview:2026-11-04]
+        confirmed: true
+  - id: edu-msc
+    type: education
+    role: M.Sc. Computer Science    # degree
+    org: Technical University of Munich
+    location: Munich
+    start: 2020-10
+    end: 2023-03
+    status: completed               # completed | ongoing | discontinued
+    grade: "1.7"
+    evidence: [degree-msc, transcript-msc]
+    confirmed: true
+skills:
+  - group: Machine Learning
+    items: [Python, scikit-learn, LightGBM]
+    evidence: [exp-acme]
+languages:
+  - {language: German, level: C1, evidence: [lang-goethe-c1]}
+  - {language: English, level: C1, evidence: [interview:2026-11-04]}
+open_questions:                     # discrepancies or gaps to clear with the user
+  - id: q-acme-team-size
+    question: "How many people were in the forecasting team, and what exactly was your part?"
+    status: open                    # open | answered | dropped

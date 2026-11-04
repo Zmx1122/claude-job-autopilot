@@ -1,11 +1,12 @@
 ---
 name: job-scan-apply
-description: Daily job scan on LinkedIn, StepStone, Indeed and Xing plus batch applying (platform quick-apply and company career sites with file uploads) — shortlist table, user picks, prefill to review pages, one confirmation, submit, log to Notion. Use for "scan jobs", "show today's jobs", "apply", "投递", "扫岗位", "看看今天的岗位", "Bewerbungen", or when a scheduled run asks for the scan phase.
+description: Daily job scan on LinkedIn, StepStone, Indeed and Xing plus batch applying (platform quick-apply and company career sites with file uploads) — shortlist table with a tailored/template mode per job, user picks, tailored CVs and cover letters where it pays off, prefill to review pages, one confirmation, submit, log to Notion. Use for "scan jobs", "show today's jobs", "apply", "投递", "扫岗位", "看看今天的岗位", "Bewerbungen", or when a scheduled run asks for the scan phase.
 ---
 
 # Scan and apply
 
 Read `config/profile.yaml`, `knowledge/PROFILE.md` and `knowledge/manifest.yaml` first. Platform details and known traps: `docs/platforms.md`.
+When to tailor: `standards/<strategy.country>/apply-strategy.md` (default `de`).
 All browsing happens in Claude's **built-in browser pane** (`mcp__Claude_Browser__*`), where the user is logged in.
 
 ## The interaction contract (agreed with real users — do not shortcut it)
@@ -22,21 +23,32 @@ All browsing happens in Claude's **built-in browser pane** (`mcp__Claude_Browser
 1. For each enabled platform, open the searches from `docs/platforms.md#search-urls` for every `search.titles` × `search.locations`
    (posted within `posted_within_days`). Read result lists with `get_page_text`; avoid screenshots.
 2. Open each promising posting once and record: title, company, platform, url, city, salary (only if stated), posted,
-   `apply_type` (easy_apply | one_click | platform_form | external), `needs` (cv, cover_letter, degree_certificate, …),
+   `posted` (ISO date if the page shows one, else the platform's text, e.g. "vor 3 Tagen"), `reposted` (true when marked
+   "reposted" / "erneut gepostet"), `apply_type` (easy_apply | one_click | platform_form | external), `needs` (cv, cover_letter, degree_certificate, …),
    `size` (large | mid | startup | unknown — check the company page or headcount when unsure), `fit` 0–100, `why` (one line).
 3. Save the list to `data/inbox/YYYY-MM-DD.json` and run `python3 tools/dedupe.py data/inbox/YYYY-MM-DD.json`.
-   It removes jobs already in Notion, applies the profile filters (blacklist, title filters, startups, cover-letter rule)
-   and prints the table. Paste that table to the user, at most `max_applications_per_day` rows, with a one-line summary
-   of what was dropped and why.
-4. Log every shown job: `python3 tools/log_application.py --status Shortlisted ...` (so tomorrow's scan skips it).
+   It removes jobs already in Notion, applies the profile filters (blacklist, title filters, startups, cover-letter rule,
+   low fit), decides the **Mode** of each job — 🎯 tailored or 📄 template, from posting age, "seen before" and fit, dream
+   companies always tailored, at most `strategy.tailored_per_day` tailored — and prints the table. Paste that table to the
+   user, at most `max_applications_per_day` rows, with a one-line summary of what was dropped and why, and one line on the
+   modes ("🎯 = I write a CV for this posting and ask you a few questions; 📄 = your role-family CV"). The user may switch a
+   job's mode when picking ("3 as template").
+4. Log every shown job: `python3 tools/log_application.py --status Shortlisted --mode <mode> --posted <date> ...` (so tomorrow's scan skips it).
 
-## Phase 2 · Prefill (after the user picked)
+## Phase 2 · Prepare documents, then prefill (after the user picked)
+**🎯 tailored jobs first**: run **job-application-writer** mode J for all of them together — one round of gap questions and
+one plus/minus table covering every tailored job, then their CVs (and cover letters where the form has a slot or
+`strategy.cover_letter` says so). Prefill the 📄 template jobs while the user answers. The user approves the tailored
+documents' text before they are uploaded.
+
 For each picked job, in its own tab:
-- **Choose the CV** whose `use_for` keywords best match the title; default to the first variant.
+- **Choose the CV**: 🎯 the tailored PDF from `data/applications/<folder>/`; 📄 the `cv_variants` entry whose `use_for`
+  keywords best match the title (default: the first variant). Never edit a template CV for one posting.
 - **Materials**: read the form's upload section (slot names, required marks, number of files, size limit), then choose and
   prepare files with the **job-knowledge-base** skill, section C (typed slots → separate unit files; single slot → one merged
   PDF in German standard order; only CV required → CV only; sensitive documents never without asking).
-  Form *requires* a cover letter → stop, log `Skipped` with note "requires cover letter" (unless `rules.cover_letter_required: generate`).
+  Form *requires* a cover letter → `rules.cover_letter_required: draft` → job-application-writer "cover letter only"
+  (tailored jobs already have one), the user approves the text; `skip` → log `Skipped` with note "requires cover letter".
   Required document not in the knowledge base → pause and ask the user for the file, add it (section A), continue.
 - Fill personal data and screening answers from the profile. Never invent answers; if a question is not covered, collect it
   and ask the user once for all jobs together. Add the answer to `screening_answers` so it is never asked again.
@@ -49,11 +61,14 @@ For each picked job, in its own tab:
 ## Phase 3 · Confirm and submit
 Show the ready list:
 
-| # | Company | Title | Platform | Files (slot ← file) | Notes |
-|---|---|---|---|---|---|
+| # | Mode | Company | Title | Platform | Files (slot ← file) | Notes |
+|---|---|---|---|---|---|---|
 
 After the confirmation: submit each, wait for the success page or message, then
-`python3 tools/log_application.py --status Applied --source auto --platform ... --company ... --title ... --url ... --notes "files: Lebenslauf←CV_…pdf; Zeugnisse←…_Zeugnisse.pdf"`.
+`python3 tools/log_application.py --status Applied --source auto --platform ... --company ... --title ... --url ...
+ --mode tailored|template --cv <CV file name> [--cover-letter] --posted <YYYY-MM-DD> --notes "files: Lebenslauf←…pdf; Zeugnisse←…_Zeugnisse.pdf"`
+(`--posted` = today minus `age_days` from the shortlist JSON). Mode and posting date feed the dashboard's
+"which applications get interviews" table — the evidence for the strategy.
 Report: submitted, skipped (with reason), waiting on the user (CAPTCHA, verification link, missing file).
 Respect the daily cap; the user may lift it explicitly for one day.
 

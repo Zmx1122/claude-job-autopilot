@@ -49,16 +49,29 @@ for r in rows:
             d2 = date(int(r['applied'][:4]), int(m.group(1)[:2]), int(m.group(1)[3:])); d1 = date.fromisoformat(r['applied'])
             if 0 <= (d2 - d1).days <= 120: resp.append((d2 - d1).days)
         except ValueError: pass
+# strategy review: interview rate by mode (tailored / template) and by posting age at application
+def age_bucket(r):
+    if not (r.get('posted') and r.get('applied')): return 'unknown'
+    a = (date.fromisoformat(r['applied'][:10]) - date.fromisoformat(r['posted'][:10])).days
+    return '≤1 day' if a <= 1 else '2–3 days' if a <= 3 else '4–7 days' if a <= 7 else '> 7 days'
+def rates(key):
+    g = collections.defaultdict(lambda: [0, 0])
+    for r in rows:
+        if r['applied']:
+            k = key(r); g[k][0] += 1; g[k][1] += reached(r, 'Interview')
+    return {k: dict(applied=a, interview=i, rate=round(i / a, 3) if a else 0) for k, (a, i) in g.items()}
+by_mode = rates(lambda r: r.get('mode') or 'unknown'); by_age = rates(age_bucket)
 data = dict(generated=datetime.now().isoformat(timespec='minutes'), total=len(rows),
             by_status=dict(collections.Counter(r['status'] for r in rows)), by_platform=dict(collections.Counter(r['platform'] for r in rows)),
             funnel={s: sum(reached(r, s) for r in rows) for s in ORDER},
             sankey=[dict(source=a, target=b, value=v) for (a, b), v in links.items()],
             weekly=[dict(week=w, total=by_week[w], **by_week_plat[w]) for w in weeks],
-            response_days=sorted(resp), open_rows=[r for r in rows if not ended(r)], rows=rows,
+            response_days=sorted(resp), by_mode=by_mode, by_age=by_age, open_rows=[r for r in rows if not ended(r)], rows=rows,
             notion_db=f"https://www.notion.so/{env['NOTION_DATABASE_ID'].replace('-', '')}")
 json.dump(data, open(out, 'w'), ensure_ascii=False, indent=1)
 print(f"{len(rows)} rows -> {out}; status={data['by_status']}; funnel={data['funnel']}; sankey links={len(links)}; weeks={len(weeks)}; response samples={len(resp)}")
+print(f"interview rate by mode: {by_mode}\ninterview rate by posting age at application: {by_age}")
 
-KEEP = ('id', 'title', 'company', 'city', 'platform', 'status', 'source', 'applied', 'last_email', 'events', 'url', 'evidence', 'notion_url', 'salary')
+KEEP = ('id', 'title', 'company', 'city', 'platform', 'status', 'source', 'applied', 'last_email', 'events', 'url', 'evidence', 'notion_url', 'salary', 'mode', 'posted')
 json.dump([{k: r.get(k, '') for k in KEEP} for r in rows], open(os.path.join(OUTDIR, 'applications.json'), 'w'), ensure_ascii=False)
 print('rows for the artifact dataset ->', os.path.join(OUTDIR, 'applications.json'))

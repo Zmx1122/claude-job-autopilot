@@ -25,6 +25,10 @@ SCHEMA = {
     'Job ID': {'rich_text': {}},
     'Events': {'rich_text': {}},
     'Notes': {'rich_text': {}},
+    'Mode': SELECT([('tailored', 'pink'), ('template', 'blue')]),
+    'CV Version': {'rich_text': {}},
+    'Cover Letter': {'checkbox': {}},
+    'Posted': {'date': {}},
 }
 
 

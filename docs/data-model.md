@@ -20,7 +20,11 @@ Created by `tools/notion_setup.py`. One row per job (seen, shortlisted, applied 
 | Email Thread | url | Gmail thread |
 | Job ID | text | reference number from emails |
 | Events | text | timeline, e.g. `11-02 application sent via StepStone; 11-03 ats confirmation` |
-| Notes | text | interview times, rejection reasons, CV used |
+| Notes | text | interview times, rejection reasons, files uploaded |
+| Mode | select | `tailored` (CV/letter written for this posting) · `template` (role-family CV) — set by the scan |
+| CV Version | text | file name of the CV that was sent |
+| Cover Letter | checkbox | a cover letter was sent |
+| Posted | date | when the posting went online — with Applied On it gives the posting age at application |
 
 ## Status flow · 状态流转
 `Seen → Shortlisted → Applied → Confirmed → Interview → Offer`, side exits `Rejected · Withdrawn · Skipped`.
@@ -33,4 +37,13 @@ Created by `tools/notion_setup.py`. One row per job (seen, shortlisted, applied 
 | `data/inbox/YYYY-MM-DD.json` | raw scan results; `.shortlist.json` = after dedupe and filters |
 | `data/applied.csv` | append-only log of every logged action |
 | `data/mail/` | dump, chunks, classifications, `sync_report.md` |
-| `data/dashboard/` | aggregates, rows for the artifact, chart PNGs |
+| `data/dashboard/` | aggregates (incl. interview rate by mode and posting age), rows for the artifact, chart PNGs |
+| `data/applications/<date>_<company>_<title>/` | tailored application: `jd.md`, `match.md`, `cv.yaml`, `letter.yaml`, PDFs, `changes.md` |
+
+## Career files (`knowledge/career/`, git-ignored)
+| File | What |
+|---|---|
+| `facts.yaml` | fact bank: entries (work, education, awards …) with achievements, evidence and `confirmed`; skills; languages; open questions. Template: `facts.example.yaml` |
+| `interviews/YYYY-MM-DD.md` | the user's answers, verbatim — evidence `interview:YYYY-MM-DD` |
+| `DIRECTION.md` | target roles with real postings, gaps, plan (job-career-coach) |
+| `cvs/<id>.yaml` | content of master and template CVs; PDFs go to `knowledge/library/cv/` and the manifest |

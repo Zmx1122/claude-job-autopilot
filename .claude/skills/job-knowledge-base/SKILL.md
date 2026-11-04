@@ -75,7 +75,7 @@ knowledge/PROFILE.md    ← human-readable knowledge profile (written by you)
 | Notenspiegel / Transcript | … | … |
 | Arbeitszeugnisse (each employer) | … | … |
 | Sprachzertifikate | … | … |
-| Anschreiben | generated per job, not stored (rule: skip jobs that require one) |
+| Anschreiben | written per posting by job-application-writer (stored with the application in `data/applications/`); samples here are style references only |
 
 ## Gaps and suggestions
 - missing documents, documents worth translating, scans worth replacing with originals.

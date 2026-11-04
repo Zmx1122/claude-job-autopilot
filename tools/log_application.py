@@ -2,6 +2,7 @@
 
 usage: python3 tools/log_application.py --title "AI Engineer (m/w/d)" --company "ACME AG" --platform LinkedIn \
           --status Applied --url https://... [--city Munich] [--salary "80-95k"] [--notes "..."] [--source auto]
+          [--mode tailored|template] [--cv Jane-Doe-CV-ACME.pdf] [--cover-letter] [--posted 2026-11-03]
 status: Seen | Shortlisted | Applied | Skipped (later stages come from the mail sync)
 Use it right after every submit, and for every job you shortlist or skip during a scan, so tomorrow's scan dedupes against it.
 """
@@ -10,8 +11,9 @@ from datetime import date
 from common import DATA, load_env, notion_rows, notion_call, rt, same_company, title_sim
 
 ap = argparse.ArgumentParser()
-for k in ('title', 'company', 'platform', 'status', 'url', 'city', 'salary', 'notes', 'source', 'date'):
+for k in ('title', 'company', 'platform', 'status', 'url', 'city', 'salary', 'notes', 'source', 'date', 'mode', 'cv', 'posted'):
     ap.add_argument('--' + k, default='')
+ap.add_argument('--cover-letter', action='store_true')
 ap.add_argument('--dry-run', action='store_true')
 a = ap.parse_args()
 a.status = a.status or 'Applied'; a.source = a.source or 'auto'; a.platform = a.platform or 'Other'; a.date = a.date or str(date.today())
@@ -25,9 +27,13 @@ if a.url: props['URL'] = {'url': a.url}
 if a.city: props['City'] = rt(a.city)
 if a.salary: props['Salary Range'] = rt(a.salary)
 if a.status in ('Applied',): props['Applied On'] = {'date': {'start': a.date}}
+if a.mode: props['Mode'] = {'select': {'name': a.mode}}
+if a.cv: props['CV Version'] = rt(a.cv)
+if a.cover_letter: props['Cover Letter'] = {'checkbox': True}
+if a.posted: props['Posted'] = {'date': {'start': a.posted}}
 if a.notes: props['Notes'] = rt(((hit or {}).get('notes', '') + ' | ' if hit and hit.get('notes') else '') + a.notes)
 if a.dry_run:
-    raise SystemExit(f"dry run: would {'update' if hit else 'create'} {a.company} · {a.title} → {a.status}" + (f" (matches existing row: {hit['title']})" if hit else ''))
+    print(f"dry run: would {'update' if hit else 'create'} {a.company} · {a.title} → {a.status}" + (f" (matches existing row: {hit['title']})" if hit else '')); raise SystemExit(0)
 if hit:
     r = notion_call('PATCH', f"https://api.notion.com/v1/pages/{hit['id']}", env, json={'properties': props}); what = 'updated'
 else:
@@ -36,8 +42,13 @@ else:
 if r.status_code != 200:
     raise SystemExit(f'Notion {r.status_code}: {r.text[:300]}')
 path = os.path.join(DATA, 'applied.csv'); new = not os.path.exists(path)
+if not new:   # older logs have 7 columns: add mode and cv once
+    old = list(csv.reader(open(path)))
+    if old and 'mode' not in old[0]:
+        with open(path, 'w', newline='') as f:
+            csv.writer(f).writerows([old[0] + ['mode', 'cv']] + [r + ['', ''] for r in old[1:]])
 with open(path, 'a', newline='') as f:
     w = csv.writer(f)
-    if new: w.writerow(['date', 'platform', 'company', 'title', 'url', 'status', 'notes'])
-    w.writerow([a.date, a.platform, a.company, a.title, a.url, a.status.lower(), a.notes])
+    if new: w.writerow(['date', 'platform', 'company', 'title', 'url', 'status', 'notes', 'mode', 'cv'])
+    w.writerow([a.date, a.platform, a.company, a.title, a.url, a.status.lower(), a.notes, a.mode, a.cv])
 print(f'{what} Notion row ({a.status}) and logged to data/applied.csv: {a.company} · {a.title}')

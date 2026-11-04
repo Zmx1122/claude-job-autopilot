@@ -7,6 +7,9 @@ knowledge/**
 !knowledge/manifest.example.yaml
 !knowledge/inbox/
 !knowledge/inbox/.gitkeep
+!knowledge/career/
+knowledge/career/*
+!knowledge/career/facts.example.yaml
 data/**
 !data/.gitkeep
 # system

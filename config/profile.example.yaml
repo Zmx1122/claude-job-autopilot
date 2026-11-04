@@ -20,7 +20,8 @@ candidate:                     # Q1 · Who you are / 基本信息 (most of this 
   xing_url: ""
   portfolio_url: ""
   current_title: ""
-  cv_variants:                 # Q2 · Which CV for which kind of role / 简历版本与适用岗位
+  cv_variants:                 # Q2 · Which CV for which kind of role / 简历版本与适用岗位 (template CVs, one per role family;
+                               #      no CV yet? Claude interviews you and writes them — skills job-career-coach, job-application-writer)
     - file: "knowledge/library/cv/CV_AI-Engineer_EN_2026.pdf"   # unit file from the knowledge base
       use_for: ["ai engineer", "machine learning"]     # keywords in a job title that select this CV
       note: "default"
@@ -50,11 +51,22 @@ rules:                         # Q5 · How Claude applies for you / 投递规则
   confirm_mode: "batch"        # batch = shortlist table → you pick → Claude prefills all → you confirm once → all submitted
                                # each  = confirm every single submit
                                # direct = you said "submit when filled" for this batch (asked per batch, never stored as default)
-  cover_letter_required: "skip"    # skip jobs whose form REQUIRES a cover letter / 必须求职信的岗位跳过 (or: generate)
+  cover_letter_required: "draft"   # form REQUIRES a cover letter → draft = Claude writes one for that posting, you approve it
+                                   # before upload / 起草后由你确认 · skip = skip those jobs / 跳过
   certificate_required: "ask"      # form requires a certificate that is not in the knowledge base → pause and ask you
   upload_only_requested: true      # upload only what the form asks for; CV only when only a CV is required
   follow_external_redirects: true  # also complete applications on company career sites / ATS
   stepstone_one_click: "confirm_first"  # "Ich bin interessiert" submits instantly; list it and wait for your OK first
+
+strategy:                      # Q5b · Tailored (精投) or template (模版投)? — standards/de/apply-strategy.md
+  country: "de"                # which standards/<country>/ rules to follow
+  dream_companies: []          # always tailored, whatever the posting age / 梦中情司：无论新旧都精投
+  dream_title_keywords: []     # e.g. ["Conversational AI"]
+  fit_high: 80                 # fit ≥ this = high match
+  fit_medium: 60               # fit below this is not shown
+  tailored_per_day: 3          # each tailored application costs you ~10–20 min (questions + review)
+  familiar_after: 3            # a company with ≥ this many postings in 30 days counts as "seen before"
+  cover_letter: "tailored_only"    # write a letter unasked: never | tailored_only (when the form has a slot) | always
 
 screening_answers:             # Q6 · Standard form answers / 表单常见问题
   work_authorization: ""       # e.g. "EU Blue Card, no sponsorship needed" / "EU citizen"

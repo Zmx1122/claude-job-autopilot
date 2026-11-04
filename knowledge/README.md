@@ -15,6 +15,7 @@ Claude then (skill `job-knowledge-base`) · 然后 Claude 会：
 | `originals/` | sources after processing, never uploaded · 原件存档，不上传 | no |
 | `library/<kind>/` | unit files, the only files ever uploaded · 单元文件，唯一会被上传的文件 | no |
 | `manifest.yaml`, `PROFILE.md` | generated index and profile · 自动生成 | no |
+| `career/` | fact bank `facts.yaml`, interview notes, `DIRECTION.md`, CV content — the source of every CV and cover letter · 事实库、访谈记录、求职方向、简历内容 | no (only `facts.example.yaml`) |
 
 Kinds: `cv`, `cover_letter`, `degree`, `transcript`, `work_reference`, `certificate`, `language_certificate`, `award`,
 `publication`, `reference_letter`, `id_document` (always sensitive), `other`. See `manifest.example.yaml`.

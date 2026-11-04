@@ -44,13 +44,13 @@
 <path d="M830,886 L890,886" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
 <path d="M830,994 L890,994" fill="none" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
 <rect x="170" y="78" width="280" height="70" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
-<text x="310.0" y="101" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Drop CVs + certificates,</text>
+<text x="310.0" y="101" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Drop documents (no CV is fine),</text>
 <text x="310.0" y="117" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">answer the questionnaire</text>
-<text x="310.0" y="134" text-anchor="middle" font-size="11.5" fill="#6F6B64">上传简历证书，回答问卷</text>
+<text x="310.0" y="134" text-anchor="middle" font-size="11.5" fill="#6F6B64">上传材料（没有简历也行），回答问卷</text>
 <rect x="510" y="78" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
-<text x="670.0" y="101" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Build knowledge base</text>
-<text x="670.0" y="117" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">+ config/profile.yaml</text>
-<text x="670.0" y="134" text-anchor="middle" font-size="11.5" fill="#6F6B64">建立知识库与个人档案</text>
+<text x="670.0" y="101" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Knowledge base, fact bank,</text>
+<text x="670.0" y="117" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">profile; first CV if needed</text>
+<text x="670.0" y="134" text-anchor="middle" font-size="11.5" fill="#6F6B64">建知识库、事实库与档案，必要时写简历</text>
 <rect x="170" y="173" width="280" height="70" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
 <text x="310.0" y="196" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Create Notion token +</text>
 <text x="310.0" y="212" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Gmail app password</text>
@@ -77,9 +77,9 @@
 <text x="1000.0" y="407" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">Gmail → Notion</text>
 <text x="1000.0" y="424" text-anchor="middle" font-size="11.5" fill="#6F6B64">确认信 · 面试 · 拒信</text>
 <rect x="510" y="467" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
-<text x="670.0" y="490" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Scan · dedupe · filter</text>
-<text x="670.0" y="506" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">(company size, cover letter …)</text>
-<text x="670.0" y="523" text-anchor="middle" font-size="11.5" fill="#6F6B64">扫描、去重、按规则筛选</text>
+<text x="670.0" y="490" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Scan · dedupe · filter,</text>
+<text x="670.0" y="506" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">tailored or template per job</text>
+<text x="670.0" y="523" text-anchor="middle" font-size="11.5" fill="#6F6B64">扫描去重筛选，逐个定精投 / 模版投</text>
 <rect x="890" y="471" width="220" height="62" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
 <text x="1000.0" y="498" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">LinkedIn · StepStone</text>
 <text x="1000.0" y="514" text-anchor="middle" font-size="13" font-weight="600" fill="#23426E">Indeed · Xing</text>
@@ -88,11 +88,11 @@
 <text x="670.0" y="623" text-anchor="middle" font-size="11.5" fill="#6F6B64">聊天里给出精选岗位表</text>
 <rect x="170" y="585" width="280" height="50" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
 <text x="310.0" y="606" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">Pick jobs  ("1, 3, 5")</text>
-<text x="310.0" y="623" text-anchor="middle" font-size="11.5" fill="#6F6B64">选择要投的岗位</text>
+<text x="310.0" y="623" text-anchor="middle" font-size="11.5" fill="#6F6B64">选岗位，回答精投岗位的问题</text>
 <rect x="510" y="668" width="320" height="70" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
-<text x="670.0" y="691" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Prefill each job to its review</text>
-<text x="670.0" y="707" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">page: CV choice, answers, uploads</text>
-<text x="670.0" y="724" text-anchor="middle" font-size="11.5" fill="#6F6B64">逐个填到确认页：选简历、答题、上传</text>
+<text x="670.0" y="691" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">Tailored CV + letter where it pays;</text>
+<text x="670.0" y="707" text-anchor="middle" font-size="13" font-weight="600" fill="#7A3418">prefill each job, upload files</text>
+<text x="670.0" y="724" text-anchor="middle" font-size="11.5" fill="#6F6B64">需要时写定制简历和求职信，逐个填到确认页</text>
 <rect x="170" y="678" width="280" height="50" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
 <text x="310.0" y="699" text-anchor="middle" font-size="13" font-weight="600" fill="#7A4B00">CAPTCHA · account · missing file</text>
 <text x="310.0" y="716" text-anchor="middle" font-size="11.5" fill="#6F6B64">验证码 / 注册 / 缺材料 → 你来</text>

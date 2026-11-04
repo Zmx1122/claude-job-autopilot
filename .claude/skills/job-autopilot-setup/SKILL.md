@@ -1,6 +1,6 @@
 ---
 name: job-autopilot-setup
-description: Guided zero-to-running setup of the job autopilot for a non-technical user — knowledge base (CVs, certificates), questionnaire → config/profile.yaml, Notion token + database, Gmail app password + "applications" label, platform logins in Claude's built-in browser, macOS upload permission, dashboards and the daily schedule. Use when the user says "set up", "get started", "配置", "开始", "onboard", when .env or config/profile.yaml is missing, or when tools/check_setup.py fails.
+description: Guided zero-to-running setup of the job autopilot for a non-technical user — knowledge base (CVs, certificates; no CV → career coaching and a first CV), questionnaire → config/profile.yaml, Notion token + database, Gmail app password + "applications" label, platform logins in Claude's built-in browser, macOS upload permission, dashboards and the daily schedule. Use when the user says "set up", "get started", "配置", "开始", "onboard", when .env or config/profile.yaml is missing, or when tools/check_setup.py fails.
 ---
 
 # Job Autopilot setup
@@ -16,6 +16,8 @@ Never paste secrets back into chat, never type a password or solve a CAPTCHA, ne
 - `python3 --version` (needs 3.9+). If missing on macOS: ask the user to run `xcode-select --install` or install from python.org.
 - `python3 -m pip install -r requirements.txt`
 - `cp -n .env.example .env`
+- A Chromium browser for writing CV / cover-letter PDFs: `ls "/Applications/Google Chrome.app"` (or Edge / Brave). Missing →
+  ask the user to install Google Chrome; only needed for generated documents.
 - Tell the user what is coming: about 30–45 minutes once, then a few minutes a day.
 
 ## 1. Knowledge base — the user's documents
@@ -26,6 +28,16 @@ Then run the **job-knowledge-base** skill (section A): it splits multi-document 
 writes `knowledge/manifest.yaml` and `knowledge/PROFILE.md`. Show the user the PROFILE "At a glance" and "Gaps" sections.
 Tell them their files stay on this Mac (git-ignored).
 
+### 1b. CVs and the fact bank
+- **No CV, or the user is unsure what to apply for** → run the **job-career-coach** skill now: interview, fact bank,
+  target roles (`knowledge/career/DIRECTION.md`), then a master CV and one CV per target role family
+  (job-application-writer modes M and T). Its search settings feed step 2.
+- **CVs exist** → build the fact bank from them (`knowledge/career/facts.yaml`: one entry per position and degree, the CV
+  bullets as achievements, `evidence:` the CV's manifest id) and run `python3 tools/facts.py check` and
+  `python3 tools/doc_check.py --cv <each CV> --facts knowledge/career/facts.yaml`. Show the user the discrepancies between
+  CVs and documents (durations, titles, grades) as open questions — they will matter in every tailored application.
+  Offer job-application-writer mode T if a target role family has no fitting CV.
+
 ## 2. Questionnaire → config/profile.yaml
 Copy `config/profile.example.yaml` to `config/profile.yaml`, then fill it **block by block (Q1–Q8 in the file)**.
 - Pre-fill from `knowledge/PROFILE.md` and the manifest facts (degree, grade, languages, employers) before asking anything.
@@ -33,7 +45,11 @@ Copy `config/profile.example.yaml` to `config/profile.yaml`, then fill it **bloc
 - Ask only what is missing, using AskUserQuestion when there are clear options (remote policy, company size, confirm mode, cover-letter rule).
 - Defaults that came out of real use — explain them, let the user change them:
   - `rules.confirm_mode: batch` → you show a shortlist table, the user picks, you prefill all, the user confirms once, you submit.
-  - `rules.cover_letter_required: skip` → jobs that force a cover letter are skipped (no generic letters).
+  - `strategy` block (Q5b): `dream_companies`, fit thresholds, `tailored_per_day: 3` — fresh, high-fit postings and dream
+    companies get a tailored CV (and letter); the rest use the template CV of their role family. Explain the decision table in
+    `standards/de/apply-strategy.md` in two sentences.
+  - `rules.cover_letter_required: draft` → when a form forces a cover letter, Claude drafts one for that posting and the user
+    approves it before upload; `skip` skips those jobs instead.
   - `rules.certificate_required: ask` → if a form demands a certificate that is not in the knowledge base, pause and ask.
   - `search.company_size: established` and `skip_title_keywords: [Founding]` if the user wants mature employers only.
   - `search.max_applications_per_day: 10`.

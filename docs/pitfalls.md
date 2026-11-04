@@ -38,6 +38,16 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
 13b. **Scanned certificates have no text layer** — text extraction returns nothing, so a script alone cannot tell what a page is. → `kb_extract.py` flags those pages and renders previews; Claude reads them visually before splitting.
     **扫描件没有文字层**：脚本识别不了，标记出来让 Claude 看图判断。
 
+## CVs and cover letters · 简历与求职信
+20. **The same fact drifted between documents** — the reference says 01/2022–03/2024 (2 years 3 months); the CV said "2.5 years", the cover letter "two and a half years". → One fact bank (`knowledge/career/facts.yaml`), durations quoted from `tools/facts.py durations`, and `tools/doc_check.py` compares CV, letter and fact bank before anything is sent.
+    **同一事实在不同文件里写法不一致**：工作证明是 2 年 3 个月，简历写 2.5 年、求职信写两年半。→ 统一事实库，时长从脚本取，发出前自动比对。
+21. **A good-looking PDF can be unreadable for an ATS** — rendered with Helvetica Neue, every bold or italic line came out of the text layer one word per line; a ligature turned "fi" into one character. → Generated documents use Arial, one column, real text; `doc_render.py` checks every line is in the text layer in reading order, `doc_check.py` flags one-word-per-line extraction.
+    **好看的 PDF 不一定能被 ATS 读懂**：Helvetica Neue 的粗体/斜体被拆成一词一行，连字把 "fi" 变成一个字符。→ 统一用 Arial、单栏、真文字，生成后自动检查文字层顺序。
+22. **The same achievement appeared three times** (experience, achievements, publications). → CV rule 9; `doc_check.py` reports repeated phrases.
+    **同一成果出现三次**：每个成果只写一次，脚本会提示重复。
+23. **Tailoring every application does not scale, and late applications rarely get interviews.** → Mode per job from posting age × seen before × fit (`standards/de/apply-strategy.md`); tailored CVs only for fresh, high-fit postings and dream companies, capped per day; the dashboard compares interview rates by mode and posting age.
+    **每份都精修不现实，老岗位精投也很少有面试**：按新鲜度 × 是否眼熟 × 匹配度决定精投/模版投，每天限量，看板按模式和岗位新鲜度对比面试率。
+
 ## Notion and Gmail
 14. **Notion parent page "cannot have content"** — a person/profile page was used. → Use a normal page shared with the integration (••• → Connections).
     **Notion 父页面不能放内容**：换普通页面并共享给 integration。

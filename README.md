@@ -31,8 +31,15 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 - **Knowledge base**: drop every document you have — scans, merged PDFs, photos. Claude reads each page, splits them into
   one-document unit files, names them, and writes a profile of what each document proves and what is missing.
   At application time it decides per form which files go into which upload slot, merged or separate, in German standard order.
-- **Dashboards**: a section on your Notion page (stage pie, stage flow, applications per week) and an interactive
-  claude.ai dashboard with the same three charts, refreshed weekly.
+- **No CV? No experience?** A career coach reads your transcript and degree, interviews you in short rounds about projects,
+  jobs and skills, recommends realistic target roles with real postings as evidence, explains how the market works
+  (language, Werkstudent / internship / junior routes, work permits) and writes your first CVs.
+- **CVs and cover letters that fit the posting**: every job in the shortlist gets a mode — 🎯 *tailored* for fresh, high-fit
+  postings and dream companies, 📄 *template* (your role-family CV) for the rest. Tailored means a requirement match table,
+  a few questions to close gaps, a CV written for that posting and a cover letter in German or English — built only from a
+  fact bank you confirmed, checked for consistent dates and numbers, readable by applicant-tracking systems.
+- **Dashboards**: a section on your Notion page (stage pie, stage flow, applications per week, interview rate by mode and
+  posting age) and an interactive claude.ai dashboard, refreshed weekly.
 
 ### What you need
 | | |
@@ -49,7 +56,7 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 
    (Or download the ZIP from GitHub, unzip it, and open the folder in the Code tab.)
 2. Claude walks you through **nine short steps** (the `job-autopilot-setup` skill):
-   documents → questionnaire → Notion token → Gmail app password + label → logins → upload permission → dashboards → schedule → final check.
+   documents (no CV yet? Claude interviews you and writes one) → questionnaire → Notion token → Gmail app password + label → logins → upload permission → dashboards → schedule → final check.
    Every click is explained in [docs/credentials.md](docs/credentials.md) and [docs/macos-permissions.md](docs/macos-permissions.md).
 3. From then on, each morning: open Claude and say **"show today's jobs"**.
 
@@ -58,11 +65,13 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 You     show today's jobs
 Claude  Mail: 2 confirmations, 1 interview (Thu 10:00, ACME), 3 rejections. Notion updated, 6 emails labeled.
         Scanned 4 platforms: 41 postings → 7 new matches.
-        | # | Company | Title | Platform | How to apply | Needs | Fit |
-        | 1 | ACME AG | AI Engineer (m/w/d) | LinkedIn | easy_apply | cv | 88 |
-        | 2 | Example SE | ML Engineer | StepStone | one_click | cv | 81 |  …
+        | # | Mode | Company | Title | Platform | Posted | Needs | Fit |
+        | 1 | 🎯 tailored · today, new | ACME AG | AI Engineer (m/w/d) | LinkedIn | today | cv, cover_letter | 88 |
+        | 2 | 📄 template · 9d old | Example SE | ML Engineer | StepStone | 9d | cv | 81 |  …
 You     1, 2, 4
-Claude  All three are filled in and waiting on their review pages (CV: CV-AI-Engineer.pdf). Submit?
+Claude  For ACME: 3 short questions about LangGraph and evaluation datasets — then I write the CV and letter.
+You     (answers)
+Claude  ACME CV + Anschreiben ready (change list attached); 2 and 4 use your template CV. All three are on their review pages. Submit?
 You     submit
 Claude  Sent 3/3, logged in Notion. Tomorrow's mail sync will link the confirmations.
 ```
@@ -71,7 +80,10 @@ Claude  Sent 3/3, logged in Notion. Tomorrow's mail sync will link the confirmat
 | Module | Where | What |
 |---|---|---|
 | Knowledge base | `.claude/skills/job-knowledge-base`, `tools/kb_extract.py`, `kb_build.py`, `kb_bundle.py` | inbox → unit files in `knowledge/library/` + `manifest.yaml` + `PROFILE.md`; merge/separate files per upload slot (never committed) |
-| Questionnaire | `config/profile.example.yaml` → `config/profile.yaml` | personal data, search, rules, standard answers |
+| Questionnaire | `config/profile.example.yaml` → `config/profile.yaml` | personal data, search, rules, strategy, standard answers |
+| Career coach | `.claude/skills/job-career-coach`, `tools/facts.py` | no CV → documents + interview → fact bank, target roles (`DIRECTION.md`), first CVs |
+| CV & cover-letter writer | `.claude/skills/job-application-writer`, `tools/doc_render.py`, `tools/doc_check.py`, `templates/` | master CV, one CV per role family, tailored CV + letter per posting; ATS-readable PDFs; consistency check |
+| Country standards | `standards/de/` | what a strong German CV and Anschreiben look like, when to tailor, market notes for newcomers |
 | Scan & apply | `.claude/skills/job-scan-apply`, `tools/dedupe.py`, `tools/log_application.py` | shortlist → pick → prefill → confirm → submit |
 | Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
 | Notion tracker | `tools/notion_setup.py` | creates the database ([schema](docs/data-model.md)) |
@@ -89,7 +101,8 @@ Claude  Sent 3/3, logged in Notion. Tomorrow's mail sync will link the confirmat
 ### Boundaries
 - Nothing is submitted without you. One-click buttons are listed first and clicked only after you pick them.
 - You type passwords, solve CAPTCHAs, create portal accounts and click account-creating verification links. Claude does not.
-- Only the documents a form requires are uploaded. Jobs that require a cover letter are skipped by default.
+- Only the documents a form requires are uploaded. A required cover letter is drafted for that posting and sent only after you approve it (or such jobs are skipped — your choice).
+- CVs and letters contain only facts you confirmed; nothing is invented, numbers and durations are checked across documents.
 - Credentials stay in `.env` on your Mac. Your CVs, answers and logs are git-ignored.
 - Job sites' terms often restrict automated use. This project keeps a human choosing and confirming every batch and
   enforces a daily cap; you are responsible for how you use it.
@@ -100,13 +113,14 @@ lost macOS permissions, merged PDFs, ambiguous email receipts — and the fix: *
 Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 
 ### Roadmap
-- CV tailoring per job (reorder and reword bullet points from the knowledge base, keep a versioned copy per application).
-- Anschreiben drafting and editing in the user's own style, for jobs where a letter is required.
+- Interview preparation per application (likely questions from the posting and your fact bank, mock interview in chat).
+- Standards for more countries (`standards/<country>/`) and a LinkedIn profile review.
 
 ### FAQ
 - **Windows?** Everything except the file-upload helper (macOS only) works; uploads then need one drag-and-drop from you.
 - **Other inboxes than Gmail?** The scripts use IMAP plus Gmail labels; other providers need small changes in `tools/common.py`.
-- **Other countries / job sites?** Add search URLs and behaviour to `docs/platforms.md`; the skills read it.
+- **I have no CV / never applied for a job.** Say "I have no CV" — the career coach starts from your transcript and degree.
+- **Other countries / job sites?** Add search URLs and behaviour to `docs/platforms.md` and a `standards/<country>/` folder; the skills read both.
 
 ---
 
@@ -119,7 +133,12 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
   所有申请邮件自动打上 Gmail 标签 **`applications`**（没有这个标签会引导你创建）。你自己手动投的申请会被发现，Claude 向你确认。
 - **知识库**：把所有材料丢进来（扫描件、合并 PDF、照片都行）。Claude 逐页阅读，拆成"一份文件一个文档"的单元文件并统一命名，
   生成知识库画像：每个文档是什么、证明了哪些能力、还缺什么。投递时按表单的上传入口决定哪些文件合并、哪些分开、按什么顺序。
-- **看板**：Notion 页面里的图表区（阶段饼图、阶段流向图、每周投递数）+ 一个 claude.ai 交互看板，版式固定，每周只更新数据。
+- **没有简历、没有求职经验？** 求职教练先读你的成绩单和学位证，再分几轮简短提问，挖出项目、工作和技能，用真实岗位作证据
+  推荐现实可行的目标岗位，讲清市场规则（语言、Werkstudent / 实习 / Junior 等入口、工作许可），并写出你的第一版简历。
+- **贴合岗位的简历和求职信**：精选表里每个岗位都有模式——新鲜、高匹配的岗位和梦中情司走 🎯 *精投*，其余用 📄 *模版投*
+  （按岗位类别准备的简历）。精投包括：岗位要求对照表、几个补缺口的问题、为该岗位写的简历和德/英文求职信。
+  所有内容只来自你确认过的事实库，自动核对日期和数字是否一致，PDF 能被招聘系统（ATS）正确读取。
+- **看板**：Notion 页面里的图表区（阶段饼图、阶段流向图、每周投递数、按投递模式和岗位新鲜度的面试率）+ 一个 claude.ai 交互看板，每周更新数据。
 
 ### 需要准备
 | | |
@@ -136,7 +155,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 
    （也可以在 GitHub 下载 ZIP，解压后在 Code 标签页打开该文件夹。）
 2. Claude 会带你走完 **九个小步骤**（`job-autopilot-setup` skill）：
-   上传材料 → 回答问卷 → Notion token → Gmail 应用密码和标签 → 登录各平台 → 上传权限 → 看板 → 定时任务 → 最终检查。
+   上传材料（还没有简历？Claude 先采访你、帮你写出来）→ 回答问卷 → Notion token → Gmail 应用密码和标签 → 登录各平台 → 上传权限 → 看板 → 定时任务 → 最终检查。
    每一步点哪里都写在 [docs/credentials.md](docs/credentials.md) 和 [docs/macos-permissions.md](docs/macos-permissions.md)。
 3. 之后每天早上打开 Claude 说 **"看看今天的岗位"** 即可。
 
@@ -145,9 +164,13 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 你      看看今天的岗位
 Claude  邮件：2 封确认信，1 个面试（周四 10:00，ACME），3 封拒信。Notion 已更新，6 封邮件已打标签。
         扫描 4 个平台：41 个岗位 → 7 个新匹配。
-        | # | 公司 | 职位 | 平台 | 投递方式 | 需要材料 | 匹配度 |  …
+        | # | 模式 | 公司 | 职位 | 平台 | 发布 | 需要材料 | 匹配度 |
+        | 1 | 🎯 精投 · 今天发布 | ACME AG | AI Engineer (m/w/d) | LinkedIn | 今天 | 简历、求职信 | 88 |
+        | 2 | 📄 模版投 · 9 天前 | Example SE | ML Engineer | StepStone | 9 天 | 简历 | 81 |  …
 你      1、2、4
-Claude  三个都已填到确认页（简历：CV-AI-Engineer.pdf）。提交吗？
+Claude  ACME 有 3 个小问题（LangGraph、评测数据集）——答完我来写简历和求职信。
+你      （回答）
+Claude  ACME 的简历和 Anschreiben 写好了（附改动清单）；2 和 4 用模版简历。三个都已填到确认页，提交吗？
 你      提交
 Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信链接上。
 ```
@@ -156,7 +179,10 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 | 模块 | 位置 | 作用 |
 |---|---|---|
 | 知识库 | `.claude/skills/job-knowledge-base`、`tools/kb_*.py` | inbox → `knowledge/library/` 单元文件 + `manifest.yaml` + `PROFILE.md`；按上传入口合并或分开（不会提交到 git） |
-| 引导问卷 | `config/profile.example.yaml` → `config/profile.yaml` | 个人信息、搜索条件、投递规则、标准答案 |
+| 引导问卷 | `config/profile.example.yaml` → `config/profile.yaml` | 个人信息、搜索条件、投递规则、投递策略、标准答案 |
+| 求职教练 | `.claude/skills/job-career-coach`、`tools/facts.py` | 没有简历 → 材料 + 访谈 → 事实库、目标岗位（`DIRECTION.md`）、第一版简历 |
+| 简历与求职信 | `.claude/skills/job-application-writer`、`tools/doc_render.py`、`tools/doc_check.py`、`templates/` | 主简历、按岗位类别的模版简历、单岗位精投简历 + 求职信；ATS 可读的 PDF；一致性检查 |
+| 各国标准 | `standards/de/` | 德国简历和 Anschreiben 标准、何时精投、给新人的市场说明 |
 | 扫描与投递 | `.claude/skills/job-scan-apply` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/sync_mail.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
 | Notion 申请表 | `tools/notion_setup.py` | 自动建表（[字段说明](docs/data-model.md)） |
@@ -167,7 +193,8 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 ### 边界
 - 不经你确认不会提交任何申请。一键投递按钮先列出来，你选了才点。
 - 输入密码、验证码、注册官网账号、点击会创建账号的验证链接，都由你来做。
-- 只上传表单要求的材料；强制要求求职信的岗位默认跳过。
+- 只上传表单要求的材料；强制要求求职信时，Claude 为该岗位起草，你确认后才上传（也可以设置为直接跳过这类岗位）。
+- 简历和求职信只使用你确认过的事实，不编造；数字和时长会在各文件之间自动核对。
 - 凭证只保存在你电脑的 `.env`；简历、问卷答案和日志都不会进入 git。
 - 招聘平台的条款通常限制自动化使用。本项目坚持每批由人挑选和确认，并设每日上限；如何使用由你自己负责。
 
@@ -176,13 +203,14 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 合并 PDF、邮件回执没有公司名……）：**[docs/pitfalls.md](docs/pitfalls.md)**。各平台行为说明：**[docs/platforms.md](docs/platforms.md)**。
 
 ### 规划中
-- 按岗位调整简历（从知识库重排、改写要点，每次投递保留版本）。
-- 按你的文风起草和修改 Anschreiben，用于必须附求职信的岗位。
+- 按岗位准备面试（根据岗位描述和事实库预测问题，在对话里模拟面试）。
+- 更多国家的求职标准（`standards/<国家>/`）和 LinkedIn 个人主页诊断。
 
 ### 常见问题
 - **Windows 可以用吗？** 除了文件上传助手（仅 macOS），其他都可以；上传时需要你拖一下文件。
 - **不用 Gmail 可以吗？** 脚本基于 IMAP + Gmail 标签，其他邮箱需要小改 `tools/common.py`。
-- **其他国家或平台？** 把搜索链接和平台行为写进 `docs/platforms.md`，skill 会读取。
+- **我没有简历 / 从没找过工作？** 说"我没有简历"，求职教练会从你的成绩单和学位证开始。
+- **其他国家或平台？** 把搜索链接和平台行为写进 `docs/platforms.md`，再加一个 `standards/<国家>/` 文件夹，skill 会读取。
 
 ---
 
