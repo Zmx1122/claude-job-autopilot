@@ -5,4 +5,5 @@ set -e; cd "$(dirname "$0")/.."
 python3 tools/dashboard_data.py    # Notion -> data/dashboard/data.json + applications.json
 python3 tools/charts_png.py        # -> data/dashboard/pie.png flow.png weekly.png
 python3 tools/notion_page.py       # rebuild the "Dashboard" section on your Notion page
+grep -q '^BACKUP_DIR=' .env 2>/dev/null && python3 tools/backup.py save -m "weekly backup" || true   # weekly copy of personal data
 echo "Next (Claude): upload data/dashboard/applications.json to DASHBOARD_URL as the 'applications' dataset."

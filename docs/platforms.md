@@ -47,6 +47,7 @@ Starting points; replace `{q}` with a URL-encoded title and `{loc}` with a city.
 | Greenhouse, Personio, softgarden, Workday, SuccessFactors | Usually standard file inputs; some require an account (user creates it). |
 
 ## File uploads
+Three methods — macOS dialog script, Claude in Chrome (Windows), manual paste — see **`docs/file-uploads.md`**. With the macOS script:
 1. Click the page's choose-file control in the browser pane (a real click; a script `.click()` often opens nothing).
 2. Within ~10 s run `tools/upload_file.sh "/absolute/path/file.pdf"`.
 3. Verify the file name appears on the page. If the portal needs a category per file, set it before step 1.

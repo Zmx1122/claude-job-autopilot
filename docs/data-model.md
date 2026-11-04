@@ -40,6 +40,11 @@ Created by `tools/notion_setup.py`. One row per job (seen, shortlisted, applied 
 | `data/dashboard/` | aggregates (incl. interview rate by mode and posting age), rows for the artifact, chart PNGs |
 | `data/applications/<date>_<company>_<title>/` | tailored application: `jd.md`, `match.md`, `cv.yaml`, `letter.yaml`, PDFs, `changes.md` |
 
+## Backup folder (`BACKUP_DIR`, default `~/Documents/Job Autopilot Data`)
+Mirror of every personal file above (profile, `knowledge/`, `data/applications/`, `data/drafts/`, `applied.csv`) plus a
+README, with a hidden git history (one version per `tools/backup.py save`). Not included: `.env`, rebuildable caches,
+documents marked `sensitive` (unless `--include-sensitive`).
+
 ## Career files (`knowledge/career/`, git-ignored)
 | File | What |
 |---|---|

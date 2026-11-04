@@ -28,7 +28,7 @@ entries:
   - id: edu-msc
     type: education
     role: M.Sc. Computer Science    # degree
-    org: Technical University of Munich
+    org: Example University of Technology
     location: Munich
     start: 2020-10
     end: 2023-03

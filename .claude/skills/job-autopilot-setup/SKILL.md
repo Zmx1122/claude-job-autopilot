@@ -16,6 +16,10 @@ Never paste secrets back into chat, never type a password or solve a CAPTCHA, ne
 - `python3 --version` (needs 3.9+). If missing on macOS: ask the user to run `xcode-select --install` or install from python.org.
 - `python3 -m pip install -r requirements.txt`
 - `cp -n .env.example .env`
+- Ask once: "Have you used Job Autopilot before (another computer, or before re-downloading)?" If yes, ask for the backup
+  folder (default `~/Documents/Job Autopilot Data`) and run `python3 tools/backup.py restore --from "<folder>"` —
+  profile, documents, fact bank and applications come back; continue with the steps `check_setup.py` still shows as open
+  (usually only Notion token and Gmail app password, which are never backed up).
 - A Chromium browser for writing CV / cover-letter PDFs: `ls "/Applications/Google Chrome.app"` (or Edge / Brave). Missing →
   ask the user to install Google Chrome; only needed for generated documents.
 - Tell the user what is coming: about 30–45 minutes once, then a few minutes a day.
@@ -86,9 +90,13 @@ For each enabled platform open the login page with `preview_start {url}` and ask
 - Xing `https://login.xing.com/`.
 Company career portals (Porsche, SAP, Siemens …) are handled per application; some need an account — the user creates those.
 
-## 6. File-upload permission (macOS, one time)
-Company portals need real file uploads; the browser pane has no upload tool, so `tools/upload_file.sh` drives the macOS
-Open dialog. See `docs/macos-permissions.md`.
+## 6. File uploads (one time)
+Company portals need real file uploads; the browser pane has no upload tool. Pick the method by system
+(`docs/file-uploads.md`) and store it as `platforms.upload_method` in the profile:
+- **Windows** → `chrome`: help the user install Google Chrome and the Claude in Chrome extension, connect it, log in to
+  the career sites there; test `file_upload` on `tools/upload_test.html`. Fallback `manual` (`tools/copy_path.py`).
+- **macOS** → `macos_dialog` (below). Fallback `manual`.
+macOS dialog script, see `docs/macos-permissions.md`:
 1. Ask the user: System Settings → Privacy & Security → **Accessibility** → turn on **Claude** (add it with + if missing).
 2. Test: open `tools/upload_test.html` in the pane (`preview_start file://<abs path>`), click the file input, run
    `tools/upload_file.sh <abs path of a CV>`, check the page shows the file name.
@@ -106,6 +114,13 @@ Create two scheduled tasks with the scheduled-tasks tool (ask the user for times
   scan phase of the job-scan-apply skill, and leave the shortlist table for me. Do not submit any application."
 - **job-autopilot-weekly-dashboard** (e.g. Monday 08:00): prompt = "In the job-autopilot repo: run the job-dashboard skill (refresh)."
 Explain: tasks run only while the Mac is awake and the Claude app is open. Submitting always happens in a session with the user.
+
+## 8b. Backup of personal data
+Explain in two sentences: everything personal stays on this computer, outside the shared repo; a copy with version history
+goes to a normal folder they can see. Default `~/Documents/Job Autopilot Data` (ask if they prefer another folder; warn
+that a folder inside iCloud Drive / OneDrive is uploaded to that cloud). Run `python3 tools/backup.py save -m "setup"`,
+then show the folder (reveal it in Finder / Explorer). The weekly dashboard task also saves a backup; Claude saves one after
+every change to documents, fact bank or applications. Tokens and passwords are not in the backup — suggest a password manager.
 
 ## 9. Final check and hand-over
 Run `python3 tools/check_setup.py` until everything required is ✅. Then tell the user, in 5 lines, how a normal day works:

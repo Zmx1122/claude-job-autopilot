@@ -17,5 +17,9 @@ Claude then (skill `job-knowledge-base`) · 然后 Claude 会：
 | `manifest.yaml`, `PROFILE.md` | generated index and profile · 自动生成 | no |
 | `career/` | fact bank `facts.yaml`, interview notes, `DIRECTION.md`, CV content — the source of every CV and cover letter · 事实库、访谈记录、求职方向、简历内容 | no (only `facts.example.yaml`) |
 
+**Backup · 备份**: `python3 tools/backup.py save` copies all of this (and your profile and applications) to
+`~/Documents/Job Autopilot Data` with version history; `restore --from <folder>` brings it back after a new download.
+`tools/backup.py save` 会把这里的全部内容（以及问卷和投递材料）备份到 `~/Documents/Job Autopilot Data`，带版本历史；换电脑或重新下载后用 `restore` 恢复。
+
 Kinds: `cv`, `cover_letter`, `degree`, `transcript`, `work_reference`, `certificate`, `language_certificate`, `award`,
 `publication`, `reference_letter`, `id_document` (always sensitive), `other`. See `manifest.example.yaml`.

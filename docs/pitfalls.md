@@ -21,7 +21,9 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
    **验证码**：Claude 按规则不做，用户填完 Claude 继续。
 
 ## Files and uploads · 文件与上传
-8. **The built-in browser cannot upload files**, and SmartRecruiters hides inputs in shadow DOM. → `tools/upload_file.sh` drives the macOS Open dialog (Cmd+Shift+G → path → Return → Return).
+8. **The built-in browser cannot upload files**, and SmartRecruiters hides inputs in shadow DOM. → `tools/upload_file.sh` drives the macOS Open dialog (Cmd+Shift+G → path → Return → Return). Windows: Claude in Chrome's `file_upload` or a manual paste (`docs/file-uploads.md`).
+8a. **Attaching a file with page JavaScript from a local server does not work** — the built-in browser blocks requests from internet pages to the computer (`ERR_BLOCKED_BY_CLIENT`). That is a security boundary; do not work around it.
+    **用页面脚本从本地服务器取文件不可行**：内置浏览器禁止网页访问本机，这是安全边界，不要绕过。
    **内置浏览器不能上传文件**：用脚本驱动系统"打开"对话框。
 9. **Permission lost after rebuilding a helper app** — each `osacompile` build is a new identity for macOS privacy settings (three re-authorisations). → Run `osascript` from Claude itself and grant Accessibility to Claude once.
    **自制 app 每次重编译都丢权限**：直接由 Claude 调 osascript，只给 Claude 授权一次。

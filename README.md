@@ -89,6 +89,8 @@ Claude  Sent 3/3, logged in Notion. Tomorrow's mail sync will link the confirmat
 | Notion tracker | `tools/notion_setup.py` | creates the database ([schema](docs/data-model.md)) |
 | Dashboards | `.claude/skills/job-dashboard`, `tools/refresh_dashboards.sh`, `dashboard/index.html` | Notion charts + interactive claude.ai dashboard |
 | File uploads | `tools/upload_file.sh` | drives the macOS Open dialog so company portals get your PDFs |
+| Backup | `tools/backup.py` | your personal data → a local folder with version history; restore after a new download |
+| Privacy guard | `tools/check_public.py`, `.githooks/` | blocks commits that would publish your name, contacts, employers or tokens |
 | Health check | `tools/check_setup.py` | one checklist for everything above |
 
 ### Dashboards (sample data)
@@ -97,6 +99,12 @@ Claude  Sent 3/3, logged in Notion. Tomorrow's mail sync will link the confirmat
 <img src="docs/img/weekly.png" alt="Bar chart: applications per week by platform" width="49%">
 </p>
 <img src="docs/img/flow.png" alt="Flow chart: applied, confirmed, interview, offer, with rejections and waiting at each stage" width="100%">
+
+### Your data stays yours
+The repo you download contains only code, skills, rules and empty templates. Everything personal — answers, documents,
+fact bank, CVs, cover letters, application log — lives in git-ignored folders on your computer and is copied, with
+version history, to a normal folder you can open: **`Documents/Job Autopilot Data`**. New computer or fresh download?
+Say *"restore my data from Documents/Job Autopilot Data"*. Passwords and tokens are never copied; keep them in a password manager.
 
 ### Boundaries
 - Nothing is submitted without you. One-click buttons are listed first and clicked only after you pick them.
@@ -117,7 +125,10 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 - Standards for more countries (`standards/<country>/`) and a LinkedIn profile review.
 
 ### FAQ
-- **Windows?** Everything except the file-upload helper (macOS only) works; uploads then need one drag-and-drop from you.
+- **Windows?** Everything works; for file uploads on company sites use **Claude in Chrome** (its upload tool needs no
+  system permission) or paste the path Claude copies for you — see [docs/file-uploads.md](docs/file-uploads.md).
+- **Is the file uploader a separate app?** No. On macOS it is a short AppleScript in this repo (`tools/upload_file.sh`)
+  run by the built-in `osascript`; it only needs the Accessibility permission for Claude.
 - **Other inboxes than Gmail?** The scripts use IMAP plus Gmail labels; other providers need small changes in `tools/common.py`.
 - **I have no CV / never applied for a job.** Say "I have no CV" — the career coach starts from your transcript and degree.
 - **Other countries / job sites?** Add search URLs and behaviour to `docs/platforms.md` and a `standards/<country>/` folder; the skills read both.
@@ -188,7 +199,14 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 | Notion 申请表 | `tools/notion_setup.py` | 自动建表（[字段说明](docs/data-model.md)） |
 | 看板 | `.claude/skills/job-dashboard`、`dashboard/index.html` | Notion 图表 + claude.ai 交互看板 |
 | 文件上传 | `tools/upload_file.sh` | 驱动 macOS 打开对话框，把 PDF 传给公司官网 |
+| 备份 | `tools/backup.py` | 个人数据备份到本地文件夹，带版本历史；重新下载后一键恢复 |
+| 隐私保护 | `tools/check_public.py`、`.githooks/` | 提交前自动拦截会公开你姓名、联系方式、雇主或 token 的改动 |
 | 健康检查 | `tools/check_setup.py` | 一张清单检查以上所有配置 |
+
+### 你的数据只属于你
+下载的仓库里只有代码、skill、规则和空模板。所有个人内容——问卷答案、证书材料、事实库、简历、求职信、投递记录——都保存在你电脑上
+不进 git 的文件夹里，并带版本历史地复制到一个你能直接打开的普通文件夹：**`文稿/Job Autopilot Data`**。换电脑或重新下载后，
+对 Claude 说 *"从 Documents/Job Autopilot Data 恢复我的数据"* 即可。密码和 token 不会被复制，请存在密码管理器里。
 
 ### 边界
 - 不经你确认不会提交任何申请。一键投递按钮先列出来，你选了才点。
@@ -207,7 +225,10 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 - 更多国家的求职标准（`standards/<国家>/`）和 LinkedIn 个人主页诊断。
 
 ### 常见问题
-- **Windows 可以用吗？** 除了文件上传助手（仅 macOS），其他都可以；上传时需要你拖一下文件。
+- **Windows 可以用吗？** 可以。公司官网的文件上传用 **Claude in Chrome**（它的上传工具不需要系统权限），或者粘贴 Claude
+  帮你复制好的文件路径，见 [docs/file-uploads.md](docs/file-uploads.md)。
+- **文件上传助手是单独下载的软件吗？** 不是。macOS 上它是本仓库里的一小段 AppleScript（`tools/upload_file.sh`），
+  由系统自带的 `osascript` 运行，只需要给 Claude 开"辅助功能"权限。
 - **不用 Gmail 可以吗？** 脚本基于 IMAP + Gmail 标签，其他邮箱需要小改 `tools/common.py`。
 - **我没有简历 / 从没找过工作？** 说"我没有简历"，求职教练会从你的成绩单和学位证开始。
 - **其他国家或平台？** 把搜索链接和平台行为写进 `docs/platforms.md`，再加一个 `standards/<国家>/` 文件夹，skill 会读取。

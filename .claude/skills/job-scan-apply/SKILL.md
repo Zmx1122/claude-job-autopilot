@@ -52,8 +52,11 @@ For each picked job, in its own tab:
   Required document not in the knowledge base → pause and ask the user for the file, add it (section A), continue.
 - Fill personal data and screening answers from the profile. Never invent answers; if a question is not covered, collect it
   and ask the user once for all jobs together. Add the answer to `screening_answers` so it is never asked again.
-- **File uploads** on company sites: click the page's choose-file control, then immediately run
-  `tools/upload_file.sh "<absolute path>"` (see `docs/platforms.md#file-uploads`). Verify the file name appears on the page.
+- **File uploads** on company sites, by `platforms.upload_method` in the profile (`docs/file-uploads.md`):
+  `macos_dialog` → click the page's choose-file control, then immediately run `tools/upload_file.sh "<absolute path>"`;
+  `chrome` → do the company-portal application in Claude in Chrome and attach with its `file_upload` tool (file input ref
+  from `find` / `read_page`, never click the input); `manual` → click the control, run `tools/copy_path.py "<file>"` and ask
+  the user to paste + Enter. Verify the file name appears on the page.
 - Stop on the final review page. Do not press the last submit button yet.
 - Hand to the user, and continue with the other jobs meanwhile: CAPTCHAs ("what is 4+5"), account registration,
   password fields, e-mail verification links that create an account.

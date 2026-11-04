@@ -51,6 +51,12 @@ if os.path.exists(prof):
         line(None, 'knowledge/career/facts.yaml (fact bank, needed for tailored CVs and cover letters)',
              'no CV → job-career-coach skill; CVs exist → setup skill step 1b')
 
+# 3a. backup of personal data (optional but recommended)
+r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'backup.py'), 'status'], capture_output=True, text=True)
+out = (r.stdout + r.stderr).strip()
+line(None if r.returncode or 'everything is backed up' not in out else True, 'backup of personal data (tools/backup.py)',
+     'no backup yet or unsaved changes: python3 tools/backup.py save' if r.returncode == 0 else out.splitlines()[-1] if out else '')
+
 # 3b. PDF writer for generated CVs / cover letters (optional)
 try:
     sys.path.insert(0, os.path.join(ROOT, 'tools'))
