@@ -5,7 +5,7 @@ description: Daily job scan on LinkedIn, StepStone, Indeed and Xing plus batch a
 
 # Scan and apply
 
-Read `config/profile.yaml` and `knowledge/manifest.yaml` first. Platform details and known traps: `docs/platforms.md`.
+Read `config/profile.yaml`, `knowledge/PROFILE.md` and `knowledge/manifest.yaml` first. Platform details and known traps: `docs/platforms.md`.
 All browsing happens in Claude's **built-in browser pane** (`mcp__Claude_Browser__*`), where the user is logged in.
 
 ## The interaction contract (agreed with real users — do not shortcut it)
@@ -33,9 +33,11 @@ All browsing happens in Claude's **built-in browser pane** (`mcp__Claude_Browser
 ## Phase 2 · Prefill (after the user picked)
 For each picked job, in its own tab:
 - **Choose the CV** whose `use_for` keywords best match the title; default to the first variant.
-- **Materials rule**: upload only what the form requires. CV only when only a CV is required. Form *requires* a cover
-  letter → stop, log `Skipped` with note "requires cover letter" (unless `rules.cover_letter_required: generate`).
-  Form requires a certificate → use it from the knowledge base; if it is not there, pause and ask the user for the file.
+- **Materials**: read the form's upload section (slot names, required marks, number of files, size limit), then choose and
+  prepare files with the **job-knowledge-base** skill, section C (typed slots → separate unit files; single slot → one merged
+  PDF in German standard order; only CV required → CV only; sensitive documents never without asking).
+  Form *requires* a cover letter → stop, log `Skipped` with note "requires cover letter" (unless `rules.cover_letter_required: generate`).
+  Required document not in the knowledge base → pause and ask the user for the file, add it (section A), continue.
 - Fill personal data and screening answers from the profile. Never invent answers; if a question is not covered, collect it
   and ask the user once for all jobs together. Add the answer to `screening_answers` so it is never asked again.
 - **File uploads** on company sites: click the page's choose-file control, then immediately run
@@ -47,11 +49,11 @@ For each picked job, in its own tab:
 ## Phase 3 · Confirm and submit
 Show the ready list:
 
-| # | Company | Title | Platform | CV | Notes |
+| # | Company | Title | Platform | Files (slot ← file) | Notes |
 |---|---|---|---|---|---|
 
 After the confirmation: submit each, wait for the success page or message, then
-`python3 tools/log_application.py --status Applied --source auto --platform ... --company ... --title ... --url ... --notes "CV-…pdf"`.
+`python3 tools/log_application.py --status Applied --source auto --platform ... --company ... --title ... --url ... --notes "files: Lebenslauf←CV_…pdf; Zeugnisse←…_Zeugnisse.pdf"`.
 Report: submitted, skipped (with reason), waiting on the user (CAPTCHA, verification link, missing file).
 Respect the daily cap; the user may lift it explicitly for one day.
 

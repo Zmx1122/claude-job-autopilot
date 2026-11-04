@@ -5,8 +5,8 @@ config/overrides.json
 knowledge/**
 !knowledge/README.md
 !knowledge/manifest.example.yaml
-!knowledge/*/
-!knowledge/*/.gitkeep
+!knowledge/inbox/
+!knowledge/inbox/.gitkeep
 data/**
 !data/.gitkeep
 # system

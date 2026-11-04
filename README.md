@@ -28,6 +28,9 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 - **Reads your application inbox** daily: confirmations, interview invitations, rejections and offers update a
   **Notion tracker**; every application links to its first email as evidence; every application email gets the Gmail label
   **`applications`**. Applications you sent by hand are detected and Claude asks you to confirm them.
+- **Knowledge base**: drop every document you have — scans, merged PDFs, photos. Claude reads each page, splits them into
+  one-document unit files, names them, and writes a profile of what each document proves and what is missing.
+  At application time it decides per form which files go into which upload slot, merged or separate, in German standard order.
 - **Dashboards**: a section on your Notion page (stage pie, stage flow, applications per week) and an interactive
   claude.ai dashboard with the same three charts, refreshed weekly.
 
@@ -67,7 +70,7 @@ Claude  Sent 3/3, logged in Notion. Tomorrow's mail sync will link the confirmat
 ### Modules
 | Module | Where | What |
 |---|---|---|
-| Knowledge base | `knowledge/` | your CVs, certificates, letter samples + `manifest.yaml` (never committed) |
+| Knowledge base | `.claude/skills/job-knowledge-base`, `tools/kb_extract.py`, `kb_build.py`, `kb_bundle.py` | inbox → unit files in `knowledge/library/` + `manifest.yaml` + `PROFILE.md`; merge/separate files per upload slot (never committed) |
 | Questionnaire | `config/profile.example.yaml` → `config/profile.yaml` | personal data, search, rules, standard answers |
 | Scan & apply | `.claude/skills/job-scan-apply`, `tools/dedupe.py`, `tools/log_application.py` | shortlist → pick → prefill → confirm → submit |
 | Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
@@ -96,6 +99,10 @@ Everything that broke while building this — wrong browser, instant one-click s
 lost macOS permissions, merged PDFs, ambiguous email receipts — and the fix: **[docs/pitfalls.md](docs/pitfalls.md)**.
 Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 
+### Roadmap
+- CV tailoring per job (reorder and reword bullet points from the knowledge base, keep a versioned copy per application).
+- Anschreiben drafting and editing in the user's own style, for jobs where a letter is required.
+
 ### FAQ
 - **Windows?** Everything except the file-upload helper (macOS only) works; uploads then need one drag-and-drop from you.
 - **Other inboxes than Gmail?** The scripts use IMAP plus Gmail labels; other providers need small changes in `tools/common.py`.
@@ -110,6 +117,8 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 - **在聊天里给你一张精选岗位表**。你挑选后，Claude 把每个申请填到最后确认页（包括需要上传文件的公司官网），**你确认一次才统一提交**。
 - **每天读取投递邮箱**：确认信、面试邀请、拒信、offer 自动更新 **Notion 申请表**；每条申请链接到第一封投递邮件作为证据；
   所有申请邮件自动打上 Gmail 标签 **`applications`**（没有这个标签会引导你创建）。你自己手动投的申请会被发现，Claude 向你确认。
+- **知识库**：把所有材料丢进来（扫描件、合并 PDF、照片都行）。Claude 逐页阅读，拆成"一份文件一个文档"的单元文件并统一命名，
+  生成知识库画像：每个文档是什么、证明了哪些能力、还缺什么。投递时按表单的上传入口决定哪些文件合并、哪些分开、按什么顺序。
 - **看板**：Notion 页面里的图表区（阶段饼图、阶段流向图、每周投递数）+ 一个 claude.ai 交互看板，版式固定，每周只更新数据。
 
 ### 需要准备
@@ -146,7 +155,7 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 ### 模块
 | 模块 | 位置 | 作用 |
 |---|---|---|
-| 知识库 | `knowledge/` | 简历、证书、求职信样本 + `manifest.yaml`（不会提交到 git） |
+| 知识库 | `.claude/skills/job-knowledge-base`、`tools/kb_*.py` | inbox → `knowledge/library/` 单元文件 + `manifest.yaml` + `PROFILE.md`；按上传入口合并或分开（不会提交到 git） |
 | 引导问卷 | `config/profile.example.yaml` → `config/profile.yaml` | 个人信息、搜索条件、投递规则、标准答案 |
 | 扫描与投递 | `.claude/skills/job-scan-apply` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/sync_mail.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
@@ -165,6 +174,10 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 ### 踩过的坑
 搭建过程中遇到的所有问题和解决办法（用错浏览器、一键投递直接发出、React 下拉框、shadow DOM 里的上传框、macOS 权限丢失、
 合并 PDF、邮件回执没有公司名……）：**[docs/pitfalls.md](docs/pitfalls.md)**。各平台行为说明：**[docs/platforms.md](docs/platforms.md)**。
+
+### 规划中
+- 按岗位调整简历（从知识库重排、改写要点，每次投递保留版本）。
+- 按你的文风起草和修改 Anschreiben，用于必须附求职信的岗位。
 
 ### 常见问题
 - **Windows 可以用吗？** 除了文件上传助手（仅 macOS），其他都可以；上传时需要你拖一下文件。

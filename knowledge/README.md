@@ -1,14 +1,20 @@
 # Knowledge base · 知识库
 
-Everything Claude may upload or quote in an application. Contents of these folders are git-ignored.
-Claude 投递时可以上传或引用的全部材料。文件夹内容不会进入 git。
+Drop **every** document you might need into `inbox/` (or into the chat during setup) — unsorted, scanned, merged, photos are fine.
+把可能用到的**所有**材料丢进 `inbox/`（或配置时直接拖进对话）——不用整理，扫描件、合并的 PDF、手机照片都可以。
 
-| Folder | Put here | 放什么 |
+Claude then (skill `job-knowledge-base`) · 然后 Claude 会：
+1. reads every page, including scans · 逐页阅读（包括扫描件）
+2. splits multi-document PDFs into **unit files**, one document each, consistently named · 把多文档 PDF 拆成**单元文件**（一份文件 = 一个文档），统一命名
+3. writes `manifest.yaml` (machine index) and `PROFILE.md` (what each document is, what it proves, what is missing) · 生成索引和知识库画像（每个文档是什么、证明了什么能力、还缺什么）
+4. at application time picks the right files per upload slot and merges or separates them in the right order · 投递时按页面上传入口决定合并还是分开、按什么顺序
+
+| Folder | Content | Tracked by git |
 |---|---|---|
-| `cv/` | one PDF per CV variant, one page or two, no transcripts inside | 每个简历版本一个 PDF，不要把成绩单合并进去 |
-| `certificates/` | degree certificate, transcripts, language certificates, Arbeitszeugnisse — one file each | 学位证、成绩单、语言证书、工作证明，每份单独一个 PDF |
-| `cover_letters/` | past letters, used only as style samples | 过往求职信，仅作文风参考 |
-| `other/` | anything else a form might ask for (publications list, portfolio PDF) | 其他（论文列表、作品集等） |
+| `inbox/` | new files to process · 待处理 | no |
+| `originals/` | sources after processing, never uploaded · 原件存档，不上传 | no |
+| `library/<kind>/` | unit files, the only files ever uploaded · 单元文件，唯一会被上传的文件 | no |
+| `manifest.yaml`, `PROFILE.md` | generated index and profile · 自动生成 | no |
 
-You do not need to sort files yourself: drop them into the chat during setup and Claude files them, splits merged PDFs,
-and writes `manifest.yaml` (see `manifest.example.yaml`). 不用自己整理：配置时把文件拖进对话，Claude 会归类、拆分合并 PDF 并生成 `manifest.yaml`。
+Kinds: `cv`, `cover_letter`, `degree`, `transcript`, `work_reference`, `certificate`, `language_certificate`, `award`,
+`publication`, `reference_letter`, `id_document` (always sensitive), `other`. See `manifest.example.yaml`.

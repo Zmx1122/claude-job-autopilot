@@ -21,15 +21,16 @@ candidate:                     # Q1 · Who you are / 基本信息 (most of this 
   portfolio_url: ""
   current_title: ""
   cv_variants:                 # Q2 · Which CV for which kind of role / 简历版本与适用岗位
-    - file: "knowledge/cv/CV.pdf"
+    - file: "knowledge/library/cv/CV_AI-Engineer_EN_2026.pdf"   # unit file from the knowledge base
       use_for: ["ai engineer", "machine learning"]     # keywords in a job title that select this CV
       note: "default"
 
-documents:                     # Q3 · Other documents in the knowledge base / 其他材料（证书、推荐信等）
-  degree_certificate: ""       # e.g. knowledge/certificates/Master-Degree.pdf (asked for by e.g. Porsche, banks)
-  work_references: []          # Arbeitszeugnisse, one PDF each
-  other: []                    # anything else a form may ask for
-  cover_letter_samples: []     # past letters, used only as style reference
+documents:                     # Q3 · Filled in from knowledge/manifest.yaml (ids) — see knowledge/PROFILE.md / 由知识库自动填写
+  highest_degree: []           # e.g. [degree-msc, transcript-msc]  → "Zeugnis höchster Bildungsabschluss"
+  work_references: []          # Arbeitszeugnisse, newest first
+  language_certificates: []
+  other_certificates: []
+  cover_letter_samples: []     # style reference only, never uploaded
 
 search:                        # Q4 · What to look for / 搜索条件
   titles: ["AI Engineer", "Machine Learning Engineer"]

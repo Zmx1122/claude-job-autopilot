@@ -38,7 +38,10 @@ if os.path.exists(prof):
         f = os.path.join(ROOT, cv.get('file', ''))
         line(os.path.exists(f), f"CV file {cv.get('file')}", 'file missing; check the path in config/profile.yaml')
     man = os.path.join(ROOT, 'knowledge', 'manifest.yaml')
-    line(os.path.exists(man) or None, 'knowledge/manifest.yaml (index of your documents)', 'the setup skill writes it after you add files')
+    line(os.path.exists(man), 'knowledge/manifest.yaml (index of your documents)', 'put files in knowledge/inbox/ and run the job-knowledge-base skill')
+    line(os.path.exists(os.path.join(ROOT, 'knowledge', 'PROFILE.md')), 'knowledge/PROFILE.md (knowledge profile)', 'job-knowledge-base skill, step A6')
+    inbox = [f for f in os.listdir(os.path.join(ROOT, 'knowledge', 'inbox')) if not f.startswith('.')] if os.path.isdir(os.path.join(ROOT, 'knowledge', 'inbox')) else []
+    line(not inbox or None, 'knowledge/inbox/ is processed', f'{len(inbox)} file(s) waiting: run the job-knowledge-base skill')
 
 # 4. Notion
 if env.get('NOTION_TOKEN') and env.get('NOTION_DATABASE_ID'):

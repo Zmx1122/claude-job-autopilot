@@ -19,19 +19,16 @@ Never paste secrets back into chat, never type a password or solve a CAPTCHA, ne
 - Tell the user what is coming: about 30–45 minutes once, then a few minutes a day.
 
 ## 1. Knowledge base — the user's documents
-Ask for every document they might need in an application: CV variants (PDF), degree certificate, work references
-(Arbeitszeugnisse), language certificates, past cover letters (as style samples only).
-- They can drag files into the chat or give paths. Copy each file into the right folder:
-  `knowledge/cv/`, `knowledge/certificates/`, `knowledge/cover_letters/`, `knowledge/other/`. Use clear names
-  (`CV-AI-Engineer.pdf`, `Master-Degree.pdf`). Keep originals untouched.
-- Read every PDF (pdf skill or `pypdf`). Split merged PDFs into one file per purpose: portals reject a 10-page "everything" PDF
-  as a CV, and Indeed stores whatever you upload first.
-- Write `knowledge/manifest.yaml`: for each file `path`, `kind` (cv | degree_certificate | work_reference | language_certificate | cover_letter_sample | other),
-  `language`, `pages`, `summary` (one line), `use_for` (job-title keywords, CVs only).
-- The folder contents are git-ignored; tell the user their files stay on this Mac.
+Ask for every document they might ever need in an application, unsorted is fine: CV variants, degree certificates,
+transcripts, Arbeitszeugnisse, language certificates, awards, past cover letters (style samples only), scans and phone photos too.
+They drag files into the chat or give paths; copy everything into `knowledge/inbox/`.
+Then run the **job-knowledge-base** skill (section A): it splits multi-document PDFs into unit files, names them,
+writes `knowledge/manifest.yaml` and `knowledge/PROFILE.md`. Show the user the PROFILE "At a glance" and "Gaps" sections.
+Tell them their files stay on this Mac (git-ignored).
 
 ## 2. Questionnaire → config/profile.yaml
 Copy `config/profile.example.yaml` to `config/profile.yaml`, then fill it **block by block (Q1–Q8 in the file)**.
+- Pre-fill from `knowledge/PROFILE.md` and the manifest facts (degree, grade, languages, employers) before asking anything.
 - Pre-fill everything the CV already answers (name, phone, city, degree, years of experience, languages) and show it for a quick OK.
 - Ask only what is missing, using AskUserQuestion when there are clear options (remote policy, company size, confirm mode, cover-letter rule).
 - Defaults that came out of real use — explain them, let the user change them:

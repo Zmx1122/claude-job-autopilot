@@ -43,7 +43,7 @@ Starting points; replace `{q}` with a URL-encoded title and `{loc}` with a city.
 |---|---|
 | SmartRecruiters | Form inside shadow DOM; no accessibility refs. Upload via the OS dialog (`upload_file.sh`). Confirmation mail "We received your application". |
 | Porsche (jobs.porsche.com) | No login. Privacy page has a math CAPTCHA → the user answers it. 3 pages: personal data → salary + source → attachments (CV + "Zeugnis höchster Bildungsabschluss" required). Choose the attachment **type first**, then the file. The upload button is a hidden `label[for=btn-attachment]` (scroll to top, it sits at the top-left). The upload does not start by itself: trigger `#start_file_upload_button`. After an upload the page can re-render without its dropdown widget → reload the page (the uploaded files stay). After submitting, an email verification link also **creates a portal account** → the user clicks it. |
-| Oracle Recruiting (e.g. Atruvia) | Wants a single PDF combining CV, references and degree certificates. Skip unless the knowledge base has such a file. |
+| Oracle Recruiting | Wants a single PDF combining CV, references and degree certificates → `tools/kb_bundle.py --merge` in German standard order (job-knowledge-base skill, section C). |
 | Greenhouse, Personio, softgarden, Workday, SuccessFactors | Usually standard file inputs; some require an account (user creates it). |
 
 ## File uploads

@@ -31,8 +31,10 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
     **Indeed 默认用了 10 页合并 PDF**：换成单页简历；知识库里一份文件一个用途。
 12. **Porsche upload did nothing** — the portal waits for an explicit start and loses its dropdown after the first upload. → Set type, choose file, trigger the start button; reload the page if the dropdown is gone.
     **Porsche 上传没反应**：需要手动触发开始上传；第一次上传后下拉框失效就刷新页面。
-13. **Forms that demand documents we do not have** (cover letter, merged certificate PDF). → Skip on cover letter; ask the user for missing certificates; never upload something unrelated.
-    **表单要求没有的材料**：要求求职信就跳过；缺证书就问用户要。
+13. **Forms that demand documents we do not have** (cover letter, merged certificate PDF). → Skip on cover letter; ask the user for missing certificates; build merged PDFs from unit files with `tools/kb_bundle.py`; never upload something unrelated.
+    **表单要求没有的材料**：要求求职信就跳过；缺证书就问用户要；需要合并 PDF 时用单元文件现拼。
+13b. **Scanned certificates have no text layer** — text extraction returns nothing, so a script alone cannot tell what a page is. → `kb_extract.py` flags those pages and renders previews; Claude reads them visually before splitting.
+    **扫描件没有文字层**：脚本识别不了，标记出来让 Claude 看图判断。
 
 ## Notion and Gmail
 14. **Notion parent page "cannot have content"** — a person/profile page was used. → Use a normal page shared with the integration (••• → Connections).
