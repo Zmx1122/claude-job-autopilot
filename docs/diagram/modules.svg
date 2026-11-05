@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 688" width="1120" height="688" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B6862"/></marker></defs>
+<rect x="0" y="0" width="1120" height="688" rx="18" fill="#FFFFFF"/>
+<text x="282" y="38" text-anchor="middle" font-size="15" font-weight="700" fill="#3B3934">Your documents <tspan font-weight="400" fill="#8A867F">· 你的材料</tspan></text>
+<text x="521" y="38" text-anchor="middle" font-size="15" font-weight="700" fill="#3B3934">Applying <tspan font-weight="400" fill="#8A867F">· 投递</tspan></text>
+<text x="759" y="38" text-anchor="middle" font-size="15" font-weight="700" fill="#3B3934">Tracking <tspan font-weight="400" fill="#8A867F">· 跟踪</tspan></text>
+<text x="998" y="38" text-anchor="middle" font-size="15" font-weight="700" fill="#3B3934">Setup &amp; safety <tspan font-weight="400" fill="#8A867F">· 配置与安全</tspan></text>
+<rect x="170" y="64" width="930" height="58" rx="10" fill="#E9F6EE" stroke="#2E9650" stroke-width="1.6"/>
+<text x="635.0" y="88" text-anchor="middle" font-size="13" font-weight="600" fill="#145A2B">You talk to Claude: "show today's jobs" · "tailor my CV for this link" · "I have no CV" · "sync my mail" · "back up my data"</text>
+<text x="635.0" y="108" text-anchor="middle" font-size="11.5" fill="#6F6B64">你只需要和 Claude 说话："看看今天的岗位" · "按这个链接改简历" · "我没有简历" · "同步邮件" · "备份我的数据"</text>
+<text x="28" y="90" font-size="13" font-weight="600" fill="#3B3934">You</text><text x="28" y="108" font-size="12" fill="#8A867F">你</text>
+<rect x="12" y="146" width="1096" height="132" rx="12" fill="#FAF9F7"/>
+<text x="28" y="174" font-size="13" font-weight="600" fill="#3B3934">Skills</text>
+<text x="28" y="192" font-size="12" fill="#8A867F">技能</text>
+<text x="28" y="208" font-size="12" fill="#8A867F">.claude/skills</text>
+<rect x="170" y="156" width="224" height="112" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="282" y="176" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A3418">job-knowledge-base</text>
+<text x="282" y="191" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A3418">job-career-coach</text>
+<text x="282" y="206" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A3418">job-application-writer</text>
+<text x="282" y="224" text-anchor="middle" font-size="11.5" fill="#4A4741">documents → unit files;</text>
+<text x="282" y="238" text-anchor="middle" font-size="11.5" fill="#4A4741">no CV → interview; CVs + letters</text>
+<text x="282" y="258" text-anchor="middle" font-size="11" fill="#8A867F">材料拆分 · 求职教练 · 简历与求职信</text>
+<rect x="408" y="156" width="224" height="112" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="521" y="176" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A3418">job-scan-apply</text>
+<text x="521" y="194" text-anchor="middle" font-size="11.5" fill="#4A4741">scan → shortlist (tailored / template)</text>
+<text x="521" y="208" text-anchor="middle" font-size="11.5" fill="#4A4741">→ you pick → prefill → you confirm</text>
+<text x="521" y="258" text-anchor="middle" font-size="11" fill="#8A867F">扫描、精选、预填、确认后提交</text>
+<rect x="647" y="156" width="224" height="112" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="759" y="176" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A3418">job-mail-sync</text>
+<text x="759" y="191" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A3418">job-dashboard</text>
+<text x="759" y="209" text-anchor="middle" font-size="11.5" fill="#4A4741">emails → statuses + label;</text>
+<text x="759" y="223" text-anchor="middle" font-size="11.5" fill="#4A4741">charts every week</text>
+<text x="759" y="258" text-anchor="middle" font-size="11" fill="#8A867F">邮件同步与打标签 · 看板</text>
+<rect x="886" y="156" width="224" height="112" rx="10" fill="#FBEDE6" stroke="#D97757" stroke-width="1.4"/>
+<text x="998" y="176" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A3418">job-autopilot-setup</text>
+<text x="998" y="194" text-anchor="middle" font-size="11.5" fill="#4A4741">zero to running: questionnaire,</text>
+<text x="998" y="208" text-anchor="middle" font-size="11.5" fill="#4A4741">tokens, logins, schedule, backup</text>
+<text x="998" y="258" text-anchor="middle" font-size="11" fill="#8A867F">从零配置</text>
+<rect x="12" y="280" width="1096" height="148" rx="12" fill="#F4F2EE"/>
+<text x="28" y="308" font-size="13" font-weight="600" fill="#3B3934">Scripts and rules</text>
+<text x="28" y="326" font-size="12" fill="#8A867F">脚本与规则</text>
+<text x="28" y="342" font-size="12" fill="#8A867F">tools/</text>
+<text x="28" y="358" font-size="12" fill="#8A867F">standards/</text>
+<rect x="170" y="290" width="224" height="128" rx="10" fill="#F3F2EF" stroke="#9B968C" stroke-width="1.4"/>
+<text x="282" y="310" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">kb_extract · kb_build</text>
+<text x="282" y="325" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">kb_bundle · facts</text>
+<text x="282" y="340" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">doc_render · doc_check</text>
+<text x="282" y="358" text-anchor="middle" font-size="11.5" fill="#4A4741">standards/de: CV, Anschreiben,</text>
+<text x="282" y="372" text-anchor="middle" font-size="11.5" fill="#4A4741">when to tailor, market notes</text>
+<text x="282" y="408" text-anchor="middle" font-size="11" fill="#8A867F">拆分合并 PDF · 事实库 · 生成与检查</text>
+<rect x="408" y="290" width="224" height="128" rx="10" fill="#F3F2EF" stroke="#9B968C" stroke-width="1.4"/>
+<text x="521" y="310" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">dedupe · log_application</text>
+<text x="521" y="325" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">upload_file · copy_path</text>
+<text x="521" y="343" text-anchor="middle" font-size="11.5" fill="#4A4741">mode per job, daily cap,</text>
+<text x="521" y="357" text-anchor="middle" font-size="11.5" fill="#4A4741">Notion row per action, uploads</text>
+<text x="521" y="408" text-anchor="middle" font-size="11" fill="#8A867F">去重筛选 · 记录 · 文件上传</text>
+<rect x="647" y="290" width="224" height="128" rx="10" fill="#F3F2EF" stroke="#9B968C" stroke-width="1.4"/>
+<text x="759" y="310" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">gmail_dump · sync_mail</text>
+<text x="759" y="325" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">label_mail · dashboard_data</text>
+<text x="759" y="340" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">charts_png · notion_page</text>
+<text x="759" y="358" text-anchor="middle" font-size="11.5" fill="#4A4741">classify, match, label;</text>
+<text x="759" y="372" text-anchor="middle" font-size="11.5" fill="#4A4741">weekly charts</text>
+<text x="759" y="408" text-anchor="middle" font-size="11" fill="#8A867F">邮件分类匹配 · 看板数据</text>
+<rect x="886" y="290" width="224" height="128" rx="10" fill="#F3F2EF" stroke="#9B968C" stroke-width="1.4"/>
+<text x="998" y="310" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">check_setup · backup</text>
+<text x="998" y="325" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">check_public</text>
+<text x="998" y="343" text-anchor="middle" font-size="11.5" fill="#4A4741">health check, backup and restore,</text>
+<text x="998" y="357" text-anchor="middle" font-size="11.5" fill="#4A4741">privacy guard before commits</text>
+<text x="998" y="408" text-anchor="middle" font-size="11" fill="#8A867F">健康检查 · 备份恢复 · 隐私保护</text>
+<rect x="12" y="430" width="1096" height="132" rx="12" fill="#FAF9F7"/>
+<text x="28" y="458" font-size="13" font-weight="600" fill="#3B3934">On your computer</text>
+<text x="28" y="476" font-size="12" fill="#8A867F">你的电脑</text>
+<text x="28" y="492" font-size="12" fill="#8A867F">不进 git</text>
+<rect x="170" y="440" width="224" height="112" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="282" y="460" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A4B00">knowledge/</text>
+<text x="282" y="478" text-anchor="middle" font-size="11.5" fill="#4A4741">library/ · manifest · PROFILE.md</text>
+<text x="282" y="492" text-anchor="middle" font-size="11.5" fill="#4A4741">career/: fact bank, interviews, CVs</text>
+<text x="282" y="542" text-anchor="middle" font-size="11" fill="#8A867F">证书材料 · 事实库 · 简历内容</text>
+<rect x="408" y="440" width="224" height="112" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="521" y="460" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A4B00">data/applications/</text>
+<text x="521" y="478" text-anchor="middle" font-size="11.5" fill="#4A4741">tailored CV + letter per posting</text>
+<text x="521" y="492" text-anchor="middle" font-size="11.5" fill="#4A4741">applied.csv log</text>
+<text x="521" y="542" text-anchor="middle" font-size="11" fill="#8A867F">每个精投岗位的简历与求职信</text>
+<rect x="647" y="440" width="224" height="112" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="759" y="460" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A4B00">data/mail · data/dashboard</text>
+<text x="759" y="478" text-anchor="middle" font-size="11.5" fill="#4A4741">mail dumps, classifications,</text>
+<text x="759" y="492" text-anchor="middle" font-size="11.5" fill="#4A4741">dashboard data (rebuildable)</text>
+<text x="759" y="542" text-anchor="middle" font-size="11" fill="#8A867F">邮件与看板缓存</text>
+<rect x="886" y="440" width="224" height="112" rx="10" fill="#FFF5E6" stroke="#E3A13B" stroke-width="1.4"/>
+<text x="998" y="460" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7A4B00">config/profile.yaml · .env</text>
+<text x="998" y="478" text-anchor="middle" font-size="11.5" fill="#4A4741">your answers; tokens (never copied)</text>
+<text x="998" y="492" text-anchor="middle" font-size="11.5" fill="#4A4741">→ backup folder in Documents</text>
+<text x="998" y="542" text-anchor="middle" font-size="11" fill="#8A867F">问卷答案 · 密钥 · 本地备份</text>
+<rect x="12" y="564" width="1096" height="106" rx="12" fill="#F4F2EE"/>
+<text x="28" y="592" font-size="13" font-weight="600" fill="#3B3934">Online services</text>
+<text x="28" y="610" font-size="12" fill="#8A867F">在线服务</text>
+<rect x="408" y="574" width="224" height="86" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
+<text x="521" y="594" text-anchor="middle" font-size="12.5" font-weight="700" fill="#23426E">LinkedIn · StepStone · Indeed · Xing</text>
+<text x="521" y="612" text-anchor="middle" font-size="11.5" fill="#4A4741">company career portals</text>
+<text x="521" y="650" text-anchor="middle" font-size="11" fill="#8A867F">招聘平台 · 公司官网</text>
+<rect x="647" y="574" width="224" height="86" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
+<text x="759" y="594" text-anchor="middle" font-size="12.5" font-weight="700" fill="#23426E">Gmail · Notion · claude.ai</text>
+<text x="759" y="612" text-anchor="middle" font-size="11.5" fill="#4A4741">label "applications", tracker,</text>
+<text x="759" y="626" text-anchor="middle" font-size="11.5" fill="#4A4741">interactive dashboard</text>
+<text x="759" y="650" text-anchor="middle" font-size="11" fill="#8A867F">邮箱 · 申请表 · 交互看板</text>
+<rect x="886" y="574" width="224" height="86" rx="10" fill="#EEF3FA" stroke="#5B7DB1" stroke-width="1.4"/>
+<text x="998" y="594" text-anchor="middle" font-size="12.5" font-weight="700" fill="#23426E">GitHub (shared repo)</text>
+<text x="998" y="612" text-anchor="middle" font-size="11.5" fill="#4A4741">code, skills, rules, empty templates —</text>
+<text x="998" y="626" text-anchor="middle" font-size="11.5" fill="#4A4741">no personal data</text>
+<text x="998" y="650" text-anchor="middle" font-size="11" fill="#8A867F">共享仓库：只有代码和模板</text>
+<path d="M282,122 L282,156" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M521,122 L521,156" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M759,122 L759,156" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M998,122 L998,156" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M282,268 L282,290" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M521,268 L521,290" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M759,268 L759,290" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M998,268 L998,290" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M282,418 L282,440" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M521,418 L521,440" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M759,418 L759,440" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M998,418 L998,440" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M521,552 L521,574" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+<path d="M759,552 L759,574" stroke="#6B6862" stroke-width="1.6" marker-end="url(#arr)"/>
+</svg>

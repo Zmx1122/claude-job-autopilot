@@ -35,14 +35,14 @@ NODES = [  # id, lane, y-centre, english, chinese, kind
     ('scan_c', 'claude', 502, 'Scan · dedupe · filter,\ntailored or template per job', '扫描去重筛选，逐个定精投 / 模版投', 'claude'),
     ('scan_s', 'svc', 502, 'LinkedIn · StepStone\nIndeed · Xing', '', 'svc'),
     ('short_c', 'claude', 610, 'Shortlist table in chat', '聊天里给出精选岗位表', 'claude'),
-    ('pick_u', 'you', 610, 'Pick jobs  ("1, 3, 5")', '选岗位，回答精投岗位的问题', 'you'),
+    ('pick_u', 'you', 610, 'Pick jobs  ("1, 3, 5"),\nanswer a few questions', '选岗位，回答精投岗位的问题', 'you'),
     ('fill_c', 'claude', 703, 'Tailored CV + letter where it pays;\nprefill each job, upload files', '需要时写定制简历和求职信，逐个填到确认页', 'claude'),
     ('hand_u', 'you', 703, 'CAPTCHA · account · missing file', '验证码 / 注册 / 缺材料 → 你来', 'you'),
     ('ready_c', 'claude', 796, 'Ready list', '待提交清单', 'claude'),
     ('ok_u', 'you', 796, 'Confirm once  ✓', '确认一次', 'gate'),
     ('send_c', 'claude', 886, 'Submit all, log each row', '全部提交并逐条记录', 'claude'),
     ('send_s', 'svc', 886, 'Platforms + company portals\nNotion tracker', '平台与公司官网 · Notion', 'svc'),
-    ('dash_c', 'claude', 994, 'Refresh Notion charts +\ninteractive dashboard', '刷新 Notion 图表与交互看板', 'claude'),
+    ('dash_c', 'claude', 994, 'Refresh charts + dashboard,\nback up your data', '刷新图表与看板，备份个人数据', 'claude'),
     ('dash_s', 'svc', 994, 'Notion page · claude.ai', '', 'svc'),
 ]
 EDGES = [  # from, to, label, dashed

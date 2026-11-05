@@ -1,0 +1,39 @@
+# Fictional sample (Jane Doe is not a real person) — what job-application-writer mode J produces for a posting.
+# Render: python3 tools/doc_render.py cv docs/sample/cv-jane-doe.yaml --out docs/sample/Jane-Doe-CV-Nordwind.pdf --max-pages 1
+lang: en
+name: Jane Doe
+headline: Machine Learning Engineer — Forecasting & MLOps
+contact: ["Hamburg, Germany", "+49 170 0000000", "jane.doe@example.com", {text: "linkedin.com/in/jane-doe-example", url: "https://www.linkedin.com/"}]
+languages: "English C2 · German B2 · Spanish (native)"
+summary: >-
+  Machine learning engineer who takes forecasting models from notebook to production. At ACME Logistics I built the
+  demand-forecasting service used by 40 planners and cut forecast error by 18%; I run it with automated retraining,
+  monitoring and drift alerts on Azure. M.Sc. Data Science, University of Example (grade 1.6).
+sections:
+  - kind: entries
+    title: Experience
+    items:
+      - what: "Machine Learning Engineer · ACME Logistics GmbH"
+        when: "03/2023 – present"
+        where: Hamburg
+        note: "Freight forwarder, 1,200 employees"
+        bullets:
+          - "Built and own the demand-forecasting service (Python, LightGBM, FastAPI) used daily by 40 planners; forecast error down 18% versus the previous rule-based system."
+          - "Set up MLOps on Azure ML: weekly retraining, model registry, data-drift alerts and a rollback path; incidents per quarter from 6 to 1."
+          - "Introduced an evaluation suite of 300 historical weeks that every model change must pass before release."
+      - what: "Working Student, Data Analytics · Example Retail SE"
+        when: "04/2021 – 02/2023"
+        where: Berlin
+        bullets:
+          - "Automated weekly sales reporting (SQL, dbt, Power BI); 6 hours of manual work saved per week."
+  - kind: skills
+    title: Skills
+    groups:
+      - {label: "Machine learning", items: ["Time-series forecasting", "Gradient boosting", "scikit-learn", "PyTorch", "Model evaluation"]}
+      - {label: "MLOps & cloud", items: ["Azure ML", "Docker", "GitHub Actions", "MLflow", "Monitoring and drift detection"]}
+      - {label: "Data", items: ["Python", "SQL", "dbt", "PostgreSQL", "Power BI"]}
+  - kind: entries
+    title: Education
+    items:
+      - {what: "M.Sc. Data Science · University of Example — grade 1.6", when: "10/2020 – 09/2022", note: "Thesis: Probabilistic demand forecasting for perishable goods"}
+      - {what: "B.Sc. Mathematics · Universidad de Ejemplo", when: "09/2016 – 07/2020"}
