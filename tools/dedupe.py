@@ -1,19 +1,24 @@
 """Turn raw scan results into the shortlist table shown to the user, with a Mode per job (🎯 tailored / 📄 template).
 
-usage: python3 tools/dedupe.py data/inbox/YYYY-MM-DD.json [--offline]
-Input: JSON list of jobs Claude collected while scanning, each with
-  title, company, platform, url, city, salary, posted (YYYY-MM-DD, or the platform's text such as "vor 3 Tagen" / "2 days ago"),
+usage: python3 tools/dedupe.py data/inbox/YYYY-MM-DD.json [--offline] [--preset wide|everything|<yours>] [--set key=value ...]
+Input: JSON list of jobs Claude collected while scanning — EVERY posting it opened, unfiltered (this script applies the filters) —
+each with title, company, platform, url, city, salary, posted (YYYY-MM-DD, or the platform's text such as "vor 3 Tagen" / "2 days ago"),
   reposted (true if the platform marks it reposted / erneut gepostet), apply_type (easy_apply | one_click | platform_form | external),
-  needs (list, e.g. ["cv"], ["cv","cover_letter"], ["cv","degree_certificate"]), size (large|mid|startup|unknown), fit (0-100), why
-Drops jobs already in Notion (same URL, or same company with a similar title), applies the profile filters
-(blacklist, skip_title_keywords, exclude_titles, company_size, cover-letter rule, fit below strategy.fit_medium),
-decides the Mode with the table in standards/<country>/apply-strategy.md, sorts by fit and prints a markdown table.
+  needs (list, e.g. ["cv"], ["cv","cover_letter"], ["cv","degree_certificate"]), size (large|mid|startup|unknown), fit (0-100), why,
+  salary_estimated (true when the platform only estimates the salary: such a figure is never used to drop a job)
+Drops jobs already in Notion (same URL, or same company with a similar title) and applies the filters: blacklist,
+skip_title_keywords, exclude_titles, posting age, salary rules, company_size, cover-letter rule, fit below strategy.fit_medium.
+The filters are run-time inputs (tools/filters.py): the profile gives the defaults, --preset / --set widen them for this run,
+so a user who is not happy with the list can say "show more" and you just re-run on the SAME raw file with a wider preset.
+Decides the Mode with the table in standards/<country>/apply-strategy.md, sorts by fit and prints a markdown table, then what each
+filter dropped and the exact flag that would bring those jobs back.
 Writes the kept list (with mode, mode_reason, age_days) to data/inbox/YYYY-MM-DD.shortlist.json.
 --offline skips the Notion lookup (testing).
 """
 import json, os, re, sys
 from datetime import date, timedelta
 from common import load_env, load_profile, notion_rows, same_company, title_sim
+import filters
 
 UNITS = {'h': 0, 'hour': 0, 'stunde': 0, 'minute': 0, 'min': 0, 'day': 1, 'tag': 1, 'week': 7, 'woche': 7, 'month': 30, 'monat': 30}
 
@@ -60,13 +65,30 @@ def decide(age, familiar, fit, dream, hi, med):
     return 'template', f'{age}d old'
 
 
+HINTS = {
+    'age': 'search.posted_within_days={n}',
+    'salary': 'search.salary_filter=off',
+    'fit': 'strategy.fit_medium={n}',
+    'startup': 'search.company_size=any',
+    'shortlisted': 'search.resurface_shortlisted=true',
+}
+
+
 def main():
-    src = sys.argv[1]
-    offline = '--offline' in sys.argv
+    import argparse
+    ap = argparse.ArgumentParser(description='shortlist builder')
+    ap.add_argument('src'); ap.add_argument('--offline', action='store_true')
+    ap.add_argument('--preset'); ap.add_argument('--set', action='append', default=[])
+    args = ap.parse_args()
+    src, offline = args.src, args.offline
     jobs = json.load(open(src))
-    prof = load_profile(); s = prof.get('search') or {}; rules = prof.get('rules') or {}; st = prof.get('strategy') or {}
+    base = load_profile()
+    prof, changes = filters.effective(base, args.preset, args.set)
+    s = prof.get('search') or {}; rules = prof.get('rules') or {}; st = prof.get('strategy') or {}
     hi, med = int(st.get('fit_high', 80)), int(st.get('fit_medium', 60))
     cap_t = int(st.get('tailored_per_day', 3)); fam_n = int(st.get('familiar_after', 3))
+    window = s.get('posted_within_days')
+    resurface = bool(s.get('resurface_shortlisted'))
     dream_co = [d.lower() for d in st.get('dream_companies') or [] if d]
     dream_kw = [d.lower() for d in st.get('dream_title_keywords') or [] if d]
     letter_rule = rules.get('cover_letter_required', 'draft')
@@ -74,35 +96,48 @@ def main():
     recent = [r for r in rows if (r.get('first_seen') or '') >= str(date.today() - timedelta(days=30))]
 
     def why_drop(j):
+        """(category, text) or None. category names match HINTS where a flag can bring the job back."""
         t = (j.get('title') or '').lower(); c = j.get('company') or ''
-        if any(b.lower() in c.lower() for b in s.get('blacklist_companies', []) if b): return 'blacklisted company'
-        if any(k.lower() in t for k in s.get('skip_title_keywords', []) + s.get('exclude_titles', []) if k): return 'title filter'
-        if s.get('company_size') == 'established' and j.get('size') == 'startup': return 'startup'
-        if 'cover_letter' in (j.get('needs') or []) and letter_rule == 'skip': return 'requires cover letter'
-        if j.get('fit') is not None and j['fit'] < med and not any(d in c.lower() for d in dream_co): return f"fit {j['fit']} < {med}"
+        if any(b.lower() in c.lower() for b in s.get('blacklist_companies', []) if b): return ('blacklist', 'blacklisted company')
+        if any(k.lower() in t for k in s.get('skip_title_keywords', []) + s.get('exclude_titles', []) if k): return ('title', 'title filter')
+        if s.get('company_size') == 'established' and j.get('size') == 'startup': return ('startup', 'startup')
+        if 'cover_letter' in (j.get('needs') or []) and letter_rule == 'skip': return ('cover', 'requires cover letter')
+        if j.get('fit') is not None and j['fit'] < med and not any(d in c.lower() for d in dream_co): return ('fit', f"fit {j['fit']} < {med}")
+        if window and j.get('age_days') is not None and j['age_days'] > int(window): return ('age', f"posted {j['age_days']}d ago > {window}d")
+        sal = filters.salary_decision(j, s)
+        if sal: return ('salary', sal)
         for r in rows:
-            if j.get('url') and r['url'] and r['url'].split('?')[0] == j['url'].split('?')[0]: return f"already in tracker ({r['status']})"
-            if same_company(c, r['company']) and (title_sim(j.get('title'), r['title']) or 0) >= 0.8: return f"already in tracker ({r['status']})"
+            same = (j.get('url') and r['url'] and r['url'].split('?')[0] == j['url'].split('?')[0]) or \
+                   (same_company(c, r['company']) and (title_sim(j.get('title'), r['title']) or 0) >= 0.8)
+            if same:
+                if r['status'] == 'Shortlisted':
+                    if resurface:
+                        j['_self'] = r.get('id'); j['carried_over'] = True; continue
+                    return ('shortlisted', f"already in tracker (Shortlisted)")
+                return ('tracker', f"already in tracker ({r['status']})")
         return None
 
     def familiar(j):
         c = j.get('company') or ''
         if j.get('reposted'): return True
-        if any(same_company(c, r['company']) and (title_sim(j.get('title'), r['title']) or 0) >= 0.5 for r in rows): return True
-        return sum(same_company(c, r['company']) for r in recent) >= fam_n
+        mine = j.get('_self')
+        if any(r.get('id') != mine and same_company(c, r['company']) and (title_sim(j.get('title'), r['title']) or 0) >= 0.5 for r in rows): return True
+        return sum(same_company(c, r['company']) for r in recent if r.get('id') != mine) >= fam_n
 
     kept, dropped, seen = [], [], set()
     for j in jobs:
         key = (j.get('company', '').lower(), j.get('title', '').lower())
-        if key in seen: dropped.append((j, 'duplicate in scan')); continue
+        if key in seen: dropped.append((j, ('duplicate', 'duplicate in scan'))); continue
         seen.add(key)
+        j['age_days'] = age_days(j.get('posted'))
         w = why_drop(j)
         if w: dropped.append((j, w)); continue
-        j['age_days'] = age_days(j.get('posted'))
         c, t = (j.get('company') or '').lower(), (j.get('title') or '').lower()
         dream = any(d in c for d in dream_co) or any(d in t for d in dream_kw)
         j['familiar'] = familiar(j)
         j['mode'], j['mode_reason'] = decide(j['age_days'], j['familiar'], j.get('fit') or 0, dream, hi, med)
+        if j.pop('carried_over', False): j['mode_reason'] += ' · carried over from an earlier scan'
+        j.pop('_self', None)
         kept.append(j)
     kept.sort(key=lambda j: (j['mode'] != 'tailored', -(j.get('fit') or 0)))
     n = 0
@@ -114,7 +149,11 @@ def main():
     kept.sort(key=lambda j: (j['mode'] != 'tailored', -(j.get('fit') or 0)))
     cap = int(s.get('max_applications_per_day') or 10)
     icon = {'tailored': '🎯 tailored', 'template': '📄 template'}
-    print(f"{len(jobs)} scanned → {len(kept)} new candidates (daily cap {cap}; "
+    print(f"Filters: preset={args.preset or 'default'}" + (f" ({', '.join(changes)})" if changes else '') +
+          f" · window {window or '–'}d · salary {'off' if str(s.get('salary_filter', 'on')).lower() in ('off', 'false', 'no', '0') else 'on'}"
+          f" · fit ≥ {med} · startups {'dropped' if s.get('company_size') == 'established' else 'allowed'}"
+          f" · earlier shortlist {'shown' if resurface else 'hidden'}\n")
+    print(f"{len(jobs)} scanned → {len(kept)} candidates (daily cap {cap}; "
           f"{sum(j['mode'] == 'tailored' for j in kept)} tailored, {sum(j['mode'] == 'template' for j in kept)} template).\n")
     print('| # | Mode | Company | Title | Platform | Posted | How to apply | Needs | Salary | Fit | Why |')
     print('|---|---|---|---|---|---|---|---|---|---|---|')
@@ -124,7 +163,26 @@ def main():
         print(f"| {i} | {icon[j['mode']]} · {j['mode_reason']} | {j.get('company','')} | [{j.get('title','')}]({j.get('url','')}) | "
               f"{j.get('platform','')} | {posted} | {j.get('apply_type','')} | {needs} | {j.get('salary') or '–'} | {j.get('fit','')} | {j.get('why','')} |")
     if dropped:
-        print('\nDropped: ' + '; '.join(f"{j.get('company','?')} – {j.get('title','')[:40]} ({w})" for j, w in dropped))
+        print('\nDropped: ' + '; '.join(f"{j.get('company','?')} – {j.get('title','')[:40]} ({w[1]})" for j, w in dropped))
+        by = {}
+        for j, (cat, _) in dropped:
+            by.setdefault(cat, []).append(j)
+        print('\nDropped by filter: ' + ' · '.join(f'{k} {len(v)}' for k, v in sorted(by.items(), key=lambda kv: -len(kv[1]))))
+        wants = []
+        for cat, hint in HINTS.items():
+            if cat in by:
+                if cat == 'age':
+                    oldest = max((j['age_days'] for j in by[cat] if j.get('age_days') is not None), default=14)
+                    hint = hint.format(n=oldest)
+                if cat == 'fit':
+                    lowest = min((j.get('fit') or 0 for j in by[cat]), default=50)
+                    hint = hint.format(n=lowest)
+                wants.append(f"  {len(by[cat])} × {cat}: --set {hint}")
+        if wants:
+            print('Bring them back with (one or several):\n' + '\n'.join(wants) + f"\n  or everything widenable at once: --preset wide  (wider still: --preset everything)")
+        fixed = [k for k in by if k in ('blacklist', 'title', 'tracker', 'cover', 'duplicate')]
+        if fixed:
+            print('Not widenable by a preset: ' + ', '.join(f'{k} {len(by[k])}' for k in fixed))
     json.dump(kept, open(src.replace('.json', '.shortlist.json'), 'w'), ensure_ascii=False, indent=1)
 
 

@@ -17,9 +17,11 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 
 ## Non-negotiable rules
 1. **Nothing is submitted without the user.** Scan → shortlist table → user picks → prefill → user confirms once → submit.
-   "Submit directly once filled" counts only for the batch where the user said it.
+   "Submit directly once filled" counts only for the batch where the user said it — then follow **Best-effort automation** in
+   the job-scan-apply skill: do everything automatable, including the form's own required declaration boxes and the submit click.
 2. One-click buttons (StepStone "Ich bin interessiert", similar) submit instantly. List them first; click only after the user picked them.
-3. The user types passwords, solves CAPTCHAs, creates accounts and clicks account-creating verification links. You never do.
+3. The user types passwords, solves CAPTCHAs / human checks, creates accounts and clicks account-creating verification links. You never do;
+   you leave exactly that step open, finish everything else, and list it.
 4. Upload only what the form requires, chosen and merged per the job-knowledge-base skill (section C); upload only unit files
    from `knowledge/library/`, bundles made from them, or documents the user approved in `data/applications/`. Required cover
    letter → draft it with job-application-writer and get the user's OK (`rules.cover_letter_required: draft`) or skip the job
