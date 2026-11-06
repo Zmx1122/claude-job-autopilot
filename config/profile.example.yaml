@@ -39,7 +39,13 @@ search:                        # Q4 · What to look for / 搜索条件
   locations: ["Munich", "Remote Germany"]
   remote: "hybrid_ok"          # onsite_only | hybrid_ok | remote_only
   seniority: ["Mid", "Senior"]
-  min_salary_eur: 0            # skip postings that state less than this / 低于此薪资的岗位跳过
+  min_salary_eur: 0            # skip postings that state less than this / 低于此薪资的岗位跳过 (flat bar; 0 = none)
+  # salary_rules:              # optional, instead of the flat bar: different bars for mature vs small companies
+  #   large_min_eur: 110000    # size large / mid
+  #   small_min_eur: 140000    # size startup
+  #   unstated: "estimate"     # salary not stated → estimate | skip | keep
+  # salary_filter: "on"        # "off" = never drop a job for its salary (a platform's own "geschätzt" figure is never used to drop)
+  # resurface_shortlisted: false   # true = jobs you were shown on earlier days (status Shortlisted) appear again
   posted_within_days: 2
   max_applications_per_day: 10 # hard daily cap / 每日上限
   company_size: "established"  # established = large or mature companies only, skip startups / any
@@ -68,6 +74,14 @@ strategy:                      # Q5b · Tailored (精投) or template (模版投
   tailored_per_day: 3          # each tailored application costs you ~10–20 min (questions + review)
   familiar_after: 3            # a company with ≥ this many postings in 30 days counts as "seen before"
   cover_letter: "tailored_only"    # write a letter unasked: never | tailored_only (when the form has a slot) | always
+
+scan_presets:                  # Optional · named ways to widen a run: "scan with preset wide" · 本次扫描的放宽方案
+                               # Built in: wide (salary filter off, 7 days, fit ≥ 60, earlier shortlist again) and everything (14 days, fit ≥ 50, startups).
+                               # Your own, or override a built-in one (dotted keys into this file):
+  # my-weekend-sweep:
+  #   search.posted_within_days: 10
+  #   search.salary_filter: "off"
+  #   strategy.fit_medium: 55
 
 screening_answers:             # Q6 · Standard form answers / 表单常见问题
   work_authorization: ""       # e.g. "EU Blue Card, no sponsorship needed" / "EU citizen"
