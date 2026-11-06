@@ -50,7 +50,8 @@ search:                        # Q4 · What to look for / 搜索条件
 rules:                         # Q5 · How Claude applies for you / 投递规则（我们实测后定下的默认值）
   confirm_mode: "batch"        # batch = shortlist table → you pick → Claude prefills all → you confirm once → all submitted
                                # each  = confirm every single submit
-                               # direct = you said "submit when filled" for this batch (asked per batch, never stored as default)
+                               # direct = you said "submit when filled" for this batch → Claude runs best-effort automation: fills, ticks the
+                               #          required declaration boxes, submits; leaves only CAPTCHAs / logins / account creation to you
   cover_letter_required: "draft"   # form REQUIRES a cover letter → draft = Claude writes one for that posting, you approve it
                                    # before upload / 起草后由你确认 · skip = skip those jobs / 跳过
   certificate_required: "ask"      # form requires a certificate that is not in the knowledge base → pause and ask you

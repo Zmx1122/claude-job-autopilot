@@ -15,9 +15,30 @@ All browsing happens in Claude's **built-in browser pane** (`mcp__Claude_Browser
 3. You **prefill** every picked job up to its final review page, each in its own tab.
 4. You show a **ready list** (what will be sent, which CV, anything unusual).
 5. One **confirmation** from the user ("submit" / "提交" / "abschicken") → you submit all and log each.
-- If the user already said "submit directly once filled" / "填完直接提交" for this batch, step 4–5 collapse: submit each one as soon as it is filled, and report afterwards. That permission is for the current batch only.
+- If the user already said "submit directly once filled" / "填完直接提交" / "直接投递" for this batch, step 4–5 collapse: apply **Best-effort automation** below — submit each one as soon as it is filled, and report afterwards. That permission is for the current batch only.
 - StepStone **"Ich bin interessiert"** and LinkedIn one-click flows submit instantly. Never click them to "look at the form". They go through steps 1–2 and are sent only after the user picked them.
 - A scheduled (unattended) run stops after step 1: it writes the table and logs `Shortlisted` rows. Nothing is ever submitted without the user in the conversation.
+
+## Best-effort automation (user rule — always follow)
+Once the user has picked jobs and said to apply directly ("直接投递", "全部投", "submit once filled", "尽可能自动化"), the job is to
+get every application **all the way to sent**, doing everything a person could do except what a machine must not or cannot do.
+- **Do yourself, without asking again:** fill every field from the profile; pick the CV; upload the files the form needs;
+  answer Yes/No and screening questions from `screening_answers`; **tick the declaration / consent boxes that the form
+  itself requires to submit** ("I confirm I have read the above", data-protection acknowledgement, truthfulness
+  certification); click the final submit; read the success message; log `Applied`.
+- **Leave to the user, and say exactly which step is open:** CAPTCHAs and "confirm you are human" checks (Cloudflare Turnstile,
+  reCAPTCHA challenges, "what is 4+5"); passwords, logins, account creation and verification links that create an account;
+  anything that needs a document or fact you do not have; a required cover letter when `rules.cover_letter_required` is `skip`
+  (with `draft`, write it and use the user's batch OK).
+- **Still not ticked even in auto mode:** optional boxes (newsletter, talent pool, marketing, "keep my data for other jobs").
+  Choose the privacy-preserving option.
+- **Never stall the whole batch on one blocker.** Open every job in its own tab, prefill all of them, collect the open
+  steps, then give the user one list: *job → what is left → which tab*. After the user says it is done, come back, click
+  submit and log it. Do not close or navigate away from a tab that waits for the user (form state is lost).
+- The daily cap (`max_applications_per_day`) is lifted when the user asks for "all"; say how many you will send.
+- **Report faithfully:** `Applied` only after the portal's success page or message. Anything else is *prefilled,
+  waiting on you* or *skipped (reason)*. Never claim submitted from a click alone.
+- This rule covers the batch the user asked for. It is not a licence to apply to jobs the user did not pick.
 
 ## Phase 1 · Scan
 1. For each enabled platform, open the searches from `docs/platforms.md#search-urls` for every `search.titles` × `search.locations`
