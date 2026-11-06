@@ -25,6 +25,9 @@ set up and run by talking to the Claude desktop app. No coding needed.**
   (company size, salary, cover-letter requirement, daily cap).
 - **Shows you a shortlist table** in chat. You pick, Claude fills every application up to its review page — including
   company career sites that need file uploads — and **submits only after you confirm once**.
+- **Keeps every job description**: before each submit the posting is saved on your computer (clean text, a readable PDF and
+  the page as loaded). Postings vanish within weeks; when the interview invitation arrives, the description is still there.
+  Older applications can be backfilled; closed postings are marked as such.
 - **Reads your application inbox** daily: confirmations, interview invitations, rejections and offers update a
   **Notion tracker**; every application links to its first email as evidence; every application email gets the Gmail label
   **`applications`**. Applications you sent by hand are detected and Claude asks you to confirm them.
@@ -71,6 +74,7 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 | "does my CV fit [job link]?" | quick fit check and the closest CV you already have |
 | "I have no CV" / "what jobs fit me?" | career coaching: interview, target roles with real postings, first CV |
 | "add these documents" | splits and indexes new certificates, updates your knowledge profile |
+| "save the job descriptions of my applications" | snapshots every tracked posting that is not saved yet (and marks closed ones) |
 | "sync my mail" | updates Notion from your inbox and labels application emails |
 | "show the dashboard" | refreshes Notion charts and the interactive dashboard |
 | "back up my data" / "restore my data from …" | saves or restores your personal data folder |
@@ -117,6 +121,7 @@ For a 🎯 posting Claude first shows how you match, asks about the gaps, then w
 | CV & cover-letter writer | `.claude/skills/job-application-writer`, `tools/doc_render.py`, `tools/doc_check.py`, `templates/` | master CV, one CV per role family, tailored CV + letter per posting; ATS-readable PDFs; consistency check |
 | Country standards | `standards/de/` | what a strong German CV and Anschreiben look like, when to tailor, market notes for newcomers |
 | Scan & apply | `.claude/skills/job-scan-apply`, `tools/dedupe.py`, `tools/log_application.py` | shortlist → pick → prefill → confirm → submit |
+| Job-description snapshots | `tools/jd_snapshot.py` | each posting → `data/applications/<date>_<company>_<title>/` (`jd.md`, `jd.pdf`, page copy); `--backfill` for older applications |
 | Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
 | Notion tracker | `tools/notion_setup.py` | creates the database ([schema](docs/data-model.md)) |
 | Dashboards | `.claude/skills/job-dashboard`, `tools/refresh_dashboards.sh`, `dashboard/index.html` | Notion charts + interactive claude.ai dashboard |
@@ -134,7 +139,7 @@ For a 🎯 posting Claude first shows how you match, asks about the gaps, then w
 
 ### Your data stays yours
 The repo you download contains only code, skills, rules and empty templates. Everything personal — answers, documents,
-fact bank, CVs, cover letters, application log — lives in git-ignored folders on your computer and is copied, with
+fact bank, CVs, cover letters, saved job descriptions, application log — lives in git-ignored folders on your computer and is copied, with
 version history, to a normal folder you can open: **`Documents/Job Autopilot Data`**. New computer or fresh download?
 Say *"restore my data from Documents/Job Autopilot Data"*. Passwords and tokens are never copied; keep them in a password manager.
 
@@ -149,7 +154,7 @@ Say *"restore my data from Documents/Job Autopilot Data"*. Passwords and tokens 
 
 ### Lessons learned
 Everything that broke while building this — wrong browser, instant one-click submits, React dropdowns, uploads in shadow DOM,
-lost macOS permissions, merged PDFs, ambiguous email receipts — and the fix: **[docs/pitfalls.md](docs/pitfalls.md)**.
+lost macOS permissions, merged PDFs, ambiguous email receipts, login walls and timed-out forms — and the fix: **[docs/pitfalls.md](docs/pitfalls.md)**.
 Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 
 ### Roadmap
@@ -172,6 +177,8 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 ### 它能做什么
 - **每天早上扫描** LinkedIn、StepStone、Indeed、Xing，去掉看过的岗位，按你的规则筛选（公司规模、薪资、是否强制求职信、每日上限）。
 - **在聊天里给你一张精选岗位表**。你挑选后，Claude 把每个申请填到最后确认页（包括需要上传文件的公司官网），**你确认一次才统一提交**。
+- **保存每个岗位的 JD**：每次提交前，岗位描述都会存到你的电脑上（干净的正文、可读的 PDF 和网页原样）。岗位几周后就会下架，
+  等面试邀请来的时候，JD 还在。以前的申请可以补存，已下架的岗位会被标出来。
 - **每天读取投递邮箱**：确认信、面试邀请、拒信、offer 自动更新 **Notion 申请表**；每条申请链接到第一封投递邮件作为证据；
   所有申请邮件自动打上 Gmail 标签 **`applications`**（没有这个标签会引导你创建）。你自己手动投的申请会被发现，Claude 向你确认。
 - **知识库**：把所有材料丢进来（扫描件、合并 PDF、照片都行）。Claude 逐页阅读，拆成"一份文件一个文档"的单元文件并统一命名，
@@ -213,6 +220,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 | "我的简历适合这个岗位吗 [岗位链接]" | 快速判断匹配度，推荐最接近的现有简历 |
 | "我没有简历" / "我适合什么岗位" | 求职教练：访谈、用真实岗位推荐方向、写第一版简历 |
 | "加这些材料" | 拆分并索引新证书，更新知识库画像 |
+| "把我申请过的岗位 JD 都存下来" | 给还没存档的申请补存 JD，并标出已下架的岗位 |
 | "同步邮件" | 根据邮件更新 Notion，给申请邮件打标签 |
 | "看看看板" | 刷新 Notion 图表和交互看板 |
 | "备份我的数据" / "从 … 恢复数据" | 备份或恢复你的个人数据文件夹 |
@@ -259,6 +267,7 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 | 简历与求职信 | `.claude/skills/job-application-writer`、`tools/doc_render.py`、`tools/doc_check.py`、`templates/` | 主简历、按岗位类别的模版简历、单岗位精投简历 + 求职信；ATS 可读的 PDF；一致性检查 |
 | 各国标准 | `standards/de/` | 德国简历和 Anschreiben 标准、何时精投、给新人的市场说明 |
 | 扫描与投递 | `.claude/skills/job-scan-apply` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
+| JD 存档 | `tools/jd_snapshot.py` | 每个岗位 → `data/applications/<日期>_<公司>_<职位>/`（`jd.md`、`jd.pdf`、网页副本）；`--backfill` 补存以前的申请 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/sync_mail.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
 | Notion 申请表 | `tools/notion_setup.py` | 自动建表（[字段说明](docs/data-model.md)） |
 | 看板 | `.claude/skills/job-dashboard`、`dashboard/index.html` | Notion 图表 + claude.ai 交互看板 |
@@ -268,7 +277,7 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 | 健康检查 | `tools/check_setup.py` | 一张清单检查以上所有配置 |
 
 ### 你的数据只属于你
-下载的仓库里只有代码、skill、规则和空模板。所有个人内容——问卷答案、证书材料、事实库、简历、求职信、投递记录——都保存在你电脑上
+下载的仓库里只有代码、skill、规则和空模板。所有个人内容——问卷答案、证书材料、事实库、简历、求职信、保存的 JD、投递记录——都保存在你电脑上
 不进 git 的文件夹里，并带版本历史地复制到一个你能直接打开的普通文件夹：**`文稿/Job Autopilot Data`**。换电脑或重新下载后，
 对 Claude 说 *"从 Documents/Job Autopilot Data 恢复我的数据"* 即可。密码和 token 不会被复制，请存在密码管理器里。
 
@@ -282,7 +291,7 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 
 ### 踩过的坑
 搭建过程中遇到的所有问题和解决办法（用错浏览器、一键投递直接发出、React 下拉框、shadow DOM 里的上传框、macOS 权限丢失、
-合并 PDF、邮件回执没有公司名……）：**[docs/pitfalls.md](docs/pitfalls.md)**。各平台行为说明：**[docs/platforms.md](docs/platforms.md)**。
+合并 PDF、邮件回执没有公司名、登录墙、表单超时……）：**[docs/pitfalls.md](docs/pitfalls.md)**。各平台行为说明：**[docs/platforms.md](docs/platforms.md)**。
 
 ### 规划中
 - 按岗位准备面试（根据岗位描述和事实库预测问题，在对话里模拟面试）。

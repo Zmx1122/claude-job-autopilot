@@ -42,6 +42,12 @@ one plus/minus table covering every tailored job, then their CVs (and cover lett
 documents' text before they are uploaded.
 
 For each picked job, in its own tab:
+- **Snapshot the job description first** (postings vanish within weeks; interviews come later): open the posting in the
+  built-in browser, `get_page_text`, write that text to a file in your scratchpad, then
+  `python3 tools/jd_snapshot.py --url <posting url> --company ... --title ... --platform ... --date <today> --text-file <that file>`
+  → `data/applications/<date>_<company>_<title>/` with `jd.md`, `jd.pdf` (readable copy), `page.pdf` / `page.html` (the
+  page as loaded). Tailored jobs already have the folder from job-application-writer; the snapshot adds to it. A posting
+  that only lives on the company portal (the board links out): snapshot the portal's job page, not the board's teaser.
 - **Choose the CV**: 🎯 the tailored PDF from `data/applications/<folder>/`; 📄 the `cv_variants` entry whose `use_for`
   keywords best match the title (default: the first variant). Never edit a template CV for one posting.
 - **Materials**: read the form's upload section (slot names, required marks, number of files, size limit), then choose and
@@ -69,11 +75,14 @@ Show the ready list:
 
 After the confirmation: submit each, wait for the success page or message, then
 `python3 tools/log_application.py --status Applied --source auto --platform ... --company ... --title ... --url ...
- --mode tailored|template --cv <CV file name> [--cover-letter] --posted <YYYY-MM-DD> --notes "files: Lebenslauf←…pdf; Zeugnisse←…_Zeugnisse.pdf"`
-(`--posted` = today minus `age_days` from the shortlist JSON). Mode and posting date feed the dashboard's
+ --mode tailored|template --cv <CV file name> [--cover-letter] --posted <YYYY-MM-DD> --notes "files: Lebenslauf←…pdf; Zeugnisse←…_Zeugnisse.pdf; jd: data/applications/<folder>/"`
+(`--posted` = today minus `age_days` from the shortlist JSON). No snapshot yet (it failed, or the job was submitted in a
+hurry) → take it right after submitting; the confirmation page often still links to the posting. Mode and posting date feed the dashboard's
 "which applications get interviews" table — the evidence for the strategy.
 Report: submitted, skipped (with reason), waiting on the user (CAPTCHA, verification link, missing file).
 Respect the daily cap; the user may lift it explicitly for one day.
 
 ## After submitting
 The next mail sync links each row to its confirmation email (Email Evidence) and moves statuses forward.
+When an interview comes in, the saved `jd.pdf` in the application's folder is what to prepare with — the live posting may
+be gone. Older applications without a snapshot: `python3 tools/jd_snapshot.py --backfill` (paced; see its docstring).

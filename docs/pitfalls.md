@@ -65,3 +65,39 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
 ## Scheduling · 定时
 19. Scheduled tasks run only while the Mac is awake and the Claude app is open. Submitting always needs the user anyway.
     定时任务只在电脑唤醒且 Claude 打开时运行；提交始终需要用户在场。
+
+## LinkedIn rate limit when reading many postings (2026-11-05)
+Fetching ~20 postings back-to-back via `/jobs-guest/jobs/api/jobPosting/<id>` from the page returned HTTP 429 after the
+first batch, and afterwards even normal `/jobs/view/<id>` page loads were 429 for a while. Read list pages with
+`get_page_text`, open only the few top candidates one by one with pauses, and never bulk-fetch postings.
+
+## upload_file.sh reports -10000 but the file is attached (2026-11-05)
+On an Ashby form the script ended with "System Events … Fehler in der AppleEvent-Routine (-10000)" although the file was
+selected and shown on the page. Always verify on the page instead of trusting the script's exit status.
+
+## Consent and declaration checkboxes need the user's explicit word (2026-11-05)
+Privacy-notice confirmations, "information is true" declarations and sanctions-screening consents are the user's own
+consent. A general "submit directly" was not enough — the permission layer blocked ticking them. When the user then said
+explicitly in chat "tick them for me and submit", ticking worked. Default: prefill everything, leave the form on its last
+page, list the boxes; tick them only after the user explicitly asks for it for that batch.
+
+## File dialog does not open while the browser pane is hidden (2026-11-05)
+Clicking an upload control while the pane is hidden (`tabs_context` says "hidden") opens no file sheet, and
+`upload_file.sh` fails with "no file sheet open". Ask the user to show the pane first; afterwards one tab's upload
+button stayed dead for a while and the user had to ask for a retry. Check `tabs_context` before every upload.
+
+## Long application forms time out (2026-11-05)
+SmartRecruiters closes an idle form ("Aufgrund von Inaktivität … geschlossen") and Phenom (Siemens Healthineers) drops
+back to the job page. Forms left for the user lose everything if they wait too long — tell the user to finish them the
+same session. Re-uploading a CV re-runs the parser, which may split one job into two entries (delete the duplicate).
+
+## Clicking "Next" by coordinate hit a footer link (2026-11-05)
+On Phenom the page shifted after scrolling and a coordinate click landed on "Career Site Cookie Settings", which left
+the form and lost step 2. Click form buttons by `ref` (from `find`) after `scroll_to`, not by coordinate.
+
+## Anonymous LinkedIn pages turn into a login wall (2026-11-06)
+Snapshotting job descriptions with a headless browser worked for the first few LinkedIn postings, then every further
+page came back as "LinkedIn Login, Einloggen" — and the first version of `tools/jd_snapshot.py` stored those walls as
+"online". Fix: LinkedIn postings are read through the public job card
+`/jobs-guest/jobs/api/jobPosting/<id>` (no login, full description, paced); a page print is kept only when it shows the
+job title and no login form. Check a sample of snapshots by size and content after any bulk run.

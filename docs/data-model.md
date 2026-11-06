@@ -38,7 +38,7 @@ Created by `tools/notion_setup.py`. One row per job (seen, shortlisted, applied 
 | `data/applied.csv` | append-only log of every logged action |
 | `data/mail/` | dump, chunks, classifications, `sync_report.md` |
 | `data/dashboard/` | aggregates (incl. interview rate by mode and posting age), rows for the artifact, chart PNGs |
-| `data/applications/<date>_<company>_<title>/` | tailored application: `jd.md`, `match.md`, `cv.yaml`, `letter.yaml`, PDFs, `changes.md` |
+| `data/applications/<date>_<company>_<title>/` | one folder per application: job-description snapshot (`jd.md`, `jd.pdf`, `page.pdf`, `page.html` from `tools/jd_snapshot.py`); for tailored ones also `match.md`, `cv.yaml`, `letter.yaml`, PDFs, `changes.md` |
 
 ## Backup folder (`BACKUP_DIR`, default `~/Documents/Job Autopilot Data`)
 Mirror of every personal file above (profile, `knowledge/`, `data/applications/`, `data/drafts/`, `applied.csv`) plus a

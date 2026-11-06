@@ -15,7 +15,7 @@ Starting points; replace `{q}` with a URL-encoded title and `{loc}` with a city.
 
 ## LinkedIn (Easy Apply)
 - Steps: contact (prefilled) → resume (choose from the LinkedIn library only) → questions → review.
-- The pane cannot upload into Easy Apply; upload every CV variant to the LinkedIn library once during setup.
+- Easy Apply upload works: click "Lebenslauf hochladen" by ref, then `tools/upload_file.sh`; the new file is selected and stays in the library. (Earlier note said the pane cannot upload — it can, with the macOS dialog script.)
 - German UI: the review step opens with **"Überprüfen"**/"Feedback geben"; the final button is **"Bewerbung senden"** — only that one needs the user's OK.
 - Untick "Unternehmen folgen". After sending, the #OpenToWork prompt → "Nein, danke".
 - Non-Easy-Apply jobs open the company site → see Company portals.
@@ -44,7 +44,10 @@ Starting points; replace `{q}` with a URL-encoded title and `{loc}` with a city.
 | SmartRecruiters | Form inside shadow DOM; no accessibility refs. Upload via the OS dialog (`upload_file.sh`). Confirmation mail "We received your application". |
 | Porsche (jobs.porsche.com) | No login. Privacy page has a math CAPTCHA → the user answers it. 3 pages: personal data → salary + source → attachments (CV + "Zeugnis höchster Bildungsabschluss" required). Choose the attachment **type first**, then the file. The upload button is a hidden `label[for=btn-attachment]` (scroll to top, it sits at the top-left). The upload does not start by itself: trigger `#start_file_upload_button`. After an upload the page can re-render without its dropdown widget → reload the page (the uploaded files stay). After submitting, an email verification link also **creates a portal account** → the user clicks it. |
 | Oracle Recruiting | Wants a single PDF combining CV, references and degree certificates → `tools/kb_bundle.py --merge` in German standard order (job-knowledge-base skill, section C). |
-| Greenhouse, Personio, softgarden, Workday, SuccessFactors | Usually standard file inputs; some require an account (user creates it). |
+| Greenhouse | Use the embed form `boards.greenhouse.io/embed/job_app?for=<board>&token=<gh_jid>` (no cookie wall). Text fields accept the native value setter + input event; react-select dropdowns: click, type, Enter. File upload: click the **`label` "Attach" by its ref** (coordinate clicks on the button opened nothing) and then run `upload_file.sh`. Export-control checkboxes: click by ref. |
+| Ashby (e.g. OpenAI) | Single page, no account. Click fields and type; location is an autocomplete (choose the option); date as MM/DD/YYYY; Yes/No are buttons; reCAPTCHA is invisible. |
+| Google Careers | Requires creating a Google Careers profile before the first application → the user does that. |
+| Personio, softgarden, Workday, SuccessFactors | Usually standard file inputs; some require an account (user creates it). |
 
 ## File uploads
 Three methods — macOS dialog script, Claude in Chrome (Windows), manual paste — see **`docs/file-uploads.md`**. With the macOS script:

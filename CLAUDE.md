@@ -44,7 +44,7 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 | `templates/document.css` | look of generated CVs and letters (rendered by `tools/doc_render.py`) |
 | `.env` | Notion token, Gmail app password, ids (git-ignored); template `.env.example` |
 | `tools/` | Python and shell scripts; every script has usage in its docstring |
-| `data/` | runtime files: inbox, mail dumps, applied.csv, dashboard data, `applications/<date>_<company>_<title>/` tailored documents (git-ignored) |
+| `data/` | runtime files: inbox, mail dumps, applied.csv, dashboard data, `applications/<date>_<company>_<title>/` per application: JD snapshot (`tools/jd_snapshot.py`, taken before every submit) and tailored documents (git-ignored) |
 | `dashboard/index.html` | page of the interactive claude.ai dashboard |
 | `docs/platforms.md` | how each platform and portal behaves, search URLs, file uploads |
 | `docs/pitfalls.md` | problems we hit and how they were solved |
