@@ -28,7 +28,9 @@ Keys of each object:
   "job_alert" = job recommendations, newsletters, "similar jobs", marketing.
   "other" = anything else.
 - "company": hiring company as written (not the ATS vendor, not the platform). LinkedIn "wurde an X gesendet" → X. XING → the company after "bei".
-  StepStone and Indeed receipts usually omit it → "" unless the body names it. Agencies applying for a client → the agency. Unknown → "".
+  Indeed receipts DO name it: "Bewerbung gesendet <Titel> <Firma> - <Ort>" and "Die folgenden Dokumente wurden an <Firma> übermittelt" → <Firma>.
+  StepStone receipts ("deine Bewerbung als T ist raus") never name it → "". NEVER take a company from the "similar jobs" / recommendation block
+  of a StepStone or LinkedIn email (logos and names there belong to other postings). Agencies applying for a client → the agency. Unknown → "".
 - "title": job title as written, keep "(m/w/d)"; "" if unknown.
 - "platform": "LinkedIn", "StepStone", "Indeed" or "Xing" when the email comes from that platform, else "".
 - "job_url": link to the posting if present, else "".

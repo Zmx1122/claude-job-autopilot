@@ -35,11 +35,22 @@ def hexid(link): return (link or '').rsplit('/', 1)[-1].lower()
 def when(r):
     d = parsedate_to_datetime(r['date']); return (d if d.tzinfo else d.replace(tzinfo=timezone.utc)).date()
 
+# Indeed receipts name the employer in the body ("Die folgenden Dokumente wurden an <Firma> übermittelt"), the classifier often leaves it empty.
+INDEED_CO = (re.compile(r'wurden an (.{2,80}?) (?:übermittelt|gesendet)', re.I),
+             re.compile(r'(?:documents|application) (?:were|was|has been) (?:sent|submitted|delivered) to (.{2,80}?)[.!\n]', re.I))
+def indeed_company(r):
+    if 'indeed' not in (r.get('frm') or '').lower(): return ''
+    for rx in INDEED_CO:
+        m = rx.search(r.get('body') or '')
+        if m: return re.sub(r'\s+', ' ', m.group(1)).strip(' .,:;')
+    return ''
+
 events = []
 for c in cls:
     r = dump.get(c.get('msgid'))
     if not r or c.get('category') in IGNORE: continue
     e = {k: (c.get(k) or '').strip() for k in ('category', 'company', 'title', 'platform', 'job_url', 'job_id', 'city', 'salary', 'note')}
+    if not e['company'] and c.get('category') in ('application_sent', 'ats_confirmation'): e['company'] = indeed_company(r)
     e['company'] = ALIAS.get(e['company'].lower(), e['company'])
     e.update(msgid=r['msgid'], thrid=r['thrid'], day=when(r), subject=r['subject'], frm=r['frm'], labeled=r.get('set') == 'labeled')
     events.append(e)
@@ -121,6 +132,9 @@ for e in events:
                        status='Confirmed' if e['category'] == 'ats_confirmation' else STATUS.get(e['category'], 'Applied'),
                        source='manual', applied=str(e['day']), last_email=str(e['day']), url=e['job_url'], evidence=link,
                        thread=gmail_link(e['thrid']) if e['thrid'] else '', job_id=e['job_id'], events=ev_txt, notes=e['note'])
+            if not new['company'] and new['platform'] in PLAT:
+                # keep the gap visible instead of leaving a silent blank (a row without a company cannot block duplicates)
+                new['notes'] = (new['notes'] + ' | ' if new['notes'] else '') + f"company missing: the {new['platform']} receipt does not name it"
             created.append(new)
             if e['thrid']: by_thread[f"{int(e['thrid']):x}"] = new
             confirm.append(new)
@@ -160,6 +174,14 @@ if confirm:
     lines += ['## Please confirm', '', 'These emails match no row in Notion. Did you apply to these yourself?', '',
               '| Date | Company | Title | Status from email |', '|---|---|---|---|']
     lines += [f"| {r['applied']} | {r['company'] or '?'} | {r['title'][:60]} | {r['status']} |" for r in confirm]
+    lines.append('')
+nocomp = [r for r in rows + created if not (r.get('company') or '').strip() and r['status'] in ('Applied', 'Confirmed', 'Interview', 'Offer')]
+if nocomp:
+    lines += [f'## Rows without a company ({len(nocomp)})', '',
+              'A row without a company cannot block a duplicate application. StepStone receipts never name the employer. Complete these from',
+              '"Meine Bewerbungen" on the platform (the user can paste the list) or from the company\'s own confirmation email.', '']
+    lines += [f"- {r.get('applied') or r.get('first_seen') or '?'} {r['platform']}: {r['title'][:70]}" for r in nocomp[:40]]
+    if len(nocomp) > 40: lines.append(f'- ... and {len(nocomp) - 40} more')
     lines.append('')
 if unsure:
     lines += ['## Weak matches (check)', '']

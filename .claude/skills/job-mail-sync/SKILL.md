@@ -60,7 +60,11 @@ Triggers: "reply to my interview invitations", "回复面试邀请", or an unans
 4. `python3 tools/notion_upsert.py data/mail/apps.json` then `python3 tools/label_mail.py data/mail/apps.json`.
 
 ## Known limits
-- StepStone and Indeed receipts often omit the company; the sync matches them by platform + title + date. Rows still
-  without a company can be completed from "Meine Bewerbungen" on the platform.
+- Indeed receipts name the employer in the body; `sync_mail.py` extracts it itself when the classifier leaves it empty.
+  StepStone receipts never name it (the company logos in them belong to the "similar jobs" block, never use them). Those rows are matched by
+  platform + title + date, get the note "company missing", and every report lists all rows still without a company, because such a row cannot block a
+  duplicate application. Complete them from "Meine Bewerbungen" on StepStone: the list does not load by URL in the built-in browser, so ask the
+  user to paste it (job title + company) and fill the rows from that.
+  *(2026-11-09: 35 rows had no company; 8 Indeed rows were filled from the mails, 26 StepStone rows stayed open.)*
 - Some portals send a verification email that also creates an account (e.g. Porsche). That click belongs to the user;
   mention it in the report.
