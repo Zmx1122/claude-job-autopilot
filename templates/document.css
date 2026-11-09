@@ -12,15 +12,17 @@ h1 { font-size: 19pt; margin: 0; letter-spacing: .2px; }
 .headline { font-size: 11pt; color: var(--accent); font-weight: 600; margin-top: 1mm; }
 .contact, .langs { color: var(--muted); margin-top: .8mm; }
 .summary { margin: 2.5mm 0 1mm; }
-h2 { font-size: 9.6pt; text-transform: uppercase; letter-spacing: .9px; color: var(--accent); margin: 3.6mm 0 1.4mm;
+h2 { font-size: 9.6pt; text-transform: uppercase; letter-spacing: .9px; color: var(--accent); margin: 3.1mm 0 1.2mm;
      padding-bottom: .6mm; border-bottom: .6pt solid var(--rule); }
-.entry { margin-bottom: 2.2mm; break-inside: avoid; }
+.entry { margin-bottom: 1.8mm; break-inside: avoid; }
 .entry .row { display: flex; justify-content: space-between; gap: 4mm; }
 .entry .what { font-weight: 600; }
 .entry .when { color: var(--muted); white-space: nowrap; }
 .entry .note { color: var(--muted); font-style: italic; }
 ul { margin: .6mm 0 0 0; padding-left: 4.2mm; }
-li { margin: .35mm 0; }
+li { margin: .3mm 0; }
+ul.sub { margin: .15mm 0 0 0; padding-left: 3.6mm; }
+ul.sub li { margin: .15mm 0; }
 .skills .row { display: flex; gap: 3mm; margin: .5mm 0; }
 .skills .label { flex: 0 0 34mm; font-weight: 600; }
 /* letter */

@@ -20,7 +20,8 @@ cv.yaml:
       title: Experience
       items:
         - {what: "Role · Organisation", when: "04/2025 – present", where: "Munich", note: "one-line org description",
-           bullets: ["…", {text: "…", fact: achievement-id}]}
+           bullets: ["…", {text: "…", fact: achievement-id},
+                     {text: "lead line with the shared stack (CV rule 20):", sub: ["use case 1 → result", "use case 2 → result"]}]}
     - kind: skills
       title: Skills
       groups: [{label: "LLM & Agents", items: ["RAG", "Tool calling"]}]
@@ -67,6 +68,18 @@ def contact_line(items):
 def btext(b): return b.get('text') if isinstance(b, dict) else b
 
 
+def bitem(b):
+    """<li> with optional nested sub-bullets: a lead line plus `sub: [...]` (CV rule 20)."""
+    sub = b.get('sub') if isinstance(b, dict) else None
+    return f'<li>{E(btext(b))}' + ('<ul class="sub">' + ''.join(bitem(x) for x in sub) + '</ul>' if sub else '') + '</li>'
+
+
+def bflat(b):
+    """Every text of a bullet in reading order (lead line, then its sub-bullets)."""
+    sub = b.get('sub') if isinstance(b, dict) else None
+    return [btext(b)] + [t for x in (sub or []) for t in bflat(x)]
+
+
 def cv_html(d):
     head = f'<h1>{E(d["name"])}</h1>'
     if d.get('headline'): head += f'<div class="headline">{E(d["headline"])}</div>'
@@ -83,14 +96,14 @@ def cv_html(d):
                 when = ' · '.join(x for x in (it.get('when'), it.get('where')) if x)
                 h = f'<div class="entry"><div class="row"><span class="what">{E(it.get("what"))}</span><span class="when">{E(when)}</span></div>'
                 if it.get('note'): h += f'<div class="note">{E(it["note"])}</div>'
-                if it.get('bullets'): h += '<ul>' + ''.join(f'<li>{E(btext(b))}</li>' for b in it['bullets']) + '</ul>'
+                if it.get('bullets'): h += '<ul>' + ''.join(bitem(b) for b in it['bullets']) + '</ul>'
                 body.append(h + '</div>')
         elif k == 'skills':
             body.append('<div class="skills">' + ''.join(
                 f'<div class="row"><span class="label">{E(g.get("label"))}</span><span>{E(" · ".join(g.get("items", [])))}</span></div>'
                 for g in s.get('groups', [])) + '</div>')
         elif k == 'list':
-            body.append('<ul>' + ''.join(f'<li>{E(btext(x))}</li>' for x in s.get('items', [])) + '</ul>')
+            body.append('<ul>' + ''.join(bitem(x) for x in s.get('items', [])) + '</ul>')
         else:
             body.append(f'<div>{E(s.get("text"))}</div>')
     return body
@@ -116,7 +129,7 @@ def expected_lines(kind, d):
         out.append(s.get('title'))
         for it in s.get('items', []) if s.get('kind') in ('entries', 'list') else []:
             if isinstance(it, dict) and 'what' in it:
-                out.append(it.get('what')); out += [btext(b) for b in it.get('bullets', [])]
+                out.append(it.get('what')); out += [t for b in it.get('bullets', []) for t in bflat(b)]
             else:
                 out.append(btext(it))
     return [x for x in out if x]

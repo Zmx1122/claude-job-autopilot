@@ -1,9 +1,12 @@
 """Check a CV and (optionally) a cover letter against the country standard and against each other.
 
 usage: python3 tools/doc_check.py --cv CV.pdf [--letter LETTER.pdf] [--keywords "LLM|large language model,RAG,Python"]
-                                  [--facts knowledge/career/facts.yaml] [--max-pages 1] [--company ACME]
+                                  [--facts knowledge/career/facts.yaml] [--max-pages 1] [--company ACME] [--cv-yaml cv.yaml]
 Reports (❌ = fix before sending, ⚠️ = look at it):
   CV      text layer present (ATS), page limit, dates to the month, hollow skill qualifiers, the same achievement repeated
+  CV      with --cv-yaml (the content file the PDF was rendered from), the screener-wording rules 19–20:
+          bare model names / algorithms / codenames without a plain-language descriptor, and technical terms repeated
+          across the bullets of one position (lift them into one lead line)
   letter  300–450 words, generic opening, filler words, dashes, subject line
   both    durations that disagree with the fact bank (e.g. "two and a half years" vs 01/2022–03/2024 = 2 years 3 months),
           the same noun with different numbers, numbers in the letter that the CV does not show, keyword coverage
@@ -94,10 +97,83 @@ def repeated_phrases(lines, min_tokens=5):
     return found
 
 
+# ---------- screener wording (CV rules 19–20); heuristics, always ⚠️ ----------
+OPEN = re.compile(r'open[- ]?(?:source|weights?)|open[- ]weight', re.I)
+MODEL = re.compile(r'\b(?:Qwen|Llama|Mistral|Mixtral|Gemma|Phi|DeepSeek|Falcon|Yi|Granite)[-\s]?[\w.]*?\d[\w.]*\b', re.I)
+# algorithm / method names → the plain-language words that count as a descriptor in the same line
+ALGOS = {
+    r'\b(?:Double |Dueling |Deep )?DQN\b|\bPPO\b|\bSAC\b|\bTD3\b|\bDDPG\b|\bA3C\b|\bTRPO\b': r'reinforcement|RL\b',
+    r'\bQ?LoRA\b|\bPEFT\b': r'fine-?tun|parameter-efficient',
+    r'\bDPO\b|\bGRPO\b|\bRLHF\b|\bKTO\b': r'align|preference|reinforcement|fine-?tun',
+    r'\bGANs?\b|\bVAEs?\b': r'generative|neural|image',
+    r'\bGNNs?\b': r'graph',
+    r'\bLSTMs?\b|\bGRUs?\b|\bCRFs?\b': r'neural|recurrent|sequence|time[- ]series|tagging',
+    r'\bMoE\b': r'mixture|expert|model',
+}
+KIND = re.compile(r'\b(?:language|project|programme|program|framework|method|algorithm|platform|tool|system|guideline|standard|model|paper|dataset|benchmark|twin|pipeline)\b', re.I)
+CODENAME = re.compile(r'\b(?!GPT|CI\b)(?=[A-Za-z0-9]*\d)(?=[A-Za-z0-9]*[A-Z][^A-Z]*[A-Z])[A-Za-z0-9]{7,}\b')
+TERM = re.compile(r'\b(?:[A-Z]{2,}[A-Za-z0-9]*(?:[-/][A-Za-z0-9]+)*|[A-Z][a-z]+[A-Z][A-Za-z0-9]*|[A-Za-z]+-as-[a-z]+|[a-z]+-calling|[A-Z][A-Za-z0-9]*\d[A-Za-z0-9.]*)\b')
+TERM_SKIP = {'CV', 'EU', 'USA', 'DE', 'EN', 'PDF', 'ARR', 'KPI', 'KPIs', 'PoC', 'PoCs', 'MSc', 'BSc', 'TUM', 'TU', 'DFG', 'VDI', 'VDE', 'GmbH', 'AG', 'SE', 'API', 'APIs', 'REST', 'IT',
+             'LLM', 'LLMs', 'AI', 'ML', 'NLP', 'GenAI'}  # generic category words double as descriptors (CV rule 19): they may repeat
+
+
+def units_of(item):
+    """Every text unit of a position: the 'what' line is skipped; each bullet and each sub-bullet is one unit."""
+    out = []
+    def walk(b):
+        if isinstance(b, dict):
+            out.append(b.get('text') or '')
+            for x in b.get('sub') or []: walk(x)
+        else:
+            out.append(str(b))
+    for b in item.get('bullets') or []: walk(b)
+    return [u for u in out if u]
+
+
+def screener_wording(cv_yaml):
+    """⚠️ strings for CV rules 19–20 from the cv.yaml the PDF was rendered from."""
+    import yaml
+    d = yaml.safe_load(open(cv_yaml)) or {}
+    warn = []
+    texts = [('summary', [d.get('summary') or ''])]
+    for sec in d.get('sections', []):
+        if sec.get('kind') == 'entries':
+            for it in sec.get('items', []):
+                texts.append((it.get('what', '?').split('·')[-1].strip() or it.get('what', '?'), units_of(it)))
+        elif sec.get('kind') == 'list':
+            texts.append((sec.get('title', 'list'), [str(x.get('text') if isinstance(x, dict) else x) for x in sec.get('items', [])]))
+    seen_gloss = set()
+    for where, units in texts:
+        for u in units:
+            for m in MODEL.finditer(u):
+                if not OPEN.search(u) and m.group(0).lower() not in seen_gloss:
+                    seen_gloss.add(m.group(0).lower())
+                    warn.append(f'{where}: model name "{m.group(0)}" without "open-source/open-weight LLM" next to it (CV rule 19)')
+            for pat, ok in ALGOS.items():
+                for m in re.finditer(pat, u):
+                    if not re.search(ok, u, re.I) and m.group(0).lower() not in seen_gloss:
+                        seen_gloss.add(m.group(0).lower())
+                        warn.append(f'{where}: "{m.group(0)}" has no general term next to it (e.g. "reinforcement learning (…)", CV rule 19)')
+            for m in CODENAME.finditer(u):
+                if m.group(0).lower() not in seen_gloss and not KIND.search(u):
+                    seen_gloss.add(m.group(0).lower())
+                    warn.append(f'{where}: "{m.group(0)}" has no category next to it — keep the name and add what it is, e.g. "{m.group(0)}, a … language / project / method" (CV rule 19)')
+        if where == 'summary' or len(units) < 2:
+            continue
+        count = {}
+        for i, u in enumerate(units):
+            for t in {m.group(0) for m in TERM.finditer(u)} - TERM_SKIP:
+                count.setdefault(t, set()).add(i)
+        rep = sorted(t for t, ix in count.items() if len(ix) >= 2)
+        if rep:
+            warn.append(f'{where}: {", ".join(rep[:8])} repeated across bullets — name each term once in a lead line, sub-bullets carry only use case and result (CV rule 20)')
+    return warn
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--cv', required=True); ap.add_argument('--letter'); ap.add_argument('--keywords', default='')
-    ap.add_argument('--facts'); ap.add_argument('--max-pages', type=int, default=None); ap.add_argument('--company')
+    ap.add_argument('--facts'); ap.add_argument('--max-pages', type=int, default=None); ap.add_argument('--company'); ap.add_argument('--cv-yaml')
     a = ap.parse_args()
     bad, warn, good = [], [], []
 
@@ -121,6 +197,8 @@ def main():
     lines = [l.strip() for l in cv.splitlines() if len(l.split()) >= 4]
     for ph in repeated_phrases(lines):
         warn.append(f'CV repeats "{ph}" in more than one place — each achievement once (CV rule 9)')
+    if a.cv_yaml and os.path.exists(a.cv_yaml):
+        warn += screener_wording(a.cv_yaml)
     if a.company:
         fn = os.path.basename(a.cv)
         if not re.fullmatch(r'[A-Z][\w]*-[A-Z][\w\-]*-CV-.+\.pdf', fn):
