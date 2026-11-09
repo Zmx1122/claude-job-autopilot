@@ -32,7 +32,8 @@ Two secrets are needed. Both go into `.env`, which never leaves your Mac. 只需
 5. Claude runs `python3 tools/gmail_setup.py`. If the label `applications` does not exist, Claude asks and then creates it
    (`--create`), or you choose an existing label such as `Bewerbungen` and Claude sets `GMAIL_LABEL`.
    Manual alternative: Gmail left sidebar → **Labels** → **+** → `applications`.
-6. Access is read-only except adding that label. Revoke any time on the app-passwords page.
+6. Access is read-only except adding that label — and, only when you approve the exact text, sending a reply to an interview invitation
+   (`tools/send_reply.py`; the same app password also works for Gmail's SMTP). Revoke any time on the app-passwords page.
 
 **中文**
 1. 用你投递时填写的 Gmail。各公司的确认信、面试邀请、拒信都会发到这里，表格就靠它自动更新。
@@ -41,7 +42,7 @@ Two secrets are needed. Both go into `.env`, which never leaves your Mac. 只需
 4. `.env` 里填 `IMAP_USER` 和 `IMAP_APP_PASSWORD`（带空格也可以）。
 5. Claude 运行 `python3 tools/gmail_setup.py`。如果没有 `applications` 标签，Claude 会先问你，再用 `--create` 建好；
    也可以选用你已有的标签（如 `Bewerbungen`），Claude 会改 `GMAIL_LABEL`。手动建法：Gmail 左栏 **标签** → **+** → `applications`。
-6. 除了打标签以外全部只读。随时可以在应用专用密码页面撤销。
+6. 除了打标签以外全部只读；唯一的例外是：你确认了原文之后，用它回复面试邀请（`tools/send_reply.py`，同一个应用专用密码也能用于 Gmail 的 SMTP）。随时可以在应用专用密码页面撤销。
 
 ## Where secrets are stored · 密钥存在哪里
 Standard: the **`.env`** file in this folder — plain text on your Mac, git-ignored, **not** in the backup, and `tools/check_public.py`

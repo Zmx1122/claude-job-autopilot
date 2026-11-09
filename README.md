@@ -82,6 +82,7 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 | "add these documents" | splits and indexes new certificates, updates your knowledge profile |
 | "save the job descriptions of my applications" | snapshots every tracked posting that is not saved yet (and marks closed ones) |
 | "sync my mail" | updates Notion from your inbox and labels application emails |
+| "reply to my interview invitations" | scans your inbox and LinkedIn messages for unanswered invitations, drafts an accept / reschedule / withdraw reply for each and sends it only after you approve the exact text |
 | "show the dashboard" | refreshes Notion charts and the interactive dashboard |
 | "back up my data" / "restore my data from …" | saves or restores your personal data folder |
 
@@ -240,6 +241,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 | "加这些材料" | 拆分并索引新证书，更新知识库画像 |
 | "把我申请过的岗位 JD 都存下来" | 给还没存档的申请补存 JD，并标出已下架的岗位 |
 | "同步邮件" | 根据邮件更新 Notion，给申请邮件打标签 |
+| "回复面试邀请" | 扫描邮箱和 LinkedIn 消息里还没回复的面试邀请，为每个起草"接受 / 改期 / 撤回"回复，你确认原文后才发送 |
 | "看看看板" | 刷新 Notion 图表和交互看板 |
 | "备份我的数据" / "从 … 恢复数据" | 备份或恢复你的个人数据文件夹 |
 
