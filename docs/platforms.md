@@ -47,7 +47,7 @@ Starting points; replace `{q}` with a URL-encoded title and `{loc}` with a city.
 | Greenhouse | Use the embed form `boards.greenhouse.io/embed/job_app?for=<board>&token=<gh_jid>` (no cookie wall). Text fields accept the native value setter + input event; react-select dropdowns: click, type, Enter. File upload: click the **`label` "Attach" by its ref** (coordinate clicks on the button opened nothing) and then run `upload_file.sh`. Export-control checkboxes: click by ref. |
 | Ashby (e.g. OpenAI) | Single page, no account. Click fields and type; location is an autocomplete (choose the option); date as MM/DD/YYYY; Yes/No are buttons; reCAPTCHA is invisible. |
 | Google Careers | Requires creating a Google Careers profile before the first application → the user does that. |
-| Personio, softgarden, Workday, SuccessFactors | Usually standard file inputs; some require an account (user creates it). SuccessFactors / j2w sites (e.g. BayernLB) load slowly and hide the form in a frame: see the skill section "Never skip a job because the portal looks broken". Personio and Dover show a Cloudflare check that fails in the built-in browser. |
+| Personio, softgarden, Workday, SuccessFactors | Usually standard file inputs; some require an account (user creates it). SuccessFactors / j2w sites (e.g. BayernLB) load slowly and hide the form in a frame: see the skill section "Never skip a job because of a technical problem". Personio and Dover show a Cloudflare check that fails in the built-in browser. |
 
 ## File uploads
 Three methods — macOS dialog script, Claude in Chrome (Windows), manual paste — see **`docs/file-uploads.md`**. With the macOS script:
