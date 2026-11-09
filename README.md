@@ -86,20 +86,23 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 | "back up my data" / "restore my data from …" | saves or restores your personal data folder |
 
 ### A normal day
-```text
-You     show today's jobs
-Claude  Mail: 2 confirmations, 1 interview (Thu 10:00, ACME), 3 rejections. Notion updated, 6 emails labeled.
-        Scanned 4 platforms: 41 postings → 7 new matches.
-        | # | Mode | Company | Title | Platform | Posted | Needs | Fit |
-        | 1 | 🎯 tailored · today, new | ACME AG | AI Engineer (m/w/d) | LinkedIn | today | cv, cover_letter | 88 |
-        | 2 | 📄 template · 9d old | Example SE | ML Engineer | StepStone | 9d | cv | 81 |  …
-You     1, 2, 4
-Claude  For ACME: 3 short questions about LangGraph and evaluation datasets — then I write the CV and letter.
-You     (answers)
-Claude  ACME CV + Anschreiben ready (change list attached); 2 and 4 use your template CV. All three are on their review pages. Submit?
-You     submit
-Claude  Sent 3/3, logged in Notion. Tomorrow's mail sync will link the confirmations.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as You
+    participant C as Claude
+    U->>C: show today's jobs
+    C-->>U: Mail: 2 confirmations, 1 interview (Thu 10:00, ACME), 3 rejections<br/>Notion updated, 6 emails labeled
+    C-->>U: Scanned 4 platforms: 41 postings → 7 new matches
+    Note over U,C: Shortlist table in chat<br/>1 · 🎯 tailored · ACME AG · AI Engineer · LinkedIn · today · fit 88<br/>2 · 📄 template · Example SE · ML Engineer · StepStone · 9d · fit 81<br/>…
+    U->>C: 1, 2, 4
+    C->>U: ACME: 3 short questions (LangGraph, evaluation datasets)<br/>then I write the CV and letter
+    U->>C: (answers)
+    C->>U: ACME CV + Anschreiben ready (change list attached)<br/>2 and 4 use your template CV<br/>All three are on their review pages. Submit?
+    U->>C: submit
+    C-->>U: Sent 3/3, logged in Notion<br/>Tomorrow's mail sync links the confirmations
 ```
+<sub>Illustrative conversation. The table and numbers are examples.</sub>
 
 ### What a tailored application looks like
 For a 🎯 posting Claude first shows how you match, asks about the gaps, then writes the CV (and letter) and checks it.
@@ -170,7 +173,7 @@ lost macOS permissions, merged PDFs, ambiguous email receipts, login walls and t
 Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 
 ### Roadmap
-- Interview preparation per application (likely questions from the posting and your fact bank, mock interview in chat).
+- Interview tips from the invitation: work out who will interview you (their role and function) and give tips tailored to them.
 - Standards for more countries (`standards/<country>/`) and a LinkedIn profile review.
 
 ### FAQ
@@ -241,20 +244,23 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 | "备份我的数据" / "从 … 恢复数据" | 备份或恢复你的个人数据文件夹 |
 
 ### 日常的一天
-```text
-你      看看今天的岗位
-Claude  邮件：2 封确认信，1 个面试（周四 10:00，ACME），3 封拒信。Notion 已更新，6 封邮件已打标签。
-        扫描 4 个平台：41 个岗位 → 7 个新匹配。
-        | # | 模式 | 公司 | 职位 | 平台 | 发布 | 需要材料 | 匹配度 |
-        | 1 | 🎯 精投 · 今天发布 | ACME AG | AI Engineer (m/w/d) | LinkedIn | 今天 | 简历、求职信 | 88 |
-        | 2 | 📄 模版投 · 9 天前 | Example SE | ML Engineer | StepStone | 9 天 | 简历 | 81 |  …
-你      1、2、4
-Claude  ACME 有 3 个小问题（LangGraph、评测数据集）——答完我来写简历和求职信。
-你      （回答）
-Claude  ACME 的简历和 Anschreiben 写好了（附改动清单）；2 和 4 用模版简历。三个都已填到确认页，提交吗？
-你      提交
-Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信链接上。
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as 你
+    participant C as Claude
+    U->>C: 看看今天的岗位
+    C-->>U: 邮件：2 封确认信，1 个面试（周四 10:00，ACME），3 封拒信<br/>Notion 已更新，6 封邮件已打标签
+    C-->>U: 扫描 4 个平台：41 个岗位 → 7 个新匹配
+    Note over U,C: 聊天里的精选表<br/>1 · 🎯 精投 · ACME AG · AI Engineer · LinkedIn · 今天 · 匹配度 88<br/>2 · 📄 模版投 · Example SE · ML Engineer · StepStone · 9 天 · 匹配度 81<br/>…
+    U->>C: 1、2、4
+    C->>U: ACME 有 3 个小问题（LangGraph、评测数据集）<br/>答完我来写简历和求职信
+    U->>C: （回答）
+    C->>U: ACME 的简历和求职信写好了（附改动清单）<br/>2 和 4 用模版简历<br/>三个都已填到确认页，提交吗？
+    U->>C: 提交
+    C-->>U: 3/3 已发出并记录到 Notion<br/>明天的邮件同步会把确认信链接上
 ```
+<sub>示例对话，表格和数字只是演示。</sub>
 
 ### 精投材料长什么样
 对 🎯 岗位，Claude 先给出匹配表、追问缺口，再写简历（和求职信）并自动检查。
@@ -280,7 +286,7 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 | 引导问卷 | `config/profile.example.yaml` → `config/profile.yaml` | 个人信息、搜索条件、投递规则、投递策略、标准答案 |
 | 求职教练 | `.claude/skills/job-career-coach`、`tools/facts.py` | 没有简历 → 材料 + 访谈 → 事实库、目标岗位（`DIRECTION.md`）、第一版简历 |
 | 简历与求职信 | `.claude/skills/job-application-writer`、`tools/doc_render.py`、`tools/doc_check.py`、`templates/` | 主简历、按岗位类别的模版简历、单岗位精投简历 + 求职信；ATS 可读的 PDF；一致性与 HR 友好措辞检查 |
-| 各国标准 | `standards/de/` | 德国简历和 Anschreiben 标准、何时精投、给新人的市场说明 |
+| 各国标准 | `standards/de/` | 德国简历和求职信标准、何时精投、给新人的市场说明 |
 | 扫描与投递 | `.claude/skills/job-scan-apply`、`tools/filters.py` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
 | JD 存档 | `tools/jd_snapshot.py` | 每个岗位 → `data/applications/<日期>_<公司>_<职位>/`（`jd.md`、`jd.pdf`、网页副本）；`--backfill` 补存以前的申请 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/gmail_*.py`、`sync_mail.py`、`label_mail.py`、`merge.py`、`split_for_classify.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
@@ -309,7 +315,7 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 合并 PDF、邮件回执没有公司名、登录墙、表单超时……）：**[docs/pitfalls.md](docs/pitfalls.md)**。各平台行为说明：**[docs/platforms.md](docs/platforms.md)**。
 
 ### 规划中
-- 按岗位准备面试（根据岗位描述和事实库预测问题，在对话里模拟面试）。
+- 按面试邀请挖掘面试官的身份和职能，给出针对性的面试 tips。
 - 更多国家的求职标准（`standards/<国家>/`）和 LinkedIn 个人主页诊断。
 
 ### 常见问题
