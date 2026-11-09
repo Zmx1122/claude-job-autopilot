@@ -27,7 +27,8 @@ Needs at least one row; with an empty database it stops with a message.
 3. Save the artifact link to `.env` as `DASHBOARD_URL` and re-run `tools/notion_page.py` so the Notion page links to it.
 
 **Refresh** (weekly, or after a big sync):
-1. Run `tools/refresh_dashboards.sh`.
+1. Run `tools/refresh_dashboards.sh` (zsh). On Windows run its four commands one by one instead: `python3 tools/dashboard_data.py`,
+   `python3 tools/charts_png.py`, `python3 tools/notion_page.py`, then `python3 tools/backup.py save -m "weekly backup"`.
 2. Upload `data/dashboard/applications.json` to `DASHBOARD_URL` as an asset (`asset: true`), then point the `applications`
    dataset at the new file and update its `updated` time (ArtifactData on the dataset document). Do not rewrite the page.
 3. Optionally delete the previous asset.

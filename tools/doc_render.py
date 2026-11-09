@@ -46,6 +46,10 @@ BROWSERS = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
             '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
             '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
             '/Applications/Chromium.app/Contents/MacOS/Chromium']
+# Windows: Chrome / Edge / Brave under Program Files, Program Files (x86) or the user's AppData
+BROWSERS += [os.path.join(base, rel) for base in (os.environ.get(v) for v in ('PROGRAMFILES', 'PROGRAMFILES(X86)', 'LOCALAPPDATA')) if base
+             for rel in (r'Google\Chrome\Application\chrome.exe', r'Microsoft\Edge\Application\msedge.exe',
+                         r'BraveSoftware\Brave-Browser\Application\brave.exe')]
 
 
 def browser():
