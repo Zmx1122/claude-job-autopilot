@@ -13,7 +13,8 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 - "write / tailor my CV", "cover letter", "Anschreiben", "简历", "求职信", "does my CV fit this job" → **job-application-writer**.
 - "I have no CV", "what jobs fit me", "求职方向", "career advice", first job / Werkstudent → **job-career-coach**.
 - "backup", "restore my data", "备份", "恢复数据", new computer → `tools/backup.py` (save / status / history / restore).
-- A scheduled daily run → job-mail-sync (daily mode), then the scan phase of job-scan-apply. Never submit in a scheduled run.
+- "reply to my interview invitations", "回复面试邀请" → **job-mail-sync**, section "Replying to interview invitations" (templates in `standards/de/interview-replies.md`).
+- A scheduled daily run → job-mail-sync (daily mode), then the scan phase of job-scan-apply. Never submit or reply in a scheduled run.
 
 ## Non-negotiable rules
 1. **Nothing is submitted without the user.** Scan → shortlist table → user picks → prefill → user confirms once → submit.
@@ -36,6 +37,8 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 9. **CVs and cover letters contain only facts from `knowledge/career/facts.yaml` that the user confirmed.** New facts come from
    the user's own words (interview notes) or documents. Never invent numbers, skills, titles or durations; quote durations
    from `tools/facts.py durations`.
+10. **Messages to recruiters are sent only after the user approved the exact text** (accept / reschedule / withdraw replies, document requests).
+   Never reply to anything else, never click links inside emails, never pick a time slot for the user, never invent availability.
 
 ## Map
 | Path | What |
