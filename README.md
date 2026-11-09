@@ -69,6 +69,7 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 |---|---|
 | "set up job autopilot" | runs the guided setup (or restores your backup) |
 | "show today's jobs" / "scan" | syncs your mail, scans the job sites, shows the shortlist with 🎯 / 📄 modes |
+| "show more" / "widen the search" / "no salary filter" | re-runs the filters on today's scan with a wider net for this run only (salary off, 7 or 14 days, lower fit, earlier shortlist again) — your profile stays unchanged |
 | "1, 3, 5" → "submit" | prefills the picked jobs, then submits after your one confirmation |
 | "tailor my CV for [job link]" | match table, a few gap questions, CV + cover letter for that posting |
 | "does my CV fit [job link]?" | quick fit check and the closest CV you already have |
@@ -120,7 +121,7 @@ For a 🎯 posting Claude first shows how you match, asks about the gaps, then w
 | Career coach | `.claude/skills/job-career-coach`, `tools/facts.py` | no CV → documents + interview → fact bank, target roles (`DIRECTION.md`), first CVs |
 | CV & cover-letter writer | `.claude/skills/job-application-writer`, `tools/doc_render.py`, `tools/doc_check.py`, `templates/` | master CV, one CV per role family, tailored CV + letter per posting; ATS-readable PDFs; consistency check |
 | Country standards | `standards/de/` | what a strong German CV and Anschreiben look like, when to tailor, market notes for newcomers |
-| Scan & apply | `.claude/skills/job-scan-apply`, `tools/dedupe.py`, `tools/log_application.py` | shortlist → pick → prefill → confirm → submit |
+| Scan & apply | `.claude/skills/job-scan-apply`, `tools/dedupe.py`, `tools/filters.py`, `tools/log_application.py` | shortlist → pick → prefill → confirm → submit |
 | Job-description snapshots | `tools/jd_snapshot.py` | each posting → `data/applications/<date>_<company>_<title>/` (`jd.md`, `jd.pdf`, page copy); `--backfill` for older applications |
 | Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
 | Notion tracker | `tools/notion_setup.py` | creates the database ([schema](docs/data-model.md)) |
@@ -215,6 +216,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 |---|---|
 | "帮我配置 job autopilot" | 带你完成配置（或从备份恢复） |
 | "看看今天的岗位" / "扫岗位" | 同步邮件、扫描各平台，给出带 🎯 / 📄 模式的精选表 |
+| "再多一点" / "放宽范围" / "不要按薪资过滤" | 用更宽的条件重新筛今天的扫描结果，只对这一次生效（关闭薪资、放到 7 或 14 天、降低匹配度、重新显示之前入选的），不改你的 profile |
 | "1、3、5" → "提交" | 预填你选的岗位，你确认一次后统一提交 |
 | "按这个链接改简历 [岗位链接]" | 匹配表、几个补缺口的问题、为该岗位写简历和求职信 |
 | "我的简历适合这个岗位吗 [岗位链接]" | 快速判断匹配度，推荐最接近的现有简历 |
@@ -266,7 +268,7 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 | 求职教练 | `.claude/skills/job-career-coach`、`tools/facts.py` | 没有简历 → 材料 + 访谈 → 事实库、目标岗位（`DIRECTION.md`）、第一版简历 |
 | 简历与求职信 | `.claude/skills/job-application-writer`、`tools/doc_render.py`、`tools/doc_check.py`、`templates/` | 主简历、按岗位类别的模版简历、单岗位精投简历 + 求职信；ATS 可读的 PDF；一致性检查 |
 | 各国标准 | `standards/de/` | 德国简历和 Anschreiben 标准、何时精投、给新人的市场说明 |
-| 扫描与投递 | `.claude/skills/job-scan-apply` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
+| 扫描与投递 | `.claude/skills/job-scan-apply`、`tools/filters.py` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
 | JD 存档 | `tools/jd_snapshot.py` | 每个岗位 → `data/applications/<日期>_<公司>_<职位>/`（`jd.md`、`jd.pdf`、网页副本）；`--backfill` 补存以前的申请 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/sync_mail.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
 | Notion 申请表 | `tools/notion_setup.py` | 自动建表（[字段说明](docs/data-model.md)） |

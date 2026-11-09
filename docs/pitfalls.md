@@ -101,3 +101,23 @@ page came back as "LinkedIn Login, Einloggen" — and the first version of `tool
 "online". Fix: LinkedIn postings are read through the public job card
 `/jobs-guest/jobs/api/jobPosting/<id>` (no login, full description, paced); a page print is kept only when it shows the
 job title and no login form. Check a sample of snapshots by size and content after any bulk run.
+
+## Batch applying · 批量投递 (2026-11-06)
+- **File dialog does nothing in a background tab** — `upload_file.sh` fails with "no file sheet open". → `tabs_select` the tab first, then click the choose-file control, then run the script.
+  **后台标签页无法弹出文件选择框**：先把该标签页切到前台。
+- **LinkedIn "Bewerben" opens a new tab, which the pane blocks** — read the target from the link: `a[href*="safety/go"]` → decode its `url=` parameter, then `navigate` there.
+  **LinkedIn 外链被拦截**：从链接 `safety/go?url=` 里解出真实地址再打开。
+- **LinkedIn job id**: after searching, the URL's `currentJobId` is the first card; `https://www.linkedin.com/jobs/view/<id>/` is the direct link.
+- **StepStone `ag=` takes 1, 3, 7, 14** (`age_2` is silently ignored and returns everything).
+- **Cloudflare Turnstile ("Bestätigen Sie, dass Sie ein Mensch sind")** on Personio forms keeps the send button grey → the user ticks it; leave the tab open.
+- **Company portals that only offer a login** (BCG studenttalent.bcg.com) → user logs in or creates the account; mark the job *waiting on you*.
+- **Ashby (OpenAI)**: the start-date field is a date picker — click it, type `MM/DD/YYYY`; location is a combobox (type, then click the option). Declaration checkbox + "Submit Application"; success text "Your application was successfully submitted". OpenAI allows at most 5 applications per 180 days.
+- **Company career pages that embed Ashby (BLP)**: the page itself shows no form. Hosted form = `https://jobs.ashbyhq.com/<company-slug>/<ashby_jid>/application`; try the company name with and without hyphens (`blp-digital` worked, `blp` and `BLP` gave 404).
+- **Free-text screening questions** (e.g. "ERP experience?"): answer only from `knowledge/career/facts.yaml`; if the fact is absent say so plainly and name the nearest real experience.
+- **StepStone "Ich bin interessiert" is not always one-click.** Three outcomes: (a) smart-apply form on stepstone.de (`/application/smart-apply`) — fill it, "Bewerbung abschicken", success = "Deine Bewerbung ist auf dem Weg"; (b) external job: lands on "Hat mit deiner Bewerbung alles geklappt?" — click **Unternehmenswebsite** to reach the company's own form (do NOT claim it is applied); (c) instant send.
+- **React forms ignore plain `.value=`**: use the native setter (`Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,v)`; for `<select>` use `HTMLSelectElement.prototype`) then dispatch `input`, `change`, `blur`. Worked on StepStone smart-apply (salary number, currency select, text questions). Checkboxes/radios: a real click.
+- **StepStone keeps your documents**: "Zusätzliche Dateien → Hinzufügen" lists the Notenspiegel / Arbeitszeugnis / Abschlusszeugnis already in the account — tick them instead of uploading.
+- **Recruitee** (`*.recruitee.com/o/<job>`): form is under the "Bewerben" tab (`/c/new`; filling before opening that tab is lost). Success = URL ends `/applied`, title "Beworben".
+- **Staffing-agency postings** (e.g. anteira, AÜG) often have no real application form — only a contact form. Skip and tell the user.
+- **Indeed smartapply** (`smartapply.indeed.com`): the "Schnellbewerbung" link on `viewjob?jk=…` gives the form URL. Plain JS `button.click()` on "Weiter" / "Bewerbung absenden" works; coordinate clicks need a fresh screenshot first. Employer questions use text inputs (set with the native setter), radios (`.click()`), and a `role=combobox` whose `role=option` items you `.click()`. Employer document slots (Arbeitszeugnis*, Urkunde*) → real click on "Datei hochladen", then `upload_file.sh`. Success: "Ihre Bewerbung wurde gesendet". The "Job-E-Mails" checkbox on the review page stays unticked.
+- **Ashby choice questions** (radio/checkbox groups): the visible text is a `<label>`; click the label (or a real coordinate click) — `input.click()` often does nothing. After submit, Ashby lists "Missing entry for required field: …" — fix and resubmit. Ashby company slug usually equals the brand (`moss`, `blp-digital`, `openai`); `getmoss`/`BLP` gave 404.

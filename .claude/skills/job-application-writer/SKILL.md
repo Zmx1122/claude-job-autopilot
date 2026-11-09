@@ -22,6 +22,31 @@ rules, this skill is the procedure. Rule numbers below refer to them.
 6. Generated files and drafts stay on this Mac (`knowledge/` and `data/` are git-ignored).
 7. Before using the fact bank: `python3 tools/facts.py check`. Unconfirmed facts are not usable; open questions that affect the
    document are asked first, all at once.
+8. **Write for the screener first** (CV rules 19–22): the first reader is a recruiter or an ATS filter, not an engineer.
+   Run the **wording pass** below on every CV before rendering.
+
+## Wording pass (every CV, every mode, before rendering)
+The fact bank keeps precise engineer wording. The CV text is a rewrite of it for a non-engineer reader, with no new facts.
+1. **Group by position.** For each position, list the technical terms of all its facts. Terms that occur in two or more facts are
+   *shared stack*. Do not write one bullet per project with the stack repeated in each.
+2. **Lead line + sub-bullets** (CV rule 20). Shared stack goes once into a lead line that reads as a sentence on its own, the
+   use cases follow as short sub-bullets with context and result only:
+   ```yaml
+   - text: "Developed LLM applications with LangChain, Llama and LLM-as-judge evaluation:"
+     sub:
+       - "customer-call summaries for sales teams: satisfaction 60 % → 95 %"
+       - "appointment-booking assistant: live for 3,000 daily users"
+   ```
+   Not: "Project 1 … (LangChain, Llama, LLM-as-judge). Project 2 … (LangChain, Llama, LLM-as-judge)."
+   A bullet that has only one use case needs no sub-bullets. A term that belongs to a single use case stays in that sub-bullet.
+3. **Never delete a name, explain it** (CV rule 19): project, method, algorithm, model, tool and paper names stay; the plain-language
+   category goes next to them — "reinforcement-learning algorithm (Double DQN)", "open-source LLM (Qwen 7B, published on Hugging
+   Face)", "DSL4DPiFS, a graphical modelling language for data pipelines in forming systems". Terms recruiters already search for
+   (LLM, RAG, Python, Azure) stay bare. The descriptor must be true: take it from the fact bank or the source; "open-source" only if
+   the licence is open, otherwise "open-weight"; "on Hugging Face" only if it is published there; if you are not sure what a term is,
+   ask the user instead of guessing.
+4. **Keep the keywords** (rule 21): the posting's keywords appear once, in the lead line or the skills list.
+5. Read the result as a recruiter who knows the job family but not the tools. Any line they could not explain in one sentence is rewritten.
 
 ## Files
 ```
@@ -38,13 +63,14 @@ data/applications/<YYYY-MM-DD>_<company>_<title>/
 Render: `python3 tools/doc_render.py cv|letter <yaml> --out <pdf> [--max-pages 1]` — it prints the PDF path, checks that
 every line is in the text layer in reading order (what an ATS reads) and writes a PNG preview. **Look at the preview**
 (dual review: text check passed is not enough — check layout, line breaks, one page).
-Check: `python3 tools/doc_check.py --cv <pdf> [--letter <pdf>] --facts knowledge/career/facts.yaml --keywords "a|a-variant,b,c" [--company X]`.
+Check: `python3 tools/doc_check.py --cv <pdf> --cv-yaml <the cv.yaml it was rendered from> [--letter <pdf>] --facts knowledge/career/facts.yaml --keywords "a|a-variant,b,c" [--company X]`.
+`--cv-yaml` switches on the screener-wording checks (bare model names, algorithms without a general term, unexplained codenames, a term repeated across the bullets of one position).
 Fix every ❌; mention ⚠️ items to the user only if they are real. The content YAML formats are in the docstring of `tools/doc_render.py`.
 
 ## Mode M · Master CV (first CV, or rebuild)
 1. Fact bank empty or thin → run **job-career-coach** first (interview).
 2. Draft `knowledge/career/cvs/cv-master-<lang>.yaml`: all strong facts, 1–2 pages, standard order
-   (header · summary · experience · skills · awards · education · publications if relevant).
+   (header · summary · experience · skills · awards · education · publications if relevant); run the **wording pass**.
 3. Render, look, check. Show the PDF path and a 5-line summary of choices (what was left out and why).
 4. After the user's OK: render to `knowledge/library/cv/CV_Master_<LANG>_<YYYY>.pdf` with `--register cv-master-<lang>`.
 
@@ -52,7 +78,7 @@ Fix every ❌; mention ⚠️ items to the user only if they are real. The conte
 One CV per role family the user targets (from `search.titles` / `knowledge/career/DIRECTION.md`), e.g. "Conversational AI",
 "Data / Digitalization". For each family:
 1. Collect 10–20 typical postings' requirements (open 3–5 real postings; note the recurring keywords, DE and EN).
-2. Select and order facts for that family; summary and headline aimed at it; keywords from the postings appear naturally.
+2. Select and order facts for that family; summary and headline aimed at it; keywords from the postings appear naturally; run the **wording pass** (CV rules 19–22).
 3. Render to `knowledge/library/cv/CV_<Family>_<LANG>_<YYYY>.pdf`, `--register cv-<family>-<lang> --use-for "<title keywords>"`.
 4. Update `candidate.cv_variants` in `config/profile.yaml` (file + use_for). The scan-apply skill picks variants by `use_for`.
 Template CVs are not edited per posting. Rebuild them when the fact bank changes materially.
@@ -79,13 +105,14 @@ Steps 2–4 are a conversation; keep each message short and batch questions. Whe
    Contested items get pro and con. Wait for the user's decisions.
 5. **Write `cv.yaml`**: headline and summary aimed at the posting; bullets reordered so the posting's top requirements are
    answered first; the posting's keywords (exact spelling, DE/EN as in the posting) appear in summary and bullets where true;
-   1 page under 10 years of experience. Render to `<First>-<Last>-CV-<Company>.pdf`.
+   1 page under 10 years of experience; run the **wording pass** (shared stack once in a lead line, general descriptors for rare names).
+   Render to `<First>-<Last>-CV-<Company>.pdf`.
 6. **Cover letter** when the form has a cover-letter slot, the form requires one, or `strategy.cover_letter: always`:
    - one verifiable company fact for paragraph 1 — open the company's site or newsroom, record the URL in `changes.md`;
    - paragraphs per letter rules 5–9; style samples in the knowledge base (`kind: cover_letter`) show the user's voice —
      reuse their tone, never their sentences for another company;
    - 300–450 words; render to `<First>-<Last>-Anschreiben-<Company>.pdf` (German) or `-CoverLetter-` (English).
-7. **Check**: `doc_check.py` with the posting's 3–5 most important keywords (with DE/EN variants) and `--company`.
+7. **Check**: `doc_check.py` with the posting's 3–5 most important keywords (with DE/EN variants), `--company` and `--cv-yaml cv.yaml`.
    Fix every ❌ (durations, numbers, missing keywords) and re-render.
 8. **Review with the user**: show the PDF paths, the change list (`what changed | why | posting line`) and any ⚠️ worth a
    decision. Apply their edits. Approval of the text is required before upload.
