@@ -42,7 +42,7 @@ get every application **all the way to sent**, doing everything a person could d
 
 ## Never skip a job because the portal looks broken (user rule — always follow)
 A job may be logged `Skipped` only for a reason that is a fact about the job or the user's decision:
-the posting is closed ("position has been filled" / "nicht mehr verfügbar"), the user said skip (including "skip every site that needs an account"),
+the posting is closed ("position has been filled" / "nicht mehr verfügbar"), the user decided to skip it (see "Sites that need a registration" below: the decision is the user's, never silent),
 a filter dropped it, the user already applied, or a required document or fact does not exist. **A technical problem on our side is never a skip reason.**
 Prefill as far as possible, leave exactly the step that cannot be automated open, and list it as *prefilled, waiting on you*.
 
@@ -63,6 +63,19 @@ Prefill as far as possible, leave exactly the step that cannot be automated open
   and the final "Meine Bewerbung absenden" to the user, and say so in one line per tab.
 Before ever writing `Skipped` for a technical reason: waited 60 s, looked at a screenshot, started from the detail page with a real click, and told the user
 what blocked it. If it is still impossible, do not log `Skipped`: keep `Shortlisted`, write the blocker in the note, and ask.
+
+## Sites that need a registration or login (user rule — never skip these silently)
+Some portals only accept an application after the user registers or logs in (Google Careers profile, PwC, BCG talent portal, Instaffo, VKB temporary login,
+SAP/SuccessFactors candidate profiles). Creating the account stays the user's job (CLAUDE.md rule 3), but **deciding whether it is worth it is a recommendation
+from you, not a silent skip** (2026-11-09: five such jobs were logged `Skipped` without a recommendation; the user wanted to be asked).
+For every job that hits a registration wall, put it in one table and recommend:
+- **Recommend registering** when the match is strong: fit ≥ `strategy.fit_high` (default 80), a `dream_companies` / `dream_title_keywords` hit, or a role where the profile
+  clearly covers the hard requirements. Say why in one line (e.g. "FDE, fit 80, company in the target list").
+- **Recommend skipping** when the fit is low (below `strategy.fit_medium` + 10), the posting's hard requirements are far above the profile (years of experience,
+  a missing mandatory skill), or the portal asks for much more than it is worth (long assessment, document sets we do not have). Say why in one line.
+Columns: `# | Company | Title | Fit | Recommendation (register / skip) | Reason | Portal`. Then wait for the user. After the user registers or logs in, continue with the
+normal prefill (the user's login persists in the built-in browser). Log `Skipped` only when the user chose to skip; until then keep `Shortlisted` with the note
+"registration needed – recommendation: register|skip".
 
 ## Phase 1 · Scan
 **The filters are run-time inputs.** The profile gives the defaults; every run can widen them (`--preset`, `--set`) without
