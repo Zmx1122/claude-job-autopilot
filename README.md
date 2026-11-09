@@ -22,9 +22,12 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 
 ### What it does
 - **Scans** LinkedIn, StepStone, Indeed and Xing every morning, removes jobs you have already seen, and filters by your rules
-  (company size, salary, cover-letter requirement, daily cap).
+  (company size, salary, posting age, fit, cover-letter requirement, daily cap). Not happy with the list? Say "show more" and the
+  filters widen for that run only.
 - **Shows you a shortlist table** in chat. You pick, Claude fills every application up to its review page — including
-  company career sites that need file uploads — and **submits only after you confirm once**.
+  company career sites that need file uploads — and **submits only after you confirm once**. Prefer less clicking? Say
+  "submit directly" for a batch: Claude then fills everything, ticks the declaration boxes a form itself requires, submits, and
+  leaves only what a machine must not do (CAPTCHAs and "I am human" checks, logins, creating accounts) to you, in one list.
 - **Keeps every job description**: before each submit the posting is saved on your computer (clean text, a readable PDF and
   the page as loaded). Postings vanish within weeks; when the interview invitation arrives, the description is still there.
   Older applications can be backfilled; closed postings are marked as such.
@@ -40,7 +43,9 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 - **CVs and cover letters that fit the posting**: every job in the shortlist gets a mode — 🎯 *tailored* for fresh, high-fit
   postings and dream companies, 📄 *template* (your role-family CV) for the rest. Tailored means a requirement match table,
   a few questions to close gaps, a CV written for that posting and a cover letter in German or English — built only from a
-  fact bank you confirmed, checked for consistent dates and numbers, readable by applicant-tracking systems.
+  fact bank you confirmed, checked for consistent dates and numbers, readable by applicant-tracking systems. Written for
+  the recruiter first: rare project, method and model names stay but get a plain-language label (e.g. "reinforcement-learning
+  algorithm (Double DQN)"), and a stack shared by several projects is named once per position, not repeated.
 - **Dashboards**: a section on your Notion page (stage pie, stage flow, applications per week, interview rate by mode and
   posting age) and an interactive claude.ai dashboard, refreshed weekly.
 
@@ -119,14 +124,14 @@ For a 🎯 posting Claude first shows how you match, asks about the gaps, then w
 | Knowledge base | `.claude/skills/job-knowledge-base`, `tools/kb_extract.py`, `kb_build.py`, `kb_bundle.py` | inbox → unit files in `knowledge/library/` + `manifest.yaml` + `PROFILE.md`; merge/separate files per upload slot (never committed) |
 | Questionnaire | `config/profile.example.yaml` → `config/profile.yaml` | personal data, search, rules, strategy, standard answers |
 | Career coach | `.claude/skills/job-career-coach`, `tools/facts.py` | no CV → documents + interview → fact bank, target roles (`DIRECTION.md`), first CVs |
-| CV & cover-letter writer | `.claude/skills/job-application-writer`, `tools/doc_render.py`, `tools/doc_check.py`, `templates/` | master CV, one CV per role family, tailored CV + letter per posting; ATS-readable PDFs; consistency check |
+| CV & cover-letter writer | `.claude/skills/job-application-writer`, `tools/doc_render.py`, `tools/doc_check.py`, `templates/` | master CV, one CV per role family, tailored CV + letter per posting; ATS-readable PDFs; consistency and screener-wording check |
 | Country standards | `standards/de/` | what a strong German CV and Anschreiben look like, when to tailor, market notes for newcomers |
 | Scan & apply | `.claude/skills/job-scan-apply`, `tools/dedupe.py`, `tools/filters.py`, `tools/log_application.py` | shortlist → pick → prefill → confirm → submit |
 | Job-description snapshots | `tools/jd_snapshot.py` | each posting → `data/applications/<date>_<company>_<title>/` (`jd.md`, `jd.pdf`, page copy); `--backfill` for older applications |
-| Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
-| Notion tracker | `tools/notion_setup.py` | creates the database ([schema](docs/data-model.md)) |
-| Dashboards | `.claude/skills/job-dashboard`, `tools/refresh_dashboards.sh`, `dashboard/index.html` | Notion charts + interactive claude.ai dashboard |
-| File uploads | `tools/upload_file.sh`, `tools/copy_path.py`, [docs/file-uploads.md](docs/file-uploads.md) | macOS: drives the Open dialog · Windows: Claude in Chrome's upload tool · anywhere: paste a copied path |
+| Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py`, `label_mail.py`, `merge.py`, `split_for_classify.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
+| Notion tracker | `tools/notion_setup.py`, `log_application.py`, `notion_upsert.py` | creates the database ([schema](docs/data-model.md)), logs and updates one row per job |
+| Dashboards | `.claude/skills/job-dashboard`, `tools/refresh_dashboards.sh`, `dashboard_data.py`, `charts_png.py`, `notion_page.py`, `dashboard/index.html` | Notion charts + interactive claude.ai dashboard |
+| File uploads | `tools/upload_file.sh`, `tools/copy_path.py`, `tools/upload_test.html`, [docs/file-uploads.md](docs/file-uploads.md), [docs/macos-permissions.md](docs/macos-permissions.md) | macOS: drives the Open dialog · Windows: Claude in Chrome's upload tool · anywhere: paste a copied path |
 | Backup | `tools/backup.py` | your personal data → a local folder with version history; restore after a new download |
 | Privacy guard | `tools/check_public.py`, `.githooks/` | blocks commits that would publish your name, contacts, employers or tokens |
 | Health check | `tools/check_setup.py` | one checklist for everything above |
@@ -145,11 +150,17 @@ version history, to a normal folder you can open: **`Documents/Job Autopilot Dat
 Say *"restore my data from Documents/Job Autopilot Data"*. Passwords and tokens are never copied; keep them in a password manager.
 
 ### Boundaries
-- Nothing is submitted without you. One-click buttons are listed first and clicked only after you pick them.
-- You type passwords, solve CAPTCHAs, create portal accounts and click account-creating verification links. Claude does not.
+- Nothing is submitted for a job you did not pick. By default you confirm once per batch; if you say "submit directly", Claude submits as
+  soon as a form is filled — for that batch only. One-click buttons are listed first and clicked only after you pick them.
+- You type passwords, solve CAPTCHAs and "I am human" checks (including codes a portal emails you to prove that), create portal accounts and click
+  account-creating verification links. Claude does not; it finishes everything else and lists these steps for you.
+  Declaration boxes a form requires to submit ("I confirm the information is true") are ticked in "submit directly" mode; optional
+  newsletter / talent-pool boxes are not.
 - Only the documents a form requires are uploaded. A required cover letter is drafted for that posting and sent only after you approve it (or such jobs are skipped — your choice).
 - CVs and letters contain only facts you confirmed; nothing is invented, numbers and durations are checked across documents.
-- Credentials stay in `.env` on your Mac. Your CVs, answers and logs are git-ignored.
+- Credentials stay in `.env` on your Mac (git-ignored, not in the backup, and the commit guard blocks them). Best: paste a token into `.env`
+  yourself. You may also paste it into the chat — Claude writes it to `.env` and never repeats it — but then it is part of the conversation
+  history, a leak risk you accept (revoke and re-create it afterwards if you are unsure). Your CVs, answers and logs are git-ignored.
 - Job sites' terms often restrict automated use. This project keeps a human choosing and confirming every batch and
   enforces a daily cap; you are responsible for how you use it.
 
@@ -163,8 +174,10 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 - Standards for more countries (`standards/<country>/`) and a LinkedIn profile review.
 
 ### FAQ
-- **Windows?** Everything works; for file uploads on company sites use **Claude in Chrome** (its upload tool needs no
-  system permission) or paste the path Claude copies for you — see [docs/file-uploads.md](docs/file-uploads.md).
+- **Windows?** Built for it, but exercised end to end on macOS only. Notes: PDF writing needs Chrome, Edge or Brave (set `CHROME_PATH`
+  if it is not found); file uploads on company sites use **Claude in Chrome** (no system permission, but its upload tool has had
+  reliability reports in 2026) or the path Claude copies for you to paste — see [docs/file-uploads.md](docs/file-uploads.md).
+  `tools/refresh_dashboards.sh` is a zsh script; on Windows Claude runs the four Python commands it contains one by one.
 - **Is the file uploader a separate app?** No. On macOS it is a short AppleScript in this repo (`tools/upload_file.sh`)
   run by the built-in `osascript`; it only needs the Accessibility permission for Claude.
 - **Other inboxes than Gmail?** The scripts use IMAP plus Gmail labels; other providers need small changes in `tools/common.py`.
@@ -176,8 +189,8 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 ## 中文
 
 ### 它能做什么
-- **每天早上扫描** LinkedIn、StepStone、Indeed、Xing，去掉看过的岗位，按你的规则筛选（公司规模、薪资、是否强制求职信、每日上限）。
-- **在聊天里给你一张精选岗位表**。你挑选后，Claude 把每个申请填到最后确认页（包括需要上传文件的公司官网），**你确认一次才统一提交**。
+- **每天早上扫描** LinkedIn、StepStone、Indeed、Xing，去掉看过的岗位，按你的规则筛选（公司规模、薪资、发布时间、匹配度、是否强制求职信、每日上限）。对结果不满意就说"再多一点"，只对这一次放宽条件。
+- **在聊天里给你一张精选岗位表**。你挑选后，Claude 把每个申请填到最后确认页（包括需要上传文件的公司官网），**你确认一次才统一提交**。想少点几下？对某一批说"直接投递"：Claude 填完就提交，表单自带的必选声明框也会勾上，只把机器不该做的事留给你并列成一张清单（验证码和"我是人类"验证、登录、注册账号）。
 - **保存每个岗位的 JD**：每次提交前，岗位描述都会存到你的电脑上（干净的正文、可读的 PDF 和网页原样）。岗位几周后就会下架，
   等面试邀请来的时候，JD 还在。以前的申请可以补存，已下架的岗位会被标出来。
 - **每天读取投递邮箱**：确认信、面试邀请、拒信、offer 自动更新 **Notion 申请表**；每条申请链接到第一封投递邮件作为证据；
@@ -188,7 +201,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
   推荐现实可行的目标岗位，讲清市场规则（语言、Werkstudent / 实习 / Junior 等入口、工作许可），并写出你的第一版简历。
 - **贴合岗位的简历和求职信**：精选表里每个岗位都有模式——新鲜、高匹配的岗位和梦中情司走 🎯 *精投*，其余用 📄 *模版投*
   （按岗位类别准备的简历）。精投包括：岗位要求对照表、几个补缺口的问题、为该岗位写的简历和德/英文求职信。
-  所有内容只来自你确认过的事实库，自动核对日期和数字是否一致，PDF 能被招聘系统（ATS）正确读取。
+  所有内容只来自你确认过的事实库，自动核对日期和数字是否一致，PDF 能被招聘系统（ATS）正确读取。措辞先照顾 HR：冷僻的项目名、方法名、模型名都保留，但旁边加一句通用说明（如"强化学习算法（Double DQN）"）；多个项目共用的技术栈在一段经历里只写一次，不重复。
 - **看板**：Notion 页面里的图表区（阶段饼图、阶段流向图、每周投递数、按投递模式和岗位新鲜度的面试率）+ 一个 claude.ai 交互看板，每周更新数据。
 
 ### 需要准备
@@ -266,14 +279,14 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 | 知识库 | `.claude/skills/job-knowledge-base`、`tools/kb_*.py` | inbox → `knowledge/library/` 单元文件 + `manifest.yaml` + `PROFILE.md`；按上传入口合并或分开（不会提交到 git） |
 | 引导问卷 | `config/profile.example.yaml` → `config/profile.yaml` | 个人信息、搜索条件、投递规则、投递策略、标准答案 |
 | 求职教练 | `.claude/skills/job-career-coach`、`tools/facts.py` | 没有简历 → 材料 + 访谈 → 事实库、目标岗位（`DIRECTION.md`）、第一版简历 |
-| 简历与求职信 | `.claude/skills/job-application-writer`、`tools/doc_render.py`、`tools/doc_check.py`、`templates/` | 主简历、按岗位类别的模版简历、单岗位精投简历 + 求职信；ATS 可读的 PDF；一致性检查 |
+| 简历与求职信 | `.claude/skills/job-application-writer`、`tools/doc_render.py`、`tools/doc_check.py`、`templates/` | 主简历、按岗位类别的模版简历、单岗位精投简历 + 求职信；ATS 可读的 PDF；一致性与 HR 友好措辞检查 |
 | 各国标准 | `standards/de/` | 德国简历和 Anschreiben 标准、何时精投、给新人的市场说明 |
 | 扫描与投递 | `.claude/skills/job-scan-apply`、`tools/filters.py` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
 | JD 存档 | `tools/jd_snapshot.py` | 每个岗位 → `data/applications/<日期>_<公司>_<职位>/`（`jd.md`、`jd.pdf`、网页副本）；`--backfill` 补存以前的申请 |
-| 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/sync_mail.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
-| Notion 申请表 | `tools/notion_setup.py` | 自动建表（[字段说明](docs/data-model.md)） |
-| 看板 | `.claude/skills/job-dashboard`、`dashboard/index.html` | Notion 图表 + claude.ai 交互看板 |
-| 文件上传 | `tools/upload_file.sh`、`tools/copy_path.py`、[docs/file-uploads.md](docs/file-uploads.md) | macOS：操作"打开"对话框 · Windows：Claude in Chrome 的上传工具 · 通用：粘贴复制好的路径 |
+| 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/gmail_*.py`、`sync_mail.py`、`label_mail.py`、`merge.py`、`split_for_classify.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
+| Notion 申请表 | `tools/notion_setup.py`、`log_application.py`、`notion_upsert.py` | 自动建表（[字段说明](docs/data-model.md)），每个岗位一行，记录并更新状态 |
+| 看板 | `.claude/skills/job-dashboard`、`tools/refresh_dashboards.sh`、`dashboard_data.py`、`charts_png.py`、`notion_page.py`、`dashboard/index.html` | Notion 图表 + claude.ai 交互看板 |
+| 文件上传 | `tools/upload_file.sh`、`tools/copy_path.py`、`tools/upload_test.html`、[docs/file-uploads.md](docs/file-uploads.md)、[docs/macos-permissions.md](docs/macos-permissions.md) | macOS：操作"打开"对话框 · Windows：Claude in Chrome 的上传工具 · 通用：粘贴复制好的路径 |
 | 备份 | `tools/backup.py` | 个人数据备份到本地文件夹，带版本历史；重新下载后一键恢复 |
 | 隐私保护 | `tools/check_public.py`、`.githooks/` | 提交前自动拦截会公开你姓名、联系方式、雇主或 token 的改动 |
 | 健康检查 | `tools/check_setup.py` | 一张清单检查以上所有配置 |
@@ -284,11 +297,11 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 对 Claude 说 *"从 Documents/Job Autopilot Data 恢复我的数据"* 即可。密码和 token 不会被复制，请存在密码管理器里。
 
 ### 边界
-- 不经你确认不会提交任何申请。一键投递按钮先列出来，你选了才点。
-- 输入密码、验证码、注册官网账号、点击会创建账号的验证链接，都由你来做。
+- 你没选的岗位不会被提交。默认每批由你确认一次；你说"直接投递"时，这一批填完就提交。一键投递按钮先列出来，你选了才点。
+- 输入密码、验证码和"我是人类"验证（包括门户发到邮箱用来证明是真人的验证码）、注册官网账号、点击会创建账号的验证链接，都由你来做；Claude 做完其余所有步骤，并把这些列给你。"直接投递"模式下会勾选表单提交所必需的声明框（如"我确认信息属实"），可选的订阅或人才库同意框不勾。
 - 只上传表单要求的材料；强制要求求职信时，Claude 为该岗位起草，你确认后才上传（也可以设置为直接跳过这类岗位）。
 - 简历和求职信只使用你确认过的事实，不编造；数字和时长会在各文件之间自动核对。
-- 凭证只保存在你电脑的 `.env`；简历、问卷答案和日志都不会进入 git。
+- 凭证只保存在你电脑的 `.env`（不进 git、不进备份，提交时有拦截）。最稳妥：自己把 token 粘贴到 `.env`。也可以直接贴在对话框里给 Claude——它会写进 `.env`、不会复述——但那样 token 会留在对话记录里，有潜在泄露风险，需要你自己接受（不放心的话事后撤销并重新生成）。简历、问卷答案和日志都不会进入 git。
 - 招聘平台的条款通常限制自动化使用。本项目坚持每批由人挑选和确认，并设每日上限；如何使用由你自己负责。
 
 ### 踩过的坑
@@ -300,8 +313,7 @@ Claude  3/3 已发出并记录到 Notion。明天的邮件同步会把确认信�
 - 更多国家的求职标准（`standards/<国家>/`）和 LinkedIn 个人主页诊断。
 
 ### 常见问题
-- **Windows 可以用吗？** 可以。公司官网的文件上传用 **Claude in Chrome**（它的上传工具不需要系统权限），或者粘贴 Claude
-  帮你复制好的文件路径，见 [docs/file-uploads.md](docs/file-uploads.md)。
+- **Windows 可以用吗？** 是按 Windows 设计的，但目前只在 macOS 上完整跑通过。注意：写 PDF 需要 Chrome、Edge 或 Brave（找不到时设置 `CHROME_PATH`）；公司官网的文件上传用 **Claude in Chrome**（不需要系统权限，但它的上传工具在 2026 年有过稳定性问题的报告），或者粘贴 Claude 帮你复制好的文件路径，见 [docs/file-uploads.md](docs/file-uploads.md)。`tools/refresh_dashboards.sh` 是 zsh 脚本，Windows 上 Claude 会把里面的四条 Python 命令逐条运行。
 - **文件上传助手是单独下载的软件吗？** 不是。macOS 上它是本仓库里的一小段 AppleScript（`tools/upload_file.sh`），
   由系统自带的 `osascript` 运行，只需要给 Claude 开"辅助功能"权限。
 - **不用 Gmail 可以吗？** 脚本基于 IMAP + Gmail 标签，其他邮箱需要小改 `tools/common.py`。

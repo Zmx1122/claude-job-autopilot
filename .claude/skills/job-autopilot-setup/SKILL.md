@@ -12,16 +12,32 @@ clicks in Notion, Gmail, System Settings and the browser pane, and answers quest
 Track progress with the task list. Steps 1–9 below. Skip a step that `python3 tools/check_setup.py` already shows as done.
 Never paste secrets back into chat, never type a password or solve a CAPTCHA, never create accounts for the user.
 
+## Where secrets live (tell the user once, before step 3)
+Standard: the **`.env`** file in the repo folder (git-ignored; template `.env.example`; read by `tools/common.py`). It holds
+`NOTION_TOKEN`, `NOTION_PARENT_PAGE_ID`, `NOTION_DATABASE_ID`, `IMAP_USER`, `IMAP_APP_PASSWORD`, `GMAIL_LABEL`, `DASHBOARD_URL`,
+`BACKUP_DIR`. It is not part of the backup (keep the tokens in a password manager) and `tools/check_public.py` blocks any commit
+that contains them. There is no keychain integration: the file is plain text on this Mac.
+Two ways to enter a secret, say both, in this order:
+1. **Safest:** the user pastes it into `.env` themselves (open it with the open_in_editor tool, else `open -e .env` on macOS /
+   `notepad .env` on Windows).
+2. **Allowed:** the user pastes it into the chat. Say it plainly, in the user's language:
+> "You can paste the token into `.env` yourself (safest). You can also paste it right here in the chat and I will write it to `.env`
+> and not repeat it — but then it stays in the conversation history, so you accept a potential leak risk. If you are unsure, you can
+> revoke it afterwards and create a new one."
+   If they choose this: write it to `.env` with `set_env_value`, never echo it back, and never put it in a command line that
+   prints it. Do not ask for it again later; read it from `.env`.
+
 ## 0. Prepare (you, 1 minute)
 - `python3 --version` (needs 3.9+). If missing on macOS: ask the user to run `xcode-select --install` or install from python.org.
 - `python3 -m pip install -r requirements.txt`
-- `cp -n .env.example .env`
+- `cp -n .env.example .env` (Windows PowerShell: `if (-not (Test-Path .env)) { Copy-Item .env.example .env }`)
 - Ask once: "Have you used Job Autopilot before (another computer, or before re-downloading)?" If yes, ask for the backup
   folder (default `~/Documents/Job Autopilot Data`) and run `python3 tools/backup.py restore --from "<folder>"` —
   profile, documents, fact bank and applications come back; continue with the steps `check_setup.py` still shows as open
   (usually only Notion token and Gmail app password, which are never backed up).
-- A Chromium browser for writing CV / cover-letter PDFs: `ls "/Applications/Google Chrome.app"` (or Edge / Brave). Missing →
-  ask the user to install Google Chrome; only needed for generated documents.
+- A Chromium browser for writing CV / cover-letter PDFs: `python3 -c "import sys; sys.path.insert(0,'tools'); import doc_render; print(doc_render.browser())"`
+  (finds Chrome / Edge / Brave on macOS and Windows; set `CHROME_PATH` for another location). Missing → ask the user to install
+  Google Chrome; only needed for generated documents.
 - Tell the user what is coming: about 30–45 minutes once, then a few minutes a day.
 
 ## 1. Knowledge base — the user's documents
@@ -64,15 +80,14 @@ Walk the user through `docs/credentials.md#notion` one click at a time:
 1. notion.so/profile/integrations → **New integration** → type Internal → name `Job Autopilot` → copy the **Internal Integration Secret** (`ntn_…`).
 2. Create a page "Job Search" in their workspace (top level). Page → `•••` → **Connections** → add `Job Autopilot`.
 3. Copy the page link.
-Ask them to paste the secret into `.env` themselves (open it with the open_in_editor tool if available, else `open -e .env`).
-If they prefer to paste it into chat, accept it, write it to `.env`, and do not repeat it back.
-Then run `python3 tools/notion_setup.py` — it creates the **Job Applications** database (15 columns) and stores its id.
+Offer both ways of entering the secret as described in "Where secrets live" (paste into `.env` themselves, or into the chat with the leak-risk sentence).
+Then run `python3 tools/notion_setup.py` — it creates the **Job Applications** database (20 columns, see `docs/data-model.md`) and stores its id.
 
 ## 4. Gmail (status tracking + the "applications" label)
 `docs/credentials.md#gmail`:
 1. Use the inbox they apply with (ideally the same address as `candidate.email`).
 2. Turn on 2-Step Verification → myaccount.google.com/apppasswords → create `job-autopilot` → 16-letter password into `.env`
-   as `IMAP_APP_PASSWORD`, address as `IMAP_USER`.
+   as `IMAP_APP_PASSWORD`, address as `IMAP_USER` (same two ways of entering it, same leak-risk sentence if they paste it into the chat).
 3. `python3 tools/gmail_setup.py`.
    - Label exists → done.
    - Missing → ask: "Create a Gmail label `applications` for all application emails?" On yes: `python3 tools/gmail_setup.py --create`.
@@ -85,21 +100,25 @@ For each enabled platform open the login page with `preview_start {url}` and ask
 (tick "keep me signed in"). Then verify by loading a page that needs login.
 - LinkedIn `https://www.linkedin.com/login` — afterwards upload every CV variant once to the resume library
   (Settings → Data privacy → Job application settings), because Easy Apply can only pick from that library.
-- StepStone `https://www.stepstone.de/` → Anmelden. Upload the default CV to the profile.
+- StepStone `https://www.stepstone.de/` → Anmelden. Upload the default CV to the profile (its smart-apply form uses that CV and the
+  degree / reference files stored in the account, so keep them current).
+- Xing `https://login.xing.com/` — Xing's easy apply also uses the CV stored in the profile: upload the current CV there too.
 - Indeed `https://secure.indeed.com/account/login` — Schnellbewerbung needs a login. Replace any stored multi-page PDF with the single CV.
-- Xing `https://login.xing.com/`.
 Company career portals (Porsche, SAP, Siemens …) are handled per application; some need an account — the user creates those.
 
 ## 6. File uploads (one time)
 Company portals need real file uploads; the browser pane has no upload tool. Pick the method by system
 (`docs/file-uploads.md`) and store it as `platforms.upload_method` in the profile:
 - **Windows** → `chrome`: help the user install Google Chrome and the Claude in Chrome extension, connect it, log in to
-  the career sites there; test `file_upload` on `tools/upload_test.html`. Fallback `manual` (`tools/copy_path.py`).
+  the career sites there; test `file_upload` on `tools/upload_test.html`. This tool has had 2026 reliability reports
+  (see `docs/file-uploads.md`): if the test fails, fall back to `manual` (`tools/copy_path.py`) instead of debugging it for long.
 - **macOS** → `macos_dialog` (below). Fallback `manual`.
 macOS dialog script, see `docs/macos-permissions.md`:
 1. Ask the user: System Settings → Privacy & Security → **Accessibility** → turn on **Claude** (add it with + if missing).
-2. Test: open `tools/upload_test.html` in the pane (`preview_start file://<abs path>`), click the file input, run
-   `tools/upload_file.sh <abs path of a CV>`, check the page shows the file name.
+2. Test: open `tools/upload_test.html` in the pane (`preview_start file://<abs path>`), make sure that tab is the **front** tab
+   (`tabs_select`), click the file input, run `tools/upload_file.sh <abs path of a CV>`, check the page shows the file name.
+   Always click the choose-file control in the front tab, then run the script within ~10 s. A background tab never shows the sheet
+   ("no file sheet open"). An `AppleEvent` error (-10000) can still come with a successful upload: look at the page before retrying.
 3. If it fails with "not allowed assistive access": the toggle is off or Claude was updated — toggle off/on.
    Never build a helper .app with osacompile as a workaround: each rebuild is a new identity and loses the permission.
 

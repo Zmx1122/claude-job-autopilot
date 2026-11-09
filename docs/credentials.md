@@ -43,6 +43,15 @@ Two secrets are needed. Both go into `.env`, which never leaves your Mac. 只需
    也可以选用你已有的标签（如 `Bewerbungen`），Claude 会改 `GMAIL_LABEL`。手动建法：Gmail 左栏 **标签** → **+** → `applications`。
 6. 除了打标签以外全部只读。随时可以在应用专用密码页面撤销。
 
+## Where secrets are stored · 密钥存在哪里
+Standard: the **`.env`** file in this folder — plain text on your Mac, git-ignored, **not** in the backup, and `tools/check_public.py`
+blocks any commit that contains them. There is no keychain integration; keep a copy in your password manager.
+标准做法：本文件夹里的 **`.env`**——你电脑上的明文文件，不进 git、不进备份，提交时 `tools/check_public.py` 会拦截。没有接入系统钥匙串，请另存一份到密码管理器。
+
 ## Where to type secrets · 在哪里填密钥
-Best: open `.env` (Claude opens it for you) and paste there. Pasting into the chat also works — Claude writes it to `.env` —
-but then the secret is part of the conversation history. 最稳妥：在 Claude 帮你打开的 `.env` 文件里粘贴。直接贴进对话也行，但密钥会留在对话记录里。
+1. **Safest · 最稳妥**: open `.env` (Claude opens it for you) and paste there yourself. 在 Claude 帮你打开的 `.env` 里自己粘贴。
+2. **Also possible · 也可以**: paste it into the chat and Claude writes it to `.env` and does not repeat it — **but it then stays in the
+   conversation history, so you accept a potential leak risk.** Not sure? Revoke it afterwards (Notion integrations page / Google
+   app-passwords page) and create a new one.
+   直接贴在对话框里，Claude 会写进 `.env`、不会复述——**但它会留在对话记录里，你需要接受潜在的泄露风险。** 不放心就事后撤销（Notion 集成页 /
+   Google 应用专用密码页）并重新生成。
