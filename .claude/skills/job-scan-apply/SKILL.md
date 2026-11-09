@@ -40,6 +40,30 @@ get every application **all the way to sent**, doing everything a person could d
   waiting on you* or *skipped (reason)*. Never claim submitted from a click alone.
 - This rule covers the batch the user asked for. It is not a licence to apply to jobs the user did not pick.
 
+## Never skip a job because the portal looks broken (user rule — always follow)
+A job may be logged `Skipped` only for a reason that is a fact about the job or the user's decision:
+the posting is closed ("position has been filled" / "nicht mehr verfügbar"), the user said skip (including "skip every site that needs an account"),
+a filter dropped it, the user already applied, or a required document or fact does not exist. **A technical problem on our side is never a skip reason.**
+Prefill as far as possible, leave exactly the step that cannot be automated open, and list it as *prefilled, waiting on you*.
+
+**Why this rule exists — the BayernLB incident (2026-11-09).** The scan skipped two BayernLB AI roles because `docs/pitfalls.md` said
+"SuccessFactors portals redirect to the home page: no form, skip". The user then found the roles on LinkedIn and the form was there.
+- *Root cause 1:* the direct link `jobs.bayernlb.de/talentcommunity/apply/<id>` does redirect to the home page. The working path is
+  job detail page → cookie dialog ("Cookie-Einstellungen ändern" → necessary only → "Meine Auswahl bestätigen") → a **real click** on "Jetzt bewerben".
+- *Root cause 2:* the apply page (`/default/content/apply/?extJobId=…`) renders very slowly: blank for 30–60 s, and the form lives in a frame that
+  page scripts cannot see (`document.body.innerText` is empty, `find` / `read_page` show only the cookie banner and footer). It looked blank, so it was
+  judged dead after ~15 s without a screenshot.
+- *Error pattern to recognise:* page title is the job title but the body is empty; no inputs in the DOM; a screenshot taken later shows the full form.
+  Same family: any SAP SuccessFactors / "j2w" career site (`jobs.<company>.de`, `/talentcommunity/`, `/default/content/apply/`).
+- *What to do:* (1) start from the job detail page, never from the apply deep link; (2) decide cookies (necessary only); (3) click "Jetzt bewerben" for real;
+  (4) wait up to 60 s, **take a screenshot** (not only `get_page_text`) before concluding anything; (5) drive the form with screenshots, real clicks and real typing
+  (click a field, type; coordinates = screenshot frame); uploads: click "…hochladen" → "Vom Gerät" → `tools/upload_file.sh`; (6) required cover letter
+  ("Motivationsschreiben*") → write it with job-application-writer from the fact bank, state experience gaps openly, attach it.
+- *Known remaining limit:* the native "Anrede" dropdown cannot be set by the tools (no popup, keyboard does nothing). Fill everything else, leave Anrede
+  and the final "Meine Bewerbung absenden" to the user, and say so in one line per tab.
+Before ever writing `Skipped` for a technical reason: waited 60 s, looked at a screenshot, started from the detail page with a real click, and told the user
+what blocked it. If it is still impossible, do not log `Skipped`: keep `Shortlisted`, write the blocker in the note, and ask.
+
 ## Phase 1 · Scan
 **The filters are run-time inputs.** The profile gives the defaults; every run can widen them (`--preset`, `--set`) without
 touching `config/profile.yaml` (details in `tools/filters.py`). Start with
