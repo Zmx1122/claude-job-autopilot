@@ -40,6 +40,52 @@ get every application **all the way to sent**, doing everything a person could d
   waiting on you* or *skipped (reason)*. Never claim submitted from a click alone.
 - This rule covers the batch the user asked for. It is not a licence to apply to jobs the user did not pick.
 
+## Never skip a job because of a technical problem (user rule — always follow)
+`Skipped` is allowed only for a **fact about the job** or a **decision by the user**:
+
+| Valid skip reason | Example |
+|---|---|
+| Posting closed | "Sorry, this position has been filled", "nicht mehr verfügbar" |
+| A filter | blacklist, title filter, posting age, salary, company size, low fit (`dedupe.py`) |
+| Already applied | tracker row Applied / Confirmed, StepStone "Schon beworben" |
+| Missing material | a required document or fact does not exist; letter required and `cover_letter_required: skip` |
+| The user's decision | the user chose to skip, e.g. after a registration recommendation (next section) |
+
+**Never a skip reason:** a blank or slow page, a redirect, a form inside a frame, a blocked popup, an upload or dropdown the tools cannot operate, a human check.
+Prefill as far as possible, leave exactly one step open, list the job as *prefilled, waiting on you* with its tab, and let the user decide.
+Before writing `Skipped` for anything technical: wait 60 s, look at a screenshot, restart from the job detail page with a real click, tell the user what blocked it.
+If it is still impossible keep `Shortlisted`, write the blocker in the note, and ask.
+
+### Why this rule exists: the BayernLB incident (2026-11-09)
+Two BayernLB AI roles were logged `Skipped` because `docs/pitfalls.md` said "SuccessFactors portals redirect to the home page: no form, skip".
+The user found the roles on LinkedIn and the form was there; both applications were sent later the same day.
+- **Root cause 1, wrong entry point.** The deep link `jobs.bayernlb.de/talentcommunity/apply/<id>` redirects to the home page.
+  The working path is job detail page → cookie dialog (*Cookie-Einstellungen ändern* → necessary only → *Meine Auswahl bestätigen*) → a **real click** on *Jetzt bewerben*.
+- **Root cause 2, judged too early and by the wrong sense.** The apply page (`/default/content/apply/?extJobId=…`) is blank for 20–60 s, and the form sits in a frame
+  that page scripts cannot see. It was declared dead after ~15 s from `get_page_text`, never from a screenshot.
+- **Error pattern.** Title shows the job, `document.body.innerText` is empty, `find` / `read_page` list only the cookie banner and footer, no inputs in the DOM,
+  yet a screenshot taken later shows the full form. Applies to every SAP SuccessFactors / "j2w" career site (`jobs.<company>.de`, `/talentcommunity/`, `/default/content/apply/`).
+- **Handling.**
+  1. Open the job detail page, decide cookies, **really click** *Jetzt bewerben*. Keep the browser pane visible (file dialogs fail while it is hidden).
+  2. Wait up to 60 s and take a **screenshot**; trust it over the DOM.
+  3. Drive the form with screenshots, real clicks and real typing (click the field, then type; coordinates are in the screenshot frame; click once per field and check the result).
+  4. Uploads: click *…hochladen* → *Vom Gerät* → `tools/upload_file.sh`; confirm the file name on screen.
+  5. A required *Motivationsschreiben\** is written with job-application-writer from the fact bank. State experience gaps openly (a posting asking 6–10 years of a candidate with ~2 is not hidden); attach it.
+  6. The custom *Anrede* dropdown may not respond to the tools. Fill everything else, ask the user to pick it, and after the user says so **click the final *Meine Bewerbung absenden* yourself**.
+     The button stays grey until every required field is set; a grey button is not an error.
+  7. Verify the result: a confirmation page, or the portal profile ("Deine Bewerbungen" → *Deine Bewerbung ist bei uns eingegangen*), then log `Applied`.
+
+## Sites that need a registration or login (user rule — never skip these silently)
+Examples: Google Careers profile, PwC, BCG talent portal, Instaffo, VKB (temporary login), SAP candidate profiles. Creating the account stays the user's job (CLAUDE.md rule 3),
+but **whether it is worth it is your recommendation, not a silent skip** (2026-11-09: five such jobs were logged `Skipped` without a recommendation; the user wanted to be asked).
+Put every job that hits a registration wall in one table and recommend:
+- **Recommend registering:** fit ≥ `strategy.fit_high` (default 80), a `dream_companies` / `dream_title_keywords` hit, or a role whose hard requirements the profile clearly covers.
+- **Recommend skipping:** fit below `strategy.fit_medium` + 10, hard requirements far above the profile (years, a missing mandatory skill), or a portal that asks for much more than the job is worth
+  (long assessment, documents we do not have). A stated salary below the user's bar counts too.
+- Columns: `# | Company | Title | Fit | Recommendation (register / skip) | One-line reason | Portal`. Then wait for the user.
+- After the user registers or logs in (the login persists in the built-in browser), continue with the normal prefill. Log `Skipped` only when the user chose to skip; until then keep
+  `Shortlisted` with the note "registration needed – recommendation: register|skip".
+
 ## Phase 1 · Scan
 **The filters are run-time inputs.** The profile gives the defaults; every run can widen them (`--preset`, `--set`) without
 touching `config/profile.yaml` (details in `tools/filters.py`). Start with
