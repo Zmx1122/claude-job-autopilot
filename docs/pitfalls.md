@@ -132,3 +132,8 @@ job title and no login form. Check a sample of snapshots by size and content aft
 - **The Gmail connector in the Claude app may be a different mailbox** (the work account, not the application inbox). The application inbox is only reachable through `tools/gmail_*.py` (IMAP) and `tools/send_reply.py` (SMTP). Check `IMAP_USER` before using any other Gmail tool.
 - **LinkedIn messaging shows every conversation** (friends, groups). When scanning for invitations read only recruiter threads; do not summarize or reuse the rest.
 
+
+## Cloudflare Turnstile fails in the built-in browser (Personio, Dover) · 2026-11-09
+Personio career pages (`*.jobs.personio.de`) and Dover (`jobs.dover.com`) show a Cloudflare "confirm you are human" box above the submit button.
+In the built-in browser it ends in "Überprüfung fehlgeschlagen" even when the user clicks it by hand, and the portal then reports "Fehler beim Senden der Bewerbung".
+Do not try to get around it. Prefill is wasted effort there: probe the page first (scroll to the bottom, look for the Cloudflare box) and list the job as "needs the user's normal browser" before filling anything.
