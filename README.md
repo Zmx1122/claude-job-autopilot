@@ -256,7 +256,7 @@ sequenceDiagram
     U->>C: 1、2、4
     C->>U: ACME 有 3 个小问题（LangGraph、评测数据集）<br/>答完我来写简历和求职信
     U->>C: （回答）
-    C->>U: ACME 的简历和 Anschreiben 写好了（附改动清单）<br/>2 和 4 用模版简历<br/>三个都已填到确认页，提交吗？
+    C->>U: ACME 的简历和求职信写好了（附改动清单）<br/>2 和 4 用模版简历<br/>三个都已填到确认页，提交吗？
     U->>C: 提交
     C-->>U: 3/3 已发出并记录到 Notion<br/>明天的邮件同步会把确认信链接上
 ```
@@ -286,7 +286,7 @@ sequenceDiagram
 | 引导问卷 | `config/profile.example.yaml` → `config/profile.yaml` | 个人信息、搜索条件、投递规则、投递策略、标准答案 |
 | 求职教练 | `.claude/skills/job-career-coach`、`tools/facts.py` | 没有简历 → 材料 + 访谈 → 事实库、目标岗位（`DIRECTION.md`）、第一版简历 |
 | 简历与求职信 | `.claude/skills/job-application-writer`、`tools/doc_render.py`、`tools/doc_check.py`、`templates/` | 主简历、按岗位类别的模版简历、单岗位精投简历 + 求职信；ATS 可读的 PDF；一致性与 HR 友好措辞检查 |
-| 各国标准 | `standards/de/` | 德国简历和 Anschreiben 标准、何时精投、给新人的市场说明 |
+| 各国标准 | `standards/de/` | 德国简历和求职信标准、何时精投、给新人的市场说明 |
 | 扫描与投递 | `.claude/skills/job-scan-apply`、`tools/filters.py` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
 | JD 存档 | `tools/jd_snapshot.py` | 每个岗位 → `data/applications/<日期>_<公司>_<职位>/`（`jd.md`、`jd.pdf`、网页副本）；`--backfill` 补存以前的申请 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/gmail_*.py`、`sync_mail.py`、`label_mail.py`、`merge.py`、`split_for_classify.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
