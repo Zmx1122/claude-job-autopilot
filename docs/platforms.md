@@ -60,3 +60,18 @@ Requires macOS Accessibility for Claude, see `docs/macos-permissions.md`.
 - Screenshot coordinates on a Retina Mac are CSS pixels × 2.
 - If the browser pane is closed mid-form, the form state is lost; reopen and re-check consent boxes.
 - Address, salary, notice period, start date and work permit appear on most German portals; keep them in the profile.
+
+## Portal notes added 2026-11-10
+- **Deloitte (de-job.deloitte.com, Eightfold)**: no account needed; the CV from an earlier application stays attached. Gender is required on submit.
+  Deloitte limits applications per candidate: the submit API answers HTTP 429 "Maximale Anzahl an Bewerbungen erreicht" (seen one day after
+  another Deloitte application). The page shows no message — read the network response. Valid skip reason (limit reached).
+- **Ashby AI-evaluation consent** ("By selecting Yes, I am consenting to the use of AI for evaluating my candidacy"): answer from
+  `screening_answers.ai_evaluation_consent`. Ashby Yes/No buttons: use real clicks; a JS `click()` can land on the wrong question.
+- **GetYourGuide**: Ashby board slug is `getyourguide.careers` (jobs.ashbyhq.com/getyourguide.careers/<jid>/application).
+- **HDI (job.hdi.group)**: use the hidden "QuickApply" link (hdi-production.p78quickapply.com …?Reqid=<id>) — no account; CV upload →
+  tag it "Lebenslauf" → data page (UI5 selects: open, then type a letter / arrows + Enter). Anrede is required although unmarked until submit.
+- **adesso (jobs.adesso-group.com, SuccessFactors j2w)**: BayernLB pattern — form not in the DOM, drive by screenshots. One upload slot
+  "CV / komplette Unterlagen" → merged PDF (kb_bundle --merge). Street/PLZ/date fields may not accept typing (optional).
+- **valantic**: modal form with native inputs (native value setter works); salary is a range slider (set value + input event).
+- **SmartRecruiters (ServiceNow)**: CV parse can split one job into two experience entries with a wrong title — delete the bad one.
+- **Personio (SQUER)**: "Add file" works only when the click and `upload_file.sh` run one after the other (not in parallel).

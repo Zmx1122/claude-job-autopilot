@@ -38,6 +38,22 @@ Keys of each object:
 - "city": job location if stated, else "".
 - "salary": salary figure or range for THIS job if stated, else "".
 - "note": one short sentence useful for a tracker (interview date/time, rejection reason, deadline, start date), else "".
+- "step": what kind of step this is (it drives the stage column: 一面邀请, 已参加一面, 参加二面后被拒 …):
+  for "interview": "invite" = a NEW invitation to an interview round (proposed slots, booking link, availability request, a
+     one-way video interview to record); "scheduling" = confirming, moving or reminding of a round that was already proposed,
+     or sending the meeting link for it; "assessment" = online test, coding challenge, case or take-home task, assessment centre
+     (not an interview with a person); "documents" = asks for certificates, transcripts, references or other documents;
+     "feedback" = says how an interview went / that the process continues, with no new date.
+  for "own_message": "accept" (accepts or books a proposed slot), "reschedule", "withdraw" (cancels the application or
+     declines the interview), "documents" (sends requested documents), "other".
+  other categories: "".
+- "round": for "interview" the round number when the email says it ("zweites Gespräch", "second interview", "2nd round",
+  "Fachgespräch nach dem Kennenlernen" = 2). A first get-to-know call = 1 only if the email calls it first; otherwise null.
+  "final round" without a number → null. Other categories: null.
+- "interview_date": "YYYY-MM-DD" of the interview this email proposes or confirms, when exactly one date is fixed; else "".
+- "after_interview": for "rejection": "yes" when the email refers to an interview, call or conversation that took place
+  ("nach unserem Gespräch", "thank you for your time speaking with us", "after careful consideration of your interviews"),
+  "no" when it is clearly a rejection based on the documents only, else "". Other categories: "".
 
 Careful: "Your application at X" / "Ihre Bewerbung" can be a confirmation or a rejection; decide from the body.
 A reply written by the candidate is always "own_message". When done, reply only with the counts per category.
