@@ -59,11 +59,12 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
     **规则解析邮件效果差**：改为 LLM 分块分类 + 确定性匹配。
 17. **StepStone/Indeed receipts have no company; generic titles collide** ("AI Engineer" × 5). → Match by platform + exact title + date, prefer rows without evidence; compare company names without spaces ("Auto Scout24" = "AutoScout24"); aliases in `config/overrides.json`.
     **回执没有公司名、通用职位名撞车**：按平台 + 完全相同职位 + 日期匹配；公司名去空格比较；别名表。
-18. **Notion cannot embed claude.ai pages.** → PNG charts from `tools/charts_png.py` in Notion, interactive version linked. (Mermaid code blocks were dropped 2026-11-10: Notion shows their source code above every chart.)
-    **Notion 不能嵌入 claude.ai 页面**：Notion 里只放脚本生成的 PNG 图，交互版放链接（Mermaid 代码块会显示源码，已删除）。
-    The Notion API cannot move a block or set a page to full width. The dashboard section is inserted with `after:` the
-    "Dashboard" heading so it sits above the database; full width is a one-time click (••• → Full width) by the user.
-    Notion API 不能移动块，也不能设置全宽：仪表盘用 `after:` 插在数据库上方；全宽由用户在页面菜单里点一次。
+18. **Notion cannot embed claude.ai pages.** → Native Notion chart views of the database (live, no script), created through the Notion connector. History: Mermaid code blocks showed their source code; script-drawn PNGs had to be re-uploaded after every sync — both dropped 2026-11-10.
+    **Notion 不能嵌入 claude.ai 页面**：Notion 里用数据库自带的图表视图（实时更新，无需脚本），通过 Notion connector 创建。
+    The public REST API (integration token) cannot create views, move blocks or set full width; the Notion connector (MCP)
+    can: `notion-create-view` (chart), `replace_content` to arrange the page, `full_width: true`. Charts cannot group a date
+    by week → formula column Applied Week. Free plan: one chart only.
+    公开 REST API 不能建视图、移动块、设全宽；Notion connector 可以。图表不能按周分组日期 → 用公式列 Applied Week。免费版只能有一个图表。
 
 ## Scheduling · 定时
 19. Scheduled tasks run only while the Mac is awake and the Claude app is open. Submitting always needs the user anyway.
