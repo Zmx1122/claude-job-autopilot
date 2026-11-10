@@ -61,6 +61,9 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
     **回执没有公司名、通用职位名撞车**：按平台 + 完全相同职位 + 日期匹配；公司名去空格比较；别名表。
 18. **Notion cannot embed claude.ai pages.** → PNG charts from `tools/charts_png.py` in Notion, interactive version linked. (Mermaid code blocks were dropped 2026-11-10: Notion shows their source code above every chart.)
     **Notion 不能嵌入 claude.ai 页面**：Notion 里只放脚本生成的 PNG 图，交互版放链接（Mermaid 代码块会显示源码，已删除）。
+    The Notion API cannot move a block or set a page to full width. The dashboard section is inserted with `after:` the
+    "Dashboard" heading so it sits above the database; full width is a one-time click (••• → Full width) by the user.
+    Notion API 不能移动块，也不能设置全宽：仪表盘用 `after:` 插在数据库上方；全宽由用户在页面菜单里点一次。
 
 ## Scheduling · 定时
 19. Scheduled tasks run only while the Mac is awake and the Claude app is open. Submitting always needs the user anyway.

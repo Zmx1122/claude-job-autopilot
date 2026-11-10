@@ -12,10 +12,21 @@ Both dashboards read only the Notion database. The layout is fixed; a refresh ch
 1. `tools/dashboard_data.py` → `data/dashboard/data.json` (aggregates) and `applications.json` (rows).
 2. `tools/charts_png.py` → `pie.png` (stage of every application), `flow.png` (Applied → Confirmed → Interview → Offer with exits),
    `weekly.png` (applications per ISO week by platform).
-3. `tools/notion_page.py` → replaces the "Dashboard" section at the top of the Notion page: callout that starts with
-   **Total applications: N** (sent; jobs tracked but never applied to are counted separately), link to the interactive dashboard,
-   and the three PNGs only (uploaded through the Notion file-upload API). No Mermaid code blocks: Notion shows their source
-   code above each chart (user decision 2026-11-10).
+3. `tools/notion_page.py` → replaces the "Dashboard" section at the **top** of the Notion page. Fixed layout (user decision 2026-11-10):
+
+   | Order | Block |
+   |---|---|
+   | 1 | "Dashboard" heading, callout starting with **Total applications: N** (sent; jobs tracked but never applied to counted separately), link to the interactive dashboard |
+   | 2 | two columns side by side: `pie.png` (stage of every application) · `flow.png` (flow between stages) |
+   | 3 | "Applications per week" heading + `weekly.png`, full width, on its own |
+   | 4 | "Which applications get interviews" table (lower part, only once rows carry a mode or posting date) |
+   | 5 | "Database" heading + the Job Applications database, always at the bottom |
+
+   The section is everything between the "Dashboard" heading and the database; each run replaces it. The API cannot move the
+   database, so on an older page (database first) the heading above the database is reused as the "Dashboard" heading. If the
+   database is the very first block, the script says so: the user drags the database to the bottom once.
+   Only the PNGs (uploaded through the Notion file-upload API); no Mermaid code blocks, Notion shows their source code.
+   For wider charts the user turns on ••• → **Full width** for the page once (the API cannot set it).
 Needs at least one row; with an empty database it stops with a message.
 
 ## Interactive dashboard (claude.ai artifact)
