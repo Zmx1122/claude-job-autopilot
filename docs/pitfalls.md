@@ -59,8 +59,8 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
     **规则解析邮件效果差**：改为 LLM 分块分类 + 确定性匹配。
 17. **StepStone/Indeed receipts have no company; generic titles collide** ("AI Engineer" × 5). → Match by platform + exact title + date, prefer rows without evidence; compare company names without spaces ("Auto Scout24" = "AutoScout24"); aliases in `config/overrides.json`.
     **回执没有公司名、通用职位名撞车**：按平台 + 完全相同职位 + 日期匹配；公司名去空格比较；别名表。
-18. **Notion cannot embed claude.ai pages.** → Native Mermaid charts + PNGs in Notion, interactive version linked.
-    **Notion 不能嵌入 claude.ai 页面**：Notion 里用 Mermaid + 图片，交互版放链接。
+18. **Notion cannot embed claude.ai pages.** → PNG charts from `tools/charts_png.py` in Notion, interactive version linked. (Mermaid code blocks were dropped 2026-11-10: Notion shows their source code above every chart.)
+    **Notion 不能嵌入 claude.ai 页面**：Notion 里只放脚本生成的 PNG 图，交互版放链接（Mermaid 代码块会显示源码，已删除）。
 
 ## Scheduling · 定时
 19. Scheduled tasks run only while the Mac is awake and the Claude app is open. Submitting always needs the user anyway.

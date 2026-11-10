@@ -1,6 +1,6 @@
 ---
 name: job-dashboard
-description: Build or refresh the job-search dashboards from the Notion tracker — a Dashboard section on the Notion "Job Search" page (headline numbers, native Mermaid pie / sankey / weekly bar charts, PNG charts) and an interactive claude.ai artifact dashboard with the same three charts. Use for "dashboard", "charts", "update the dashboard", "可视化", "看板", or the weekly scheduled run.
+description: Build or refresh the job-search dashboards from the Notion tracker — a Dashboard section on the Notion "Job Search" page (headline numbers with the total number of applications, PNG charts drawn by the script) and an interactive claude.ai artifact dashboard with the same three charts. Use for "dashboard", "charts", "update the dashboard", "可视化", "看板", or the weekly scheduled run.
 ---
 
 # Dashboards
@@ -12,9 +12,10 @@ Both dashboards read only the Notion database. The layout is fixed; a refresh ch
 1. `tools/dashboard_data.py` → `data/dashboard/data.json` (aggregates) and `applications.json` (rows).
 2. `tools/charts_png.py` → `pie.png` (stage of every application), `flow.png` (Applied → Confirmed → Interview → Offer with exits),
    `weekly.png` (applications per ISO week by platform).
-3. `tools/notion_page.py` → replaces the "Dashboard" section at the top of the Notion page: callout with key numbers,
-   link to the interactive dashboard, three Mermaid code blocks (Notion renders `pie`, `sankey-beta`, `xychart-beta` natively)
-   and the three PNGs (uploaded through the Notion file-upload API).
+3. `tools/notion_page.py` → replaces the "Dashboard" section at the top of the Notion page: callout that starts with
+   **Total applications: N** (sent; jobs tracked but never applied to are counted separately), link to the interactive dashboard,
+   and the three PNGs only (uploaded through the Notion file-upload API). No Mermaid code blocks: Notion shows their source
+   code above each chart (user decision 2026-11-10).
 Needs at least one row; with an empty database it stops with a message.
 
 ## Interactive dashboard (claude.ai artifact)
