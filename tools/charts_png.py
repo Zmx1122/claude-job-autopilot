@@ -60,6 +60,19 @@ for l in rows: n = nodes.setdefault(l['target'], dict(col=l['column'], kind=l['k
 for s in stages[:3]:
     src = nodes.get(s); y = src['y'] if src else None
     for l in [l for l in rows if l['source'] == s]: nodes[l['target']]['y'] = y; y += nodes[l['target']]['h'] + gap
+# Later columns hold few applications and would bunch up at the top: keep the stage node (Interview, Offer) at the top and
+# spread the exits (waiting / rejected / withdrawn) evenly down to the bottom edge. Band widths stay proportional.
+MINH = 4
+for c in (2, 3):
+    col = [n for n in nodes.values() if n['col'] == c]
+    prog = [n for n in col if n['kind'] == 'progress']; rest = sorted([n for n in col if n['kind'] != 'progress'], key=lambda n: n['y'])
+    if not rest: continue
+    top = (prog[0]['y'] + max(prog[0]['h'], MINH) + gap * 3) if prog else padT
+    free = (H - padB) - top - sum(max(n['h'], MINH) for n in rest)
+    step = free / (len(rest) - 1) if len(rest) > 1 else 0
+    if free <= 0: continue
+    y = top if len(rest) > 1 else top + free / 2
+    for n in rest: n['y'] = y; y += max(n['h'], MINH) + step
 colX = lambda c: padL + c * ((W - padL - padR - nodeW) / 3)
 KC = {'progress': COL['Applied'], 'waiting': (200, 196, 190), 'rejected': COL['Rejected'], 'withdrawn': (170, 166, 160)}
 img = Image.new('RGB', (W * S, H * S), BG); dr = ImageDraw.Draw(img)
@@ -71,19 +84,19 @@ def bezier(x0, y0, x1, y1, steps=40):
 overlay = Image.new('RGBA', img.size, (0, 0, 0, 0)); od = ImageDraw.Draw(overlay)
 for l in rows:
     s, t = nodes[l['source']], nodes[l['target']]; w = l['value'] * scale
-    x0, x1 = colX(s['col']) + nodeW, colX(t['col']); y0 = s['y'] + s['out'] + w / 2; s['out'] += w; y1 = t['y'] + t['h'] / 2
+    x0, x1 = colX(s['col']) + nodeW, colX(t['col']); y0 = s['y'] + s['out'] + w / 2; s['out'] += w; y1 = t['y'] + max(t['h'], MINH) / 2
     top = bezier(x0, y0 - w / 2, x1, y1 - w / 2); bot = bezier(x0, y0 + w / 2, x1, y1 + w / 2)
     od.polygon([(x * S, y * S) for x, y in top + bot[::-1]], fill=KC[l['kind']] + (110 if l['kind'] == 'progress' else 80,))
 img.paste(Image.alpha_composite(img.convert('RGBA'), overlay).convert('RGB')); dr = ImageDraw.Draw(img)
 for name, n in nodes.items():
-    x = colX(n['col']); dr.rounded_rectangle([x * S, n['y'] * S, (x + nodeW) * S, (n['y'] + max(2, n['h'])) * S], radius=2 * S, fill=KC[n['kind']])
+    x = colX(n['col']); dr.rounded_rectangle([x * S, n['y'] * S, (x + nodeW) * S, (n['y'] + max(MINH, n['h'])) * S], radius=2 * S, fill=KC[n['kind']])
     cnt = round(n['h'] / scale)
     if n['kind'] == 'progress': text(dr, (x, n['y'] - 22), f'{name}  {cnt}', 14, FG, True)
 # side labels with collision push
 for c in (1, 2, 3):
     last = -1e9
     for name, n in sorted([(k, v) for k, v in nodes.items() if v['col'] == c and v['kind'] != 'progress'], key=lambda kv: kv[1]['y']):
-        ly = max(n['y'] + max(2, n['h']) / 2, last + 16); last = ly; text(dr, (colX(c) + nodeW + 8, ly), f"{name}  {round(n['h'] / scale)}", 12, MUTED, False, 'lm')
+        ly = max(n['y'] + max(MINH, n['h']) / 2, last + 16); last = ly; text(dr, (colX(c) + nodeW + 8, ly), f"{name}  {round(n['h'] / scale)}", 12, MUTED, False, 'lm')
 save(img, 'flow.png')
 
 # ---- weekly stacked bars ----
