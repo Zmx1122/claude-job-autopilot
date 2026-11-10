@@ -32,8 +32,9 @@ for s in order:
         mid = math.radians(a + sweep / 2); text(dr, (cx + math.cos(mid) * (R + r) / 2, cy + math.sin(mid) * (R + r) / 2), str(n), 15, BG, True, 'mm')
     a += sweep
 dr.ellipse([(cx - r) * S, (cy - r) * S, (cx + r) * S, (cy + r) * S], fill=BG)
-text(dr, (cx, cy - 10), str(total), 34, FG, False, 'mm'); text(dr, (cx, cy + 22), 'applications', 13, MUTED, False, 'mm')
-text(dr, (380, 40), 'Where every application stands', 17, FG, True)
+text(dr, (cx, cy - 10), str(total), 34, FG, False, 'mm'); text(dr, (cx, cy + 22), 'jobs tracked', 13, MUTED, False, 'mm')
+_bs = d['by_status']; _sent = sum(_bs.values()) - _bs.get('Skipped', 0) - _bs.get('Shortlisted', 0) - _bs.get('Seen', 0)
+text(dr, (380, 40), f"Total applications: {_sent}", 17, FG, True)
 y = 80
 for s in order:
     n = bs.get(s, 0)

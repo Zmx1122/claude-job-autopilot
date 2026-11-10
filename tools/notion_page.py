@@ -1,4 +1,5 @@
-"""Rebuild the Dashboard section on the Notion Job Search page: headline numbers, link to the interactive dashboard, chart images."""
+"""Rebuild the Dashboard section on the Notion Job Search page: headline numbers (total applications first), link to the interactive
+dashboard, and the chart images from tools/charts_png.py (run dashboard_data.py and charts_png.py first). No Mermaid code blocks."""
 import json, os, sys, requests
 import datetime as _dt
 from common import *
@@ -28,6 +29,8 @@ for b in blocks:
     if inside: requests.delete(f"https://api.notion.com/v1/blocks/{b['id']}", headers=H); removed += 1
 # 2. build the new section
 s = d['by_status']; f = d['funnel']; total = d['total']; open_n = len(d['open_rows']); rej = s.get('Rejected', 0)
+not_sent = s.get('Skipped', 0) + s.get('Shortlisted', 0) + s.get('Seen', 0)   # 放弃投递 / 待定: tracked, never sent
+sent = total - not_sent
 med = d['response_days'][len(d['response_days']) // 2] if d['response_days'] else None
 if not d['total']:
     raise SystemExit('No applications in the database yet; the dashboard is built after the first rows exist.')
@@ -36,7 +39,7 @@ since = min((r['applied'] for r in d['rows'] if r.get('applied')), default=today
 children = [
  {'object': 'block', 'type': 'heading_1', 'heading_1': {'rich_text': [t(MARK)]}},
  {'object': 'block', 'type': 'callout', 'callout': {'icon': {'emoji': '📊'}, 'rich_text': [
-   t(f'{total} applications since {since}', bold=True), t(f' · {open_n} open · {f["Interview"]} reached interview · {f["Offer"]} offer · {rej} rejected ({rej/total:.0%})' + (f' · median {med} days to a first decision' if med is not None else '') + f'\nUpdated {today} by the job-autopilot sync.')]}},
+   t(f'Total applications: {sent}', bold=True), t(f' since {since} ({total} jobs tracked, {not_sent} not applied)'), t(f' · {open_n} open · {f["Interview"]} reached interview · {f["Offer"]} offer · {rej} rejected ({rej/max(sent, 1):.0%})' + (f' · median {med} days to a first decision' if med is not None else '') + f'\nUpdated {today} by the job-autopilot sync.')]}},
 ]
 if DASH_URL:
     children.append({'object': 'block', 'type': 'paragraph', 'paragraph': {'rich_text': [t('Interactive version with hover details, open pipeline table and search: '), {'type': 'text', 'text': {'content': 'Job Search Dashboard', 'link': {'url': DASH_URL}}}]}})
@@ -51,25 +54,9 @@ if known:
     children += [{'object': 'block', 'type': 'heading_2', 'heading_2': {'rich_text': [t('Which applications get interviews')]}},
                  table(['Group', 'Applied', 'Interview', 'Rate'], [[k, v['applied'], v['interview'], f"{v['rate']:.0%}"] for k, v in known]),
                  {'object': 'block', 'type': 'paragraph', 'paragraph': {'rich_text': [t('Tailored vs template and how old the posting was when you applied (standards/de/apply-strategy.md). Shift effort to the groups with the higher rate.', italic=True)]}}]
-# Mermaid blocks render natively in Notion (pie, sankey-beta, xychart-beta)
-order = ['Applied', 'Confirmed', 'Interview', 'Offer', 'Rejected', 'Withdrawn', 'Skipped']
-pie = 'pie showData\n    title Where every application stands\n' + ''.join(f'    "{k}" : {s[k]}\n' for k in order if s.get(k))
-wait = {'Applied': 'No reply yet', 'Confirmed': 'Waiting after confirmation', 'Interview': 'Interview pending'}
-def sk_name(src, tgt):
-    if tgt in ('Confirmed', 'Interview', 'Offer'): return tgt
-    if tgt.startswith('Waiting at '): return wait[tgt[11:]]
-    return f'{tgt} after {src.lower()}'
-sankey = 'sankey-beta\n\n' + ''.join(f"{l['source']},{sk_name(l['source'], l['target'])},{l['value']}\n" for l in d['sankey'])
-wk = d['weekly']; plats = [p for p in ['LinkedIn', 'StepStone', 'Indeed', 'Xing', 'Other'] if any(w.get(p) for w in wk)]
-xy = 'xychart-beta\n    title "Applications per week"\n    x-axis [' + ', '.join('"W' + w['week'][6:] + '"' for w in wk) + ']\n    y-axis "Applications" 0 --> ' + str(max(w['total'] for w in wk) + 2) + '\n    bar [' + ', '.join(str(w['total']) for w in wk) + ']\n'
-def code(src): return {'object': 'block', 'type': 'code', 'code': {'language': 'mermaid', 'rich_text': [t(src)]}}
-children += [
- {'object': 'block', 'type': 'heading_2', 'heading_2': {'rich_text': [t('Stage of every application')]}}, code(pie),
- {'object': 'block', 'type': 'heading_2', 'heading_2': {'rich_text': [t('Flow between stages')]}}, code(sankey),
- {'object': 'block', 'type': 'heading_2', 'heading_2': {'rich_text': [t('Applications per week')]}}, code(xy),
- {'object': 'block', 'type': 'heading_2', 'heading_2': {'rich_text': [t('Charts as images')]}},
-]
-for name, caption in (('pie.png', 'Where every application stands. Applied = platform receipt only, Confirmed = company acknowledged receipt.'),
+# Charts: only the PNGs drawn by tools/charts_png.py (Mermaid code blocks showed their source code above every chart)
+children += [{'object': 'block', 'type': 'heading_2', 'heading_2': {'rich_text': [t(f'Charts · total applications: {sent}')]}}]
+for name, caption in (('pie.png', f'Where every application stands: {sent} applications sent, {not_sent} jobs tracked but not applied ({total} rows). Applied = platform receipt only, Confirmed = company acknowledged receipt.'),
                       ('flow.png', 'How applications flow between stages. Band width = number of applications.'),
                       ('weekly.png', 'Applications per ISO week, by platform.')):
     fid = upload(os.path.join(OUTDIR, name))
