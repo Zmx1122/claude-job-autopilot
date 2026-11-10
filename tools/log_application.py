@@ -19,8 +19,13 @@ a = ap.parse_args()
 a.status = a.status or 'Applied'; a.source = a.source or 'auto'; a.platform = a.platform or 'Other'; a.date = a.date or str(date.today())
 env = load_env()
 rows = notion_rows(env)
-hit = next((r for r in rows if a.url and r['url'] and r['url'].split('?')[0] == a.url.split('?')[0]), None) or \
-      next((r for r in rows if same_company(a.company, r['company']) and (title_sim(a.title, r['title']) or 0) >= 0.8), None)
+hit = next((r for r in rows if a.url and r['url'] and r['url'].split('?')[0] == a.url.split('?')[0]), None)
+if not hit:
+    # Fall back to company + similar title only when the URLs cannot tell the postings apart (one side has none).
+    # Two postings with different URLs are different jobs even if the title differs only by "Senior" (title_sim ignores it):
+    # 2026-11-09 "Senior Consultant" overwrote "Consultant" at the same company.
+    hit = next((r for r in rows if same_company(a.company, r['company']) and (title_sim(a.title, r['title']) or 0) >= 0.8
+                and not (a.url and r['url'] and r['url'].split('?')[0] != a.url.split('?')[0])), None)
 props = {'Title': {'title': [{'text': {'content': a.title}}]}, 'Company': rt(a.company), 'Platform': {'select': {'name': a.platform}},
          'Status': {'select': {'name': a.status}}, 'Source': {'select': {'name': a.source}}}
 if a.url: props['URL'] = {'url': a.url}
