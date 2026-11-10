@@ -110,6 +110,15 @@ for each platform), the salary rule, the fit threshold, the startup rule and the
    modes ("🎯 = I write a CV for this posting and ask you a few questions; 📄 = your role-family CV"). The user may switch a
    job's mode when picking ("3 as template").
 4. Log every shown job: `python3 tools/log_application.py --status Shortlisted --mode <mode> --posted <date> ...` (so tomorrow's scan skips it).
+   Jobs the user does not pick (or skips later) → `--status Skipped`: Stage and Applied On become **放弃投递** (never leave Applied On blank once decided).
+
+### Tracker labels (Notion)
+- **Applied On** is text: the application date `YYYY-MM-DD`, or `放弃投递` for jobs never applied to; blank only while the user has not decided (待定).
+- **Stage** is the detailed progress, Status the coarse one derived from it (labels and rules: `tools/stage.py`):
+  待定 · 放弃投递 · 投递失败 · 已投递 · 已确认收到 · 补交材料 · 测评中 / 测评后被拒 / 测评后撤回 · 简历被拒 · 投递后撤回 ·
+  N面邀请 · 已参加N面 · N面邀请后撤回 · N面后撤回 · 参加N面后被拒 (N = 一 二 三 四) · 收到Offer · 接受Offer · 拒绝Offer.
+- `log_application.py` sets it from `--status` (Applied → 已投递, Skipped → 放弃投递, Withdrawn → the matching 撤回 label);
+  `--stage <label>` sets it directly (e.g. an interview agreed by phone: `--stage 一面邀请`; `--stage 接受Offer`). The mail sync moves it afterwards.
 
 ### Widening the search (the user is not happy with the list)
 Triggers: "show more", "not enough", "too few", "放宽", "扩大范围", "再多一点", "不要按薪资过滤", "把过去一周也加上".

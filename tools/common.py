@@ -80,8 +80,11 @@ def flatten(p):
     def dt(k): return (((pr.get(k) or {}).get('date') or {}).get('start') or '')
     def url(k): return (pr.get(k) or {}).get('url') or ''
     def chk(k): return bool((pr.get(k) or {}).get('checkbox'))
+    # Applied On is a text column ("2026-11-10", or "放弃投递" for jobs never applied to); older databases have a date column.
+    applied_text = dt('Applied On') or txt('Applied On')
     return dict(id=p['id'], notion_url=p.get('url', ''), title=ttl('Title'), company=txt('Company'), city=txt('City'), salary=txt('Salary Range'),
-                platform=sel('Platform'), status=sel('Status'), source=sel('Source'), applied=dt('Applied On'), first_seen=dt('First Seen'),
+                platform=sel('Platform'), status=sel('Status'), source=sel('Source'), applied=iso_day(applied_text), applied_text=applied_text,
+                stage=sel('Stage'), interview_date=dt('Interview Date'), first_seen=dt('First Seen'),
                 last_email=dt('Last Email'), url=url('URL'), evidence=url('Email Evidence'), thread=url('Email Thread'),
                 job_id=txt('Job ID'), events=txt('Events'), notes=txt('Notes'),
                 mode=sel('Mode'), cv_version=txt('CV Version'), cover_letter=chk('Cover Letter'), posted=dt('Posted'))
@@ -89,6 +92,30 @@ def flatten(p):
 
 def rt(s):
     return {'rich_text': [{'text': {'content': (s or '')[:1900]}}]}
+
+
+def iso_day(s):
+    """'2026-11-10' (or a longer ISO timestamp) → '2026-11-10'; anything else (e.g. '放弃投递') → ''."""
+    return s[:10] if re.match(r'\d{4}-\d\d-\d\d', s or '') else ''
+
+
+NOT_APPLIED = '放弃投递'   # Applied On text for jobs that were never applied to
+_DB_PROPS = {}
+
+
+def db_props(env):
+    """{column name: type} of the applications database (cached)."""
+    if not _DB_PROPS:
+        r = notion_call('GET', f"https://api.notion.com/v1/databases/{env['NOTION_DATABASE_ID']}", env)
+        _DB_PROPS.update({k: v['type'] for k, v in r.json().get('properties', {}).items()})
+    return _DB_PROPS
+
+
+def applied_value(env, v):
+    """Notion value for Applied On: text column (new) or date column (databases not migrated yet)."""
+    if db_props(env).get('Applied On') == 'date':
+        return {'date': {'start': iso_day(v)}} if iso_day(v) else {'date': None}
+    return rt(v)
 
 
 def notion_call(method, url, env, **kw):

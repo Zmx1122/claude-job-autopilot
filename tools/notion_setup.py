@@ -2,9 +2,12 @@
 
 usage: python3 tools/notion_setup.py [--force]
 Safe to re-run: if NOTION_DATABASE_ID is already set and reachable, it only verifies the schema and adds missing columns.
+It also migrates older databases: "Applied On" date → text (so rows never applied to can say "放弃投递"), existing dates are
+rewritten as "YYYY-MM-DD". Back up first (python3 tools/backup.py save); the column keeps its id, so views keep their sort.
 """
-import re, sys, requests
-from common import load_env, set_env_value, notion_headers
+import re, sys, time, requests
+from common import load_env, set_env_value, notion_headers, notion_rows, notion_call, rt
+from stage import STAGES, color
 
 SELECT = lambda opts: {'select': {'options': [{'name': n, 'color': c} for n, c in opts]}}
 SCHEMA = {
@@ -13,7 +16,9 @@ SCHEMA = {
     'City': {'rich_text': {}},
     'Salary Range': {'rich_text': {}},
     'First Seen': {'date': {}},
-    'Applied On': {'date': {}},
+    'Applied On': {'rich_text': {}},
+    'Stage': {'select': {'options': [{'name': n, 'color': color(n)} for n in STAGES]}},
+    'Interview Date': {'date': {}},
     'Last Email': {'date': {}},
     'Platform': SELECT([('LinkedIn', 'blue'), ('Indeed', 'purple'), ('StepStone', 'orange'), ('Xing', 'green'), ('Other', 'gray')]),
     'Status': SELECT([('Seen', 'gray'), ('Shortlisted', 'yellow'), ('Applied', 'blue'), ('Confirmed', 'purple'), ('Interview', 'orange'),
@@ -41,6 +46,20 @@ def page_id(s):
     return f'{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:]}'
 
 
+def migrate_applied_on(env, db, H):
+    """Applied On: date column → text column, values rewritten as YYYY-MM-DD."""
+    rows = notion_rows(env)
+    dates = {r['id']: r['applied'] for r in rows if r['applied']}
+    r = requests.patch(f'https://api.notion.com/v1/databases/{db}', headers=H, json={'properties': {'Applied On': {'rich_text': {}}}})
+    if r.status_code != 200:
+        raise SystemExit(f'Applied On: type change failed {r.status_code}: {r.text[:300]}')
+    for pid, d in dates.items():
+        x = notion_call('PATCH', f'https://api.notion.com/v1/pages/{pid}', env, json={'properties': {'Applied On': rt(d)}})
+        if x.status_code != 200: print('ERR', pid, x.status_code, x.text[:200])
+        time.sleep(0.34)
+    print(f'Applied On is now a text column; {len(dates)} dates rewritten as YYYY-MM-DD')
+
+
 def main():
     env = load_env(); H = notion_headers(env)
     parent = page_id(env.get('NOTION_PARENT_PAGE_ID'))
@@ -57,6 +76,8 @@ def main():
             if missing:
                 requests.patch(f'https://api.notion.com/v1/databases/{db}', headers=H, json={'properties': missing})
             print(f'database ok ({db}); added columns: {list(missing) or "none"}')
+            if have.get('Applied On', {}).get('type') == 'date':
+                migrate_applied_on(env, db, H)
             return
         print('stored NOTION_DATABASE_ID is not reachable, creating a new database')
     body = {'parent': {'type': 'page_id', 'page_id': parent}, 'is_inline': True,

@@ -3,20 +3,23 @@
 usage: python3 tools/log_application.py --title "AI Engineer (m/w/d)" --company "ACME AG" --platform LinkedIn \
           --status Applied --url https://... [--city Munich] [--salary "80-95k"] [--notes "..."] [--source auto]
           [--mode tailored|template] [--cv Jane-Doe-CV-ACME.pdf] [--cover-letter] [--posted 2026-11-03]
-status: Seen | Shortlisted | Applied | Skipped (later stages come from the mail sync)
+status: Seen | Shortlisted | Applied | Skipped | Withdrawn (later stages come from the mail sync)
+The detailed Stage column follows the status: Applied → 已投递, Skipped → 放弃投递 (and Applied On = "放弃投递" unless the row was
+applied before), Withdrawn → the matching withdrawal label (一面邀请后撤回, 一面后撤回, 投递后撤回 …). --stage sets it explicitly.
 Use it right after every submit, and for every job you shortlist or skip during a scan, so tomorrow's scan dedupes against it.
 """
 import argparse, csv, os
 from datetime import date
-from common import DATA, load_env, notion_rows, notion_call, rt, same_company, title_sim
+from common import DATA, load_env, notion_rows, notion_call, rt, same_company, title_sim, db_props, applied_value, NOT_APPLIED
+from stage import from_status, withdrawn_stage, parse, STAGES, status_of
 
 ap = argparse.ArgumentParser()
-for k in ('title', 'company', 'platform', 'status', 'url', 'city', 'salary', 'notes', 'source', 'date', 'mode', 'cv', 'posted'):
+for k in ('title', 'company', 'platform', 'status', 'url', 'city', 'salary', 'notes', 'source', 'date', 'mode', 'cv', 'posted', 'stage'):
     ap.add_argument('--' + k, default='')
 ap.add_argument('--cover-letter', action='store_true')
 ap.add_argument('--dry-run', action='store_true')
 a = ap.parse_args()
-a.status = a.status or 'Applied'; a.source = a.source or 'auto'; a.platform = a.platform or 'Other'; a.date = a.date or str(date.today())
+status_given = bool(a.status); a.status = a.status or 'Applied'; a.source = a.source or 'auto'; a.platform = a.platform or 'Other'; a.date = a.date or str(date.today())
 env = load_env()
 rows = notion_rows(env)
 hit = next((r for r in rows if a.url and r['url'] and r['url'].split('?')[0] == a.url.split('?')[0]), None)
@@ -28,10 +31,25 @@ if not hit:
                 and not (a.url and r['url'] and r['url'].split('?')[0] != a.url.split('?')[0])), None)
 props = {'Title': {'title': [{'text': {'content': a.title}}]}, 'Company': rt(a.company), 'Platform': {'select': {'name': a.platform}},
          'Status': {'select': {'name': a.status}}, 'Source': {'select': {'name': a.source}}}
+if hit and not status_given:   # e.g. only adding a note after a reply: never move an Interview row back to Applied
+    a.status = hit['status']; del props['Status']
+    for k in ('Platform', 'Source'): props.pop(k)
 if a.url: props['URL'] = {'url': a.url}
 if a.city: props['City'] = rt(a.city)
 if a.salary: props['Salary Range'] = rt(a.salary)
-if a.status in ('Applied',): props['Applied On'] = {'date': {'start': a.date}}
+if a.status in ('Applied',) and (status_given or not hit): props['Applied On'] = applied_value(env, a.date)
+if a.status == 'Skipped' and not (hit and hit.get('applied')): props['Applied On'] = applied_value(env, NOT_APPLIED)
+if 'Stage' in db_props(env) and (status_given or a.stage or not hit):
+    cur = (hit or {}).get('stage') or from_status((hit or {}).get('status', ''))
+    if a.stage: stage = a.stage
+    elif a.status == 'Withdrawn': stage = withdrawn_stage(cur)
+    elif a.status == 'Applied': stage = cur if parse(cur)['phase'] not in ('', 'pre', 'skipped', 'failed') else '已投递'
+    elif a.status == 'Skipped': stage = cur if parse(cur)['phase'] == 'failed' else '放弃投递'
+    elif a.status in ('Shortlisted', 'Seen') and not hit: stage = '待定'
+    else: stage = '' if a.status in ('Shortlisted', 'Seen') else from_status(a.status)
+    if a.stage and a.stage not in STAGES: raise SystemExit(f'unknown --stage {a.stage}; one of: {" ".join(STAGES)}')
+    if stage: props['Stage'] = {'select': {'name': stage}}
+    if a.stage: props['Status'] = {'select': {'name': status_of(a.stage)}}; a.status = status_of(a.stage)
 if a.mode: props['Mode'] = {'select': {'name': a.mode}}
 if a.cv: props['CV Version'] = rt(a.cv)
 if a.cover_letter: props['Cover Letter'] = {'checkbox': True}
