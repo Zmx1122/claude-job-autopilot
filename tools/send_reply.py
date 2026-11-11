@@ -1,7 +1,8 @@
 """Send ONE approved reply to an email in the application inbox (Gmail SMTP with the same app password as IMAP).
 
-usage: python3 tools/send_reply.py --gm-msgid <X-GM-MSGID from data/mail/dump.json> --body-file reply.txt [--to addr] [--subject "Re: …"] [--yes]
+usage: python3 tools/send_reply.py --gm-msgid <X-GM-MSGID from data/mail/dump.json> --body-file reply.txt [--to addr] [--subject "Re: …"] [--yes | --draft]
 Without --yes it only prints the complete message that WOULD be sent (dry run). With --yes it sends it.
+With --draft it saves the reply in Gmail's Drafts folder (IMAP APPEND, threaded) and sends nothing: the user edits and sends it in Gmail.
 Threading: In-Reply-To / References are taken from the original message; recipient = its Reply-To, else From (override with --to).
 From: IMAP_USER in .env, display name = candidate.full_name. Gmail keeps the copy in "Sent".
 Use only after the user approved the exact text (job-mail-sync skill, "Replying to interview invitations").
@@ -15,6 +16,7 @@ from common import load_env, load_profile, imap_login
 ap = argparse.ArgumentParser()
 ap.add_argument('--gm-msgid', required=True); ap.add_argument('--body-file', required=True)
 ap.add_argument('--to'); ap.add_argument('--subject'); ap.add_argument('--yes', action='store_true')
+ap.add_argument('--draft', action='store_true')
 a = ap.parse_args()
 
 env = load_env(); M = imap_login(env, readonly=True)
@@ -35,6 +37,14 @@ msg['Date'] = formatdate(localtime=True); msg['Message-ID'] = make_msgid(domain=
 if mid: msg['In-Reply-To'] = mid; msg['References'] = (refs + ' ' + mid).strip()
 msg.set_content(open(a.body_file, encoding='utf-8').read().strip() + '\n')
 print(msg.as_string())
+if a.draft:
+    import imaplib, time
+    D = imap_login(env, readonly=False)
+    typ, boxes = D.list()
+    box = next((b.decode().split(' "/" ')[-1] for b in boxes if b'\\Drafts' in b), '"[Gmail]/Drafts"')
+    typ, res = D.append(box, '(\\Draft)', imaplib.Time2Internaldate(time.time()), msg.as_bytes())
+    D.logout()
+    sys.exit(f'\nsaved as draft in {box}: {typ} — nothing sent' if typ == 'OK' else f'draft failed: {typ} {res}')
 if not a.yes:
     sys.exit('\n(dry run — nothing sent. Re-run with --yes after the user approved this exact text.)')
 with smtplib.SMTP_SSL('smtp.gmail.com', 465) as s:

@@ -17,7 +17,7 @@ Writes the kept list (with mode, mode_reason, age_days) to data/inbox/YYYY-MM-DD
 """
 import json, os, re, sys
 from datetime import date, timedelta
-from common import load_env, load_profile, notion_rows, same_company, title_sim
+from common import load_env, load_profile, notion_rows, same_company, title_sim, url_key
 import filters
 
 UNITS = {'h': 0, 'hour': 0, 'stunde': 0, 'minute': 0, 'min': 0, 'day': 1, 'tag': 1, 'week': 7, 'woche': 7, 'month': 30, 'monat': 30}
@@ -107,7 +107,7 @@ def main():
         sal = filters.salary_decision(j, s)
         if sal: return ('salary', sal)
         for r in rows:
-            same = (j.get('url') and r['url'] and r['url'].split('?')[0] == j['url'].split('?')[0]) or \
+            same = (j.get('url') and r['url'] and url_key(r['url']) == url_key(j['url'])) or \
                    (same_company(c, r['company']) and (title_sim(j.get('title'), r['title']) or 0) >= 0.8)
             if same:
                 if r['status'] == 'Shortlisted':

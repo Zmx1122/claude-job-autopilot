@@ -3,6 +3,7 @@
 usage: python3 tools/log_application.py --title "AI Engineer (m/w/d)" --company "ACME AG" --platform LinkedIn \
           --status Applied --url https://... [--city Munich] [--salary "80-95k"] [--notes "..."] [--source auto]
           [--mode tailored|template] [--cv Jane-Doe-CV-ACME.pdf] [--cover-letter] [--posted 2026-11-03]
+          [--stage 一面邀请] [--interview-date 2026-11-17T17:15:00+01:00]
 status: Seen | Shortlisted | Applied | Skipped | Withdrawn (later stages come from the mail sync)
 The detailed Stage column follows the status: Applied → 已投递, Skipped → 放弃投递 (and Applied On = "放弃投递" unless the row was
 applied before), Withdrawn → the matching withdrawal label (一面邀请后撤回, 一面后撤回, 投递后撤回 …). --stage sets it explicitly.
@@ -10,25 +11,26 @@ Use it right after every submit, and for every job you shortlist or skip during 
 """
 import argparse, csv, os
 from datetime import date
-from common import DATA, load_env, notion_rows, notion_call, rt, same_company, title_sim, db_props, applied_props, NOT_APPLIED
+from common import DATA, load_env, notion_rows, notion_call, rt, same_company, title_sim, url_key, db_props, applied_props, NOT_APPLIED
 from stage import from_status, withdrawn_stage, parse, STAGES, status_of
 
 ap = argparse.ArgumentParser()
 for k in ('title', 'company', 'platform', 'status', 'url', 'city', 'salary', 'notes', 'source', 'date', 'mode', 'cv', 'posted', 'stage'):
     ap.add_argument('--' + k, default='')
+ap.add_argument('--interview-date', dest='interview_date', default='')
 ap.add_argument('--cover-letter', action='store_true')
 ap.add_argument('--dry-run', action='store_true')
 a = ap.parse_args()
 status_given = bool(a.status); a.status = a.status or 'Applied'; a.source = a.source or 'auto'; a.platform = a.platform or 'Other'; a.date = a.date or str(date.today())
 env = load_env()
 rows = notion_rows(env)
-hit = next((r for r in rows if a.url and r['url'] and r['url'].split('?')[0] == a.url.split('?')[0]), None)
+hit = next((r for r in rows if a.url and r['url'] and url_key(r['url']) == url_key(a.url)), None)
 if not hit:
     # Fall back to company + similar title only when the URLs cannot tell the postings apart (one side has none).
     # Two postings with different URLs are different jobs even if the title differs only by "Senior" (title_sim ignores it):
     # 2026-11-09 "Senior Consultant" overwrote "Consultant" at the same company.
     hit = next((r for r in rows if same_company(a.company, r['company']) and (title_sim(a.title, r['title']) or 0) >= 0.8
-                and not (a.url and r['url'] and r['url'].split('?')[0] != a.url.split('?')[0])), None)
+                and not (a.url and r['url'] and url_key(r['url']) != url_key(a.url))), None)
 props = {'Title': {'title': [{'text': {'content': a.title}}]}, 'Company': rt(a.company), 'Platform': {'select': {'name': a.platform}},
          'Status': {'select': {'name': a.status}}, 'Source': {'select': {'name': a.source}}}
 if hit and not status_given:   # e.g. only adding a note after a reply: never move an Interview row back to Applied
@@ -54,6 +56,7 @@ if a.mode: props['Mode'] = {'select': {'name': a.mode}}
 if a.cv: props['CV Version'] = rt(a.cv)
 if a.cover_letter: props['Cover Letter'] = {'checkbox': True}
 if a.posted: props['Posted'] = {'date': {'start': a.posted}}
+if a.interview_date: props['Interview Date'] = {'date': {'start': a.interview_date}}   # YYYY-MM-DD or YYYY-MM-DDTHH:MM+01:00
 if a.notes: props['Notes'] = rt(((hit or {}).get('notes', '') + ' | ' if hit and hit.get('notes') else '') + a.notes)
 if a.dry_run:
     print(f"dry run: would {'update' if hit else 'create'} {a.company} · {a.title} → {a.status}" + (f" (matches existing row: {hit['title']})" if hit else '')); raise SystemExit(0)

@@ -118,6 +118,12 @@ def match(e):
     if t: return t, 'thread'
     pool = [r for r in rows + created if e['company'] and same_company(e['company'], r['company'])]
     if pool:
+        # identical title at the same company is that application, even if it is already closed — otherwise a repeat
+        # of a rejection lands on another open row of the company (BridgingIT, 2026-11-11)
+        exact = [r for r in pool if e['title'] and tscore(e, r) == 1.0]
+        if exact:
+            r = pick(exact, e)
+            if r: return r, 'company+title'
         live = [r for r in pool if is_open(r)] or pool
         if e['title']:
             scored = [(title_sim(e['title'], r['title']) or 0, r) for r in live]
