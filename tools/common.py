@@ -177,6 +177,14 @@ def norm_company(c):
     return re.sub(r'\s+', ' ', c).strip()
 
 
+def url_key(u):
+    """Posting URL for comparisons: drops tracking query parameters but keeps the ones that ARE the job id
+    (Indeed viewjob?jk=…, LinkedIn currentJobId=…). Stripping the whole query made every Indeed posting equal (2026-11-11)."""
+    base, _, q = (u or '').strip().partition('?')
+    keep = sorted(p for p in q.split('&') if p.split('=')[0] in ('jk', 'vjk', 'currentJobId', 'jobId', 'gh_jid'))
+    return base.rstrip('/') + ('?' + '&'.join(keep) if keep else '')
+
+
 def same_company(a, b):
     na, nb = norm_company(a), norm_company(b)
     if not na or not nb:

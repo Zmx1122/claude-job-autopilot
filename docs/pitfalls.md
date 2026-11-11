@@ -141,3 +141,35 @@ job title and no login form. Check a sample of snapshots by size and content aft
 Personio career pages (`*.jobs.personio.de`) and Dover (`jobs.dover.com`) show a Cloudflare "confirm you are human" box above the submit button.
 In the built-in browser it ends in "Überprüfung fehlgeschlagen" even when the user clicks it by hand, and the portal then reports "Fehler beim Senden der Bewerbung".
 Do not try to get around it. Prefill is wasted effort there: probe the page first (scroll to the bottom, look for the Cloudflare box) and list the job as "needs the user's normal browser" before filling anything.
+
+## Found on 2026-11-11 (scheduled daily run)
+- **Indeed URLs all looked identical to the tracker.** `dedupe.py` and `log_application.py` compared posting URLs with the whole query string cut off,
+  so every `de.indeed.com/viewjob?jk=…` posting matched the one Indeed row already in Notion ("already in tracker (Confirmed)"), and logging it would have
+  overwritten that row. Fixed with `common.url_key()`, which keeps job-id parameters (`jk`, `vjk`, `currentJobId`, `jobId`, `gh_jid`) and drops tracking ones.
+- **Mail sync re-matched an old rejection to a different row.** The 3-day window re-reads emails already applied the day before. When the row they
+  belonged to is already Rejected (terminal), `sync_mail.py` looks only at open rows of the same company and attached the old rejection to another
+  application there ("matched by company"). Fixed the same day: an identical title at the same company now wins even when that row is closed
+  (see the BridgingIT entry below). Still read every *Weak matches* rejection line in the dry run.
+- **"Senior X" and "X" at the same company tie in the mail sync** (`title_tokens` ignores "Senior"), so a rejection for one of them matches neither and
+  shows up under *Please confirm* as a new manual row. Fix before `--apply`: set the correct row's **Email Thread** in Notion to the email's thread link
+  (`common.gmail_link(thrid)`); the sync then matches by thread.
+- **LinkedIn job pages (`/jobs/view/<id>/`) render without the description** until you scroll: navigate, `computer scroll` down ~10, then `get_page_text`.
+  Job ids on the search page: `[componentkey^="job-card-component-ref-"]` (the cards have no `/jobs/view/` links any more).
+
+## Repeat rejection mail landed on another open row of the same company (2026-11-11)
+The mail sync matched a BridgingIT rejection for "AI Engineer" (row already Rejected) to the company's other, still open row
+"GenAI Solutions Architect", because the matcher only looked at open rows first. → `sync_mail.py` now prefers a row with an
+identical title at the same company even when that row is closed. Always read "Stage changes" in the dry run before `--apply`.
+
+## Portal lessons from the 2026-11-11 batch
+- **Viewport resize shifts coordinates.** After `resize_window` (or when the user changes the pane width) the app clears the emulated size;
+  clicks by old coordinates miss and `upload_file.sh` reports "no file sheet open". Take a fresh screenshot before every coordinate click.
+- **mein-check-in.de (DZ HYP, Volksbank-style portals):** hides "Jetzt hier bewerben" below ~800 px width (widen the tab). Date fields
+  need real typing + Tab (a hidden `_final` field takes the ISO date); a JS `.click()` on "Bewerbung abschicken" bounces back to page 1 —
+  use a real click. The portal mails a resume login after the first page; that is not a confirmation.
+- **SuccessFactors (DZ BANK, DekaBank, SIGNAL IDUNA on career5.successfactors.eu):** one candidate session at a time — logging in to a
+  second company logs the first out. Finish one company before the user logs in to the next. Comboboxes: focus the input, click it, then
+  dispatch mousedown/mouseup/click on the `li` in the list named by `aria-controls`. Upload: "+" → "Von Gerät hochladen" → `upload_file.sh`.
+- **MEDIAN (karriere.median-kliniken.de):** AJAX upload shows the file name but the server answered "Bitte fügen Sie Ihrer Bewerbung
+  Anlagen bei" twice; a new required field "Wie haben Sie uns gefunden?" appears only after the first submit. Hand the upload to the user.
+- **Workday (Deutsche Bank):** `applyManually` works; dropdowns are `button[aria-haspopup=listbox]` → click → `[role=option]` click.
