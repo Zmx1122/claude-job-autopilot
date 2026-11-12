@@ -17,8 +17,6 @@ SCHEMA = {
     'Salary Range': {'rich_text': {}},
     'First Seen': {'date': {}},
     'Applied On': {'rich_text': {}},
-    'Applied Date': {'date': {}},          # same date as Applied On, as a real date (native Notion charts)
-    'Applied Week': {'formula': {'expression': 'if(empty(prop("Applied Date")), "", formatDate(prop("Applied Date"), "GGGG-[W]WW"))'}},
     'Stage': {'select': {'options': [{'name': n, 'color': color(n)} for n in STAGES]}},
     'Interview Date': {'date': {}},
     'Last Email': {'date': {}},
@@ -62,17 +60,6 @@ def migrate_applied_on(env, db, H):
     print(f'Applied On is now a text column; {len(dates)} dates rewritten as YYYY-MM-DD')
 
 
-def fill_applied_date(env):
-    """New Applied Date column: copy every ISO date from Applied On."""
-    n = 0
-    for r in notion_rows(env):
-        if r['applied']:
-            x = notion_call('PATCH', f"https://api.notion.com/v1/pages/{r['id']}", env, json={'properties': {'Applied Date': {'date': {'start': r['applied']}}}})
-            if x.status_code != 200: print('ERR', r['id'], x.status_code, x.text[:200])
-            n += 1; time.sleep(0.34)
-    print(f'Applied Date filled for {n} rows')
-
-
 def main():
     env = load_env(); H = notion_headers(env)
     parent = page_id(env.get('NOTION_PARENT_PAGE_ID'))
@@ -91,8 +78,6 @@ def main():
             print(f'database ok ({db}); added columns: {list(missing) or "none"}')
             if have.get('Applied On', {}).get('type') == 'date':
                 migrate_applied_on(env, db, H)
-            if 'Applied Date' in missing:
-                fill_applied_date(env)
             return
         print('stored NOTION_DATABASE_ID is not reachable, creating a new database')
     body = {'parent': {'type': 'page_id', 'page_id': parent}, 'is_inline': True,

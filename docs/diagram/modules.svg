@@ -57,7 +57,7 @@
 <rect x="647" y="290" width="224" height="128" rx="10" fill="#F3F2EF" stroke="#9B968C" stroke-width="1.4"/>
 <text x="759" y="310" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">gmail_dump · sync_mail</text>
 <text x="759" y="325" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">label_mail · dashboard_data</text>
-<text x="759" y="340" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">stage · notion_setup</text>
+<text x="759" y="340" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3B3934">charts_png · notion_page</text>
 <text x="759" y="358" text-anchor="middle" font-size="11.5" fill="#4A4741">classify, match, label;</text>
 <text x="759" y="372" text-anchor="middle" font-size="11.5" fill="#4A4741">weekly charts</text>
 <text x="759" y="408" text-anchor="middle" font-size="11" fill="#8A867F">邮件分类匹配 · 看板数据</text>

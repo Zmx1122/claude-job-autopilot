@@ -11,7 +11,7 @@ Use it right after every submit, and for every job you shortlist or skip during 
 """
 import argparse, csv, os
 from datetime import date
-from common import DATA, load_env, notion_rows, notion_call, rt, same_company, title_sim, url_key, db_props, applied_props, NOT_APPLIED
+from common import DATA, load_env, notion_rows, notion_call, rt, same_company, title_sim, url_key, db_props, applied_value, NOT_APPLIED
 from stage import from_status, withdrawn_stage, parse, STAGES, status_of
 
 ap = argparse.ArgumentParser()
@@ -39,8 +39,8 @@ if hit and not status_given:   # e.g. only adding a note after a reply: never mo
 if a.url: props['URL'] = {'url': a.url}
 if a.city: props['City'] = rt(a.city)
 if a.salary: props['Salary Range'] = rt(a.salary)
-if a.status in ('Applied',) and (status_given or not hit): props.update(applied_props(env, a.date))
-if a.status == 'Skipped' and not (hit and hit.get('applied')): props.update(applied_props(env, NOT_APPLIED))
+if a.status in ('Applied',) and (status_given or not hit): props['Applied On'] = applied_value(env, a.date)
+if a.status == 'Skipped' and not (hit and hit.get('applied')): props['Applied On'] = applied_value(env, NOT_APPLIED)
 if 'Stage' in db_props(env) and (status_given or a.stage or not hit):
     cur = (hit or {}).get('stage') or from_status((hit or {}).get('status', ''))
     if a.stage: stage = a.stage

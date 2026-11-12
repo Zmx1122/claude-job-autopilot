@@ -111,14 +111,6 @@ def db_props(env):
     return _DB_PROPS
 
 
-def applied_props(env, v):
-    """Applied On (text: date or "放弃投递") plus Applied Date (a real date, for Notion's native charts grouped by week)."""
-    p = {'Applied On': applied_value(env, v)}
-    if db_props(env).get('Applied Date') == 'date':
-        p['Applied Date'] = {'date': {'start': iso_day(v)}} if iso_day(v) else {'date': None}
-    return p
-
-
 def applied_value(env, v):
     """Notion value for Applied On: text column (new) or date column (databases not migrated yet)."""
     if db_props(env).get('Applied On') == 'date':

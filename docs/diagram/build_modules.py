@@ -28,7 +28,7 @@ ROWS = [
     ('tool', 'Scripts and rules', '脚本与规则 · tools/ · standards/', 'tool', 128, [
         ('kb_extract · kb_build\nkb_bundle · facts\ndoc_render · doc_check', 'standards/de: CV, Anschreiben,\nwhen to tailor, market notes', '拆分合并 PDF · 事实库 · 生成与检查'),
         ('dedupe · log_application\nupload_file · copy_path', 'mode per job, daily cap,\nNotion row per action, uploads', '去重筛选 · 记录 · 文件上传'),
-        ('gmail_dump · sync_mail\nlabel_mail · dashboard_data\nstage · notion_setup', 'classify, match, label;\nstages · data for charts', '邮件分类匹配 · 看板数据'),
+        ('gmail_dump · sync_mail\nlabel_mail · dashboard_data\ncharts_png · notion_page', 'classify, match, label;\nweekly charts', '邮件分类匹配 · 看板数据'),
         ('check_setup · backup\ncheck_public', 'health check, backup and restore,\nprivacy guard before commits', '健康检查 · 备份恢复 · 隐私保护'),
     ]),
     ('data', 'On your computer', '你的电脑 · 不进 git', 'data', 112, [
