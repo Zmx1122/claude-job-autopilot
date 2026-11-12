@@ -10,14 +10,10 @@ Created by `tools/notion_setup.py`. One row per job (seen, shortlisted, applied 
 | City | text | scan |
 | Salary Range | text | scan — only when the posting states it, never guessed |
 | First Seen | date | first time the job appeared |
-| Applied On | text | application date `YYYY-MM-DD`, or `放弃投递` for jobs never applied to (blank only while undecided) |
-| Applied Date | date | the same date as a real date, for the Notion charts |
-| Applied Week | formula | ISO week of Applied Date (`2026-W46`), x-axis of the weekly chart |
-| Stage | select | detailed progress: 已投递 · 补交材料 · 一面邀请 · 已参加一面 · 参加一面后被拒 · 一面邀请后撤回 … (`tools/stage.py`) |
-| Interview Date | date | next interview; once passed, N面邀请 → 已参加N面 |
+| Applied On | date | submit / first application email |
 | Last Email | date | mail sync |
 | Platform | select | LinkedIn · StepStone · Indeed · Xing · Other |
-| Status | select | see below; derived from Stage |
+| Status | select | see below |
 | Source | select | `auto` (Claude applied) · `manual` (found in the inbox, you applied by hand) |
 | URL | url | job posting |
 | Email Evidence | url | Gmail link to the first submission email |

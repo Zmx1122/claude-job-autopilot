@@ -81,11 +81,7 @@ Walk the user through `docs/credentials.md#notion` one click at a time:
 2. Create a page "Job Search" in their workspace (top level). Page → `•••` → **Connections** → add `Job Autopilot`.
 3. Copy the page link.
 Offer both ways of entering the secret as described in "Where secrets live" (paste into `.env` themselves, or into the chat with the leak-risk sentence).
-Then run `python3 tools/notion_setup.py` — it creates the **Job Applications** database (see `docs/data-model.md`) and stores its id.
-4. **Connect Notion to Claude desktop** (needed for the dashboard charts): Claude desktop → Settings → **Connectors** → Notion →
-   Connect → choose the **same workspace** and give it access to the "Job Search" page. Check: the connector's `notion-get-self`
-   workspace name equals `bot.workspace_name` from `GET /v1/users/me` with `NOTION_TOKEN`. If another workspace is connected
-   (e.g. a work account), Disconnect → Connect and pick the right one.
+Then run `python3 tools/notion_setup.py` — it creates the **Job Applications** database (20 columns, see `docs/data-model.md`) and stores its id.
 
 ## 4. Gmail (status tracking + the "applications" label)
 `docs/credentials.md#gmail`:
@@ -127,17 +123,15 @@ macOS dialog script, see `docs/macos-permissions.md`:
    Never build a helper .app with osacompile as a workaround: each rebuild is a new identity and loses the permission.
 
 ## 7. Dashboards
-- Notion: after the first rows exist, run the **job-dashboard** skill. It creates native Notion charts on the "Job Search" page
-  through the Notion connector (step 3.4); they update live, nothing to refresh. Notion's free plan allows one chart; the full
-  dashboard (five charts) needs a paid plan — ask which charts to keep on the free plan.
-- Interactive (optional): the same skill creates a claude.ai artifact dashboard and stores its link as `DASHBOARD_URL`.
+- Notion: after the first rows exist, run the **job-dashboard** skill (adds charts to the "Job Search" page).
+- Interactive: the same skill creates a claude.ai artifact dashboard and stores its link as `DASHBOARD_URL`.
 
 ## 8. Schedule (Claude desktop scheduled tasks)
 Create two scheduled tasks with the scheduled-tasks tool (ask the user for times; defaults from `schedule:` in the profile):
 - **job-autopilot-daily** (e.g. weekdays 08:00): prompt =
   "In the job-autopilot repo: run the job-mail-sync skill (daily mode, apply after reviewing the report), then the
   scan phase of the job-scan-apply skill, and leave the shortlist table for me. Do not submit any application."
-- **job-autopilot-weekly-dashboard** (e.g. Monday 08:00): prompt = "In the job-autopilot repo: run the job-dashboard skill (refresh the interactive dashboard and save a backup; the Notion charts update live)."
+- **job-autopilot-weekly-dashboard** (e.g. Monday 08:00): prompt = "In the job-autopilot repo: run the job-dashboard skill (refresh)."
 Explain: tasks run only while the Mac is awake and the Claude app is open. Submitting always happens in a session with the user.
 
 ## 8b. Backup of personal data

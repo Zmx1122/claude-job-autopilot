@@ -19,7 +19,7 @@ def existing():
         cursor = d['next_cursor']
 def props(a):
     p = {'Title': {'title': [{'text': {'content': a['title'] or '(title unknown)'}}]}, 'Company': rt(a['company']), 'City': rt(a.get('city','')), 'Salary Range': rt(a.get('salary','')),
-         'First Seen': {'date': {'start': a['applied']}}, **applied_props(env, a['applied']), 'Last Email': {'date': {'start': a['last_email']}},
+         'First Seen': {'date': {'start': a['applied']}}, 'Applied On': applied_value(env, a['applied']), 'Last Email': {'date': {'start': a['last_email']}},
          'Platform': {'select': {'name': a['platform']}}, 'Status': {'select': {'name': a['status']}}, 'Source': {'select': {'name': a.get('source','manual')}},
          'Email Evidence': {'url': a['evidence']}, 'Job ID': rt(a.get('job_id','')), 'Events': rt(a.get('events_text','')), 'Notes': rt(' | '.join(a.get('notes', [])))}
     if a.get('job_url'): p['URL'] = {'url': a['job_url']}

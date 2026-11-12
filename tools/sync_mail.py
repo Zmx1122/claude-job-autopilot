@@ -22,7 +22,7 @@ import glob, json, os, re, sys, subprocess
 from datetime import timezone, date
 from email.utils import parsedate_to_datetime
 from common import (DATA, ROOT, load_env, notion_rows, notion_call, rt, gmail_link, same_company, title_sim, title_tokens, load_json, label_name,
-                    db_props, applied_value, applied_props, iso_day, NOT_APPLIED)
+                    db_props, applied_value, iso_day, NOT_APPLIED)
 from stage import next_stage, from_status, status_of, held, withdrawn_stage, parse, rname
 
 APPLY = '--apply' in sys.argv
@@ -279,9 +279,7 @@ def props(r, keys):
     N = {'title': 'Title', 'company': 'Company', 'city': 'City', 'salary': 'Salary Range', 'job_id': 'Job ID', 'events': 'Events', 'notes': 'Notes',
          'status': 'Status', 'platform': 'Platform', 'source': 'Source', 'applied': 'Applied On', 'last_email': 'Last Email', 'url': 'URL',
          'evidence': 'Email Evidence', 'thread': 'Email Thread', 'stage': 'Stage', 'interview_date': 'Interview Date'}
-    out = {N[k]: P[k](r[k]) for k in keys if k in N}
-    if 'applied' in keys: out.update(applied_props(env, r['applied']))   # + Applied Date for the native charts
-    return out
+    return {N[k]: P[k](r[k]) for k in keys if k in N}
 for ch in changes.values():
     if ch['row'].get('id'):
         r = notion_call('PATCH', f"https://api.notion.com/v1/pages/{ch['row']['id']}", env, json={'properties': props(ch['row'], ch['set'].keys())})

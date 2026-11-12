@@ -46,16 +46,15 @@ set up and run by talking to the Claude desktop app. No coding needed.**
   fact bank you confirmed, checked for consistent dates and numbers, readable by applicant-tracking systems. Written for
   the recruiter first: rare project, method and model names stay but get a plain-language label (e.g. "reinforcement-learning
   algorithm (Double DQN)"), and a stack shared by several projects is named once per position, not repeated.
-- **Dashboards**: native Notion charts at the top of your Notion page — total applications, where every application stands,
-  how far applications got (一面邀请, 参加一面后被拒 …), applications per week, interviews by CV mode — live, no script.
-  Optional: an interactive claude.ai dashboard.
+- **Dashboards**: a section on your Notion page (stage pie, stage flow, applications per week, interview rate by mode and
+  posting age) and an interactive claude.ai dashboard, refreshed weekly.
 
 ### What you need
 | | |
 |---|---|
 | A Mac or Windows PC with the **Claude desktop app** (Code tab) | the built-in browser is used; file uploads on company sites: [docs/file-uploads.md](docs/file-uploads.md) |
 | A **Gmail** inbox you apply with | read access via an app password; only adds a label |
-| A **Notion** account, connected to Claude desktop (Settings → Connectors → Notion) | free plan works for the tracker; it allows one chart, the full dashboard needs a paid plan |
+| A **Notion** account | free plan is fine |
 | Accounts on the job sites you use | you log in once inside Claude's browser |
 | About 45 minutes once | then a few minutes a day |
 
@@ -66,7 +65,7 @@ set up and run by talking to the Claude desktop app. No coding needed.**
    (Or download the ZIP from GitHub, unzip it, and open the folder in the Code tab.)
 2. Claude walks you through a few short steps (the `job-autopilot-setup` skill):
    restore an earlier backup (if you have one) → documents (no CV yet? Claude interviews you and writes one) → questionnaire →
-   Notion token + Notion connector → Gmail app password + label → logins → file uploads → dashboards → schedule → backup → final check.
+   Notion token → Gmail app password + label → logins → file uploads → dashboards → schedule → backup → final check.
    Every click is explained in [docs/credentials.md](docs/credentials.md) and [docs/file-uploads.md](docs/file-uploads.md).
 3. From then on, each morning: open Claude and say **"show today's jobs"**.
 
@@ -84,7 +83,7 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 | "save the job descriptions of my applications" | snapshots every tracked posting that is not saved yet (and marks closed ones) |
 | "sync my mail" | updates Notion from your inbox and labels application emails |
 | "reply to my interview invitations" | scans your inbox and LinkedIn messages for unanswered invitations, drafts an accept / reschedule / withdraw reply for each and sends it only after you approve the exact text |
-| "show the dashboard" | sets up the Notion charts (once; they update live) and refreshes the interactive dashboard |
+| "show the dashboard" | refreshes Notion charts and the interactive dashboard |
 | "back up my data" / "restore my data from …" | saves or restores your personal data folder |
 
 ### A normal day
@@ -135,17 +134,18 @@ For a 🎯 posting Claude first shows how you match, asks about the gaps, then w
 | Job-description snapshots | `tools/jd_snapshot.py` | each posting → `data/applications/<date>_<company>_<title>/` (`jd.md`, `jd.pdf`, page copy); `--backfill` for older applications |
 | Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py`, `label_mail.py`, `merge.py`, `split_for_classify.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
 | Notion tracker | `tools/notion_setup.py`, `log_application.py`, `notion_upsert.py` | creates the database ([schema](docs/data-model.md)), logs and updates one row per job |
-| Dashboards | `.claude/skills/job-dashboard` (Notion connector), `tools/stage.py`, `dashboard_data.py`, `dashboard/index.html` | native Notion charts (live) + optional interactive claude.ai dashboard |
+| Dashboards | `.claude/skills/job-dashboard`, `tools/refresh_dashboards.sh`, `dashboard_data.py`, `charts_png.py`, `notion_page.py`, `dashboard/index.html` | Notion charts + interactive claude.ai dashboard |
 | File uploads | `tools/upload_file.sh`, `tools/copy_path.py`, `tools/upload_test.html`, [docs/file-uploads.md](docs/file-uploads.md), [docs/macos-permissions.md](docs/macos-permissions.md) | macOS: drives the Open dialog · Windows: Claude in Chrome's upload tool · anywhere: paste a copied path |
 | Backup | `tools/backup.py` | your personal data → a local folder with version history; restore after a new download |
 | Privacy guard | `tools/check_public.py`, `.githooks/` | blocks commits that would publish your name, contacts, employers or tokens |
 | Health check | `tools/check_setup.py` | one checklist for everything above |
 
-### Dashboards
-The "Job Search" page in Notion, top to bottom: **Total applications** · two charts side by side (**where every application
-stands** by Status, **how far applications got** by Stage) · **applications per week** by platform · **which applications get
-interviews** (tailored vs template CV) · the **Job Applications** database. All are Notion chart views of the database, so
-they change the moment a row changes. Claude creates them once through the Notion connector (`job-dashboard` skill).
+### Dashboards (sample data)
+<p>
+<img src="docs/img/pie.png" alt="Donut chart: where every application stands" width="49%">
+<img src="docs/img/weekly.png" alt="Bar chart: applications per week by platform" width="49%">
+</p>
+<img src="docs/img/flow.png" alt="Flow chart: applied, confirmed, interview, offer, with rejections and waiting at each stage" width="100%">
 
 ### Your data stays yours
 The repo you download contains only code, skills, rules and empty templates. Everything personal — answers, documents,
@@ -181,6 +181,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 - **Windows?** Built for it, but exercised end to end on macOS only. Notes: PDF writing needs Chrome, Edge or Brave (set `CHROME_PATH`
   if it is not found); file uploads on company sites use **Claude in Chrome** (no system permission, but its upload tool has had
   reliability reports in 2026) or the path Claude copies for you to paste — see [docs/file-uploads.md](docs/file-uploads.md).
+  `tools/refresh_dashboards.sh` is a zsh script; on Windows Claude runs the four Python commands it contains one by one.
 - **Is the file uploader a separate app?** No. On macOS it is a short AppleScript in this repo (`tools/upload_file.sh`)
   run by the built-in `osascript`; it only needs the Accessibility permission for Claude.
 - **Other inboxes than Gmail?** The scripts use IMAP plus Gmail labels; other providers need small changes in `tools/common.py`.
@@ -205,14 +206,14 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 - **贴合岗位的简历和求职信**：精选表里每个岗位都有模式——新鲜、高匹配的岗位和梦中情司走 🎯 *精投*，其余用 📄 *模版投*
   （按岗位类别准备的简历）。精投包括：岗位要求对照表、几个补缺口的问题、为该岗位写的简历和德/英文求职信。
   所有内容只来自你确认过的事实库，自动核对日期和数字是否一致，PDF 能被招聘系统（ATS）正确读取。措辞先照顾 HR：冷僻的项目名、方法名、模型名都保留，但旁边加一句通用说明（如"强化学习算法（Double DQN）"）；多个项目共用的技术栈在一段经历里只写一次，不重复。
-- **看板**：Notion 页面顶部用 Notion 自带图表——总投递数、各状态分布、各阶段进度（一面邀请、参加一面后被拒 …）、每周投递数、按简历模式的面试情况——实时更新，无需脚本。可选：一个 claude.ai 交互看板。
+- **看板**：Notion 页面里的图表区（阶段饼图、阶段流向图、每周投递数、按投递模式和岗位新鲜度的面试率）+ 一个 claude.ai 交互看板，每周更新数据。
 
 ### 需要准备
 | | |
 |---|---|
 | 一台 Mac 或 Windows 电脑 + **Claude 桌面端**（Code 标签页） | 用到内置浏览器；公司官网的文件上传见 [docs/file-uploads.md](docs/file-uploads.md) |
 | 用于投递的 **Gmail** | 通过应用专用密码只读访问，只会添加标签 |
-| **Notion** 账号，并在 Claude 桌面端连接（设置 → Connectors → Notion） | 申请表用免费版即可；免费版只能有一个图表，完整看板需要付费版 |
+| **Notion** 账号 | 免费版即可 |
 | 各招聘平台账号 | 在 Claude 内置浏览器里登录一次 |
 | 一次性约 45 分钟 | 之后每天几分钟 |
 
@@ -222,7 +223,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 
    （也可以在 GitHub 下载 ZIP，解压后在 Code 标签页打开该文件夹。）
 2. Claude 会带你走完几个小步骤（`job-autopilot-setup` skill）：
-   从旧备份恢复（如果有）→ 上传材料（还没有简历？Claude 先采访你、帮你写出来）→ 回答问卷 → Notion token 和 Notion connector →
+   从旧备份恢复（如果有）→ 上传材料（还没有简历？Claude 先采访你、帮你写出来）→ 回答问卷 → Notion token →
    Gmail 应用密码和标签 → 登录各平台 → 文件上传方式 → 看板 → 定时任务 → 备份 → 最终检查。
    每一步点哪里都写在 [docs/credentials.md](docs/credentials.md) 和 [docs/file-uploads.md](docs/file-uploads.md)。
 3. 之后每天早上打开 Claude 说 **"看看今天的岗位"** 即可。
@@ -241,7 +242,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 | "把我申请过的岗位 JD 都存下来" | 给还没存档的申请补存 JD，并标出已下架的岗位 |
 | "同步邮件" | 根据邮件更新 Notion，给申请邮件打标签 |
 | "回复面试邀请" | 扫描邮箱和 LinkedIn 消息里还没回复的面试邀请，为每个起草"接受 / 改期 / 撤回"回复，你确认原文后才发送 |
-| "看看看板" | 建好 Notion 图表（一次即可，之后实时更新）并刷新交互看板 |
+| "看看看板" | 刷新 Notion 图表和交互看板 |
 | "备份我的数据" / "从 … 恢复数据" | 备份或恢复你的个人数据文件夹 |
 
 ### 日常的一天
@@ -292,7 +293,7 @@ sequenceDiagram
 | JD 存档 | `tools/jd_snapshot.py` | 每个岗位 → `data/applications/<日期>_<公司>_<职位>/`（`jd.md`、`jd.pdf`、网页副本）；`--backfill` 补存以前的申请 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/gmail_*.py`、`sync_mail.py`、`label_mail.py`、`merge.py`、`split_for_classify.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
 | Notion 申请表 | `tools/notion_setup.py`、`log_application.py`、`notion_upsert.py` | 自动建表（[字段说明](docs/data-model.md)），每个岗位一行，记录并更新状态 |
-| 看板 | `.claude/skills/job-dashboard`（Notion connector）、`tools/stage.py`、`dashboard_data.py`、`dashboard/index.html` | Notion 自带图表（实时）+ 可选的 claude.ai 交互看板 |
+| 看板 | `.claude/skills/job-dashboard`、`tools/refresh_dashboards.sh`、`dashboard_data.py`、`charts_png.py`、`notion_page.py`、`dashboard/index.html` | Notion 图表 + claude.ai 交互看板 |
 | 文件上传 | `tools/upload_file.sh`、`tools/copy_path.py`、`tools/upload_test.html`、[docs/file-uploads.md](docs/file-uploads.md)、[docs/macos-permissions.md](docs/macos-permissions.md) | macOS：操作"打开"对话框 · Windows：Claude in Chrome 的上传工具 · 通用：粘贴复制好的路径 |
 | 备份 | `tools/backup.py` | 个人数据备份到本地文件夹，带版本历史；重新下载后一键恢复 |
 | 隐私保护 | `tools/check_public.py`、`.githooks/` | 提交前自动拦截会公开你姓名、联系方式、雇主或 token 的改动 |
@@ -320,7 +321,7 @@ sequenceDiagram
 - 更多国家的求职标准（`standards/<国家>/`）和 LinkedIn 个人主页诊断。
 
 ### 常见问题
-- **Windows 可以用吗？** 是按 Windows 设计的，但目前只在 macOS 上完整跑通过。注意：写 PDF 需要 Chrome、Edge 或 Brave（找不到时设置 `CHROME_PATH`）；公司官网的文件上传用 **Claude in Chrome**（不需要系统权限，但它的上传工具在 2026 年有过稳定性问题的报告），或者粘贴 Claude 帮你复制好的文件路径，见 [docs/file-uploads.md](docs/file-uploads.md)。
+- **Windows 可以用吗？** 是按 Windows 设计的，但目前只在 macOS 上完整跑通过。注意：写 PDF 需要 Chrome、Edge 或 Brave（找不到时设置 `CHROME_PATH`）；公司官网的文件上传用 **Claude in Chrome**（不需要系统权限，但它的上传工具在 2026 年有过稳定性问题的报告），或者粘贴 Claude 帮你复制好的文件路径，见 [docs/file-uploads.md](docs/file-uploads.md)。`tools/refresh_dashboards.sh` 是 zsh 脚本，Windows 上 Claude 会把里面的四条 Python 命令逐条运行。
 - **文件上传助手是单独下载的软件吗？** 不是。macOS 上它是本仓库里的一小段 AppleScript（`tools/upload_file.sh`），
   由系统自带的 `osascript` 运行，只需要给 Claude 开"辅助功能"权限。
 - **不用 Gmail 可以吗？** 脚本基于 IMAP + Gmail 标签，其他邮箱需要小改 `tools/common.py`。
