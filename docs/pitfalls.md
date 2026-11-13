@@ -197,3 +197,10 @@ identical title at the same company even when that row is closed. Always read "S
 - **HDI QuickApply refuses an email that already has an HDI candidate account** ("Sie haben bereits ein Bewerberkonto") — the user must log in.
 - **Ashby public-official question** (Doctolib): "Have you or a close family member been a Public Official in the last 5 years? … public institution …".
   A university research job is a public institution — ask the user, do not answer "No" by default.
+
+## StepStone profile page: a click can import LinkedIn data (2026-11-13)
+- While looking for a way to add a current CV on `stepstone.de/profile` (tab "Meine Unterlagen"), a dialog appeared:
+  "Ihr Stepstone-Profil wurde mit den folgenden Informationen aktualisiert … von LinkedIn importiert". The profile page mixes
+  tabs with "LinkedIn verknüpfen" / "Lade deinen CV hoch" buttons that shift while it loads.
+- Rule: do not click around the StepStone profile page. Replacing the stored CV is the user's job (it is an account change);
+  ask them to do it in the profile, then apply.
