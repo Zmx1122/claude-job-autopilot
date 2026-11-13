@@ -172,3 +172,11 @@ identical title at the same company even when that row is closed. Always read "S
 - **MEDIAN (karriere.median-kliniken.de):** AJAX upload shows the file name but the server answered "Bitte fügen Sie Ihrer Bewerbung
   Anlagen bei" twice; a new required field "Wie haben Sie uns gefunden?" appears only after the first submit. Hand the upload to the user.
 - **Workday (Deutsche Bank):** `applyManually` works; dropdowns are `button[aria-haspopup=listbox]` → click → `[role=option]` click.
+
+## Mail sync: a generic subject threads rejections onto the wrong job (2026-11-13)
+- **Symptom:** a Deloitte rejection for "Senior Consultant GenAI & Agentic AI" was about to mark "Consultant AI Engineering" rejected.
+- **Cause:** Gmail threads by subject, so every "Deloitte | Deine Bewerbung" mail sits in one thread, and the thread match won over the title.
+  The fallback did not help either: "Senior X" and "X" have the same title tokens, so the two exact rows tied and `pick()` gave up.
+- **Fix (`tools/sync_mail.py`):** a row whose title equals the mail's title beats the thread row; `pick()` prefers the literal title before token-equal ones.
+- **Also:** an updated calendar invite (`SEQUENCE:1`) can move an interview, and the classifier sees only the first ~1500 characters of the body.
+  When there are several invites in one thread, read the `.ics` `DTSTART` of the latest one (ServiceNow moved from 11:00 to 15:00 that way).
