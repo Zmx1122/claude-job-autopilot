@@ -5,9 +5,10 @@ Input: JSON list of jobs Claude collected while scanning — EVERY posting it op
 each with title, company, platform, url, city, salary, posted (YYYY-MM-DD, or the platform's text such as "vor 3 Tagen" / "2 days ago"),
   reposted (true if the platform marks it reposted / erneut gepostet), apply_type (easy_apply | one_click | platform_form | external),
   needs (list, e.g. ["cv"], ["cv","cover_letter"], ["cv","degree_certificate"]), size (large|mid|startup|unknown), fit (0-100), why,
-  salary_estimated (true when the platform only estimates the salary: such a figure is never used to drop a job)
+  salary_estimated (true when the platform only estimates the salary: such a figure is never used to drop a job),
+  agency (true when the poster is a recruiting agency / headhunter / Personalvermittlung acting for an unnamed or other client)
 Drops jobs already in Notion (same URL, or same company with a similar title) and applies the filters: blacklist,
-skip_title_keywords, exclude_titles, posting age, salary rules, company_size, cover-letter rule, fit below strategy.fit_medium.
+skip_title_keywords, exclude_titles, recruiting agencies (search.skip_agencies), posting age, salary rules, company_size, cover-letter rule, fit below strategy.fit_medium.
 The filters are run-time inputs (tools/filters.py): the profile gives the defaults, --preset / --set widen them for this run,
 so a user who is not happy with the list can say "show more" and you just re-run on the SAME raw file with a wider preset.
 Decides the Mode with the table in standards/<country>/apply-strategy.md, sorts by fit and prints a markdown table, then what each
@@ -99,7 +100,9 @@ def main():
         """(category, text) or None. category names match HINTS where a flag can bring the job back."""
         t = (j.get('title') or '').lower(); c = j.get('company') or ''
         if any(b.lower() in c.lower() for b in s.get('blacklist_companies', []) if b): return ('blacklist', 'blacklisted company')
-        if any(k.lower() in t for k in s.get('skip_title_keywords', []) + s.get('exclude_titles', []) if k): return ('title', 'title filter')
+        # whole words only: "Intern" must not drop "Internal AI" (2026-11-13, Personio fit 84 was lost that way)
+        if any(re.search(r'(?<![a-z])' + re.escape(k.lower()) + r'(?![a-z])', t) for k in s.get('skip_title_keywords', []) + s.get('exclude_titles', []) if k): return ('title', 'title filter')
+        if s.get('skip_agencies') and j.get('agency'): return ('agency', 'recruiting agency')
         if s.get('company_size') == 'established' and j.get('size') == 'startup': return ('startup', 'startup')
         if 'cover_letter' in (j.get('needs') or []) and letter_rule == 'skip': return ('cover', 'requires cover letter')
         if j.get('fit') is not None and j['fit'] < med and not any(d in c.lower() for d in dream_co): return ('fit', f"fit {j['fit']} < {med}")
@@ -180,7 +183,7 @@ def main():
                 wants.append(f"  {len(by[cat])} × {cat}: --set {hint}")
         if wants:
             print('Bring them back with (one or several):\n' + '\n'.join(wants) + f"\n  or everything widenable at once: --preset wide  (wider still: --preset everything)")
-        fixed = [k for k in by if k in ('blacklist', 'title', 'tracker', 'cover', 'duplicate')]
+        fixed = [k for k in by if k in ('blacklist', 'title', 'agency', 'tracker', 'cover', 'duplicate')]
         if fixed:
             print('Not widenable by a preset: ' + ', '.join(f'{k} {len(by[k])}' for k in fixed))
     json.dump(kept, open(src.replace('.json', '.shortlist.json'), 'w'), ensure_ascii=False, indent=1)
