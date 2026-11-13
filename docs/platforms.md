@@ -75,3 +75,13 @@ Requires macOS Accessibility for Claude, see `docs/macos-permissions.md`.
 - **valantic**: modal form with native inputs (native value setter works); salary is a range slider (set value + input event).
 - **SmartRecruiters (ServiceNow)**: CV parse can split one job into two experience entries with a wrong title — delete the bad one.
 - **Personio (SQUER)**: "Add file" works only when the click and `upload_file.sh` run one after the other (not in parallel).
+
+## Scan notes added 2026-11-13
+- **Xing date filter has a URL parameter after all:** `&sincePeriod=LAST_24_HOURS` (the sidebar "in den letzten 24 Stunden" sets it). The search URL also
+  redirects to `/jobs/search/ki?...`. Salary ranges on Xing cards are Xing's own estimates ("von XING geschätzt") unless the ad text states one.
+- **StepStone result pages append CV-based suggestions** ("Vorschläge basierend auf deinem Lebenslauf", many older than the `ag=` window) after the
+  real hits. Read the posting date on each card ("vor N Stunden/Tagen") and ignore anything older than the window.
+- **StepStone one-click detail pages** show only "Ich bin interessiert" in `get_page_text`; the description is in a `<section>` — read it with
+  `javascript_tool` (`section` elements with long `innerText`). Never click the button to see more.
+- **Indeed:** OR-queries and `sort=date` return mostly unrelated jobs; a plain keyword (`q=%22AI+Engineer%22` or `q=LLM+Agent`) with relevance sort
+  and `fromage=3` works better. Cards marked "Anzeige" are ads outside the window.

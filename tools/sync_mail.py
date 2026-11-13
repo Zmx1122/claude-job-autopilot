@@ -103,7 +103,9 @@ def pick(cands, e):
     """Best title first, then rows with no email evidence yet, then closest in time. Ambiguous ties → None."""
     if not cands: return None
     def key(r):
-        d = day_of(r); return (-round(tscore(e, r), 2), bool(r['evidence']), abs((d - e['day']).days) if d else 999)
+        # literal title before token-equal ones: "Senior X" and "X" have the same tokens (Deloitte, 2026-11-13)
+        d = day_of(r); return (-round(tscore(e, r), 2), (r['title'] or '').strip().lower() != (e['title'] or '').strip().lower(),
+                               bool(r['evidence']), abs((d - e['day']).days) if d else 999)
     s = sorted(cands, key=key)
     if len(s) > 1 and key(s[0]) == key(s[1]): return None
     return s[0]
@@ -115,6 +117,12 @@ def is_open(r):
 
 def match(e):
     t = by_thread.get(f"{int(e['thrid']):x}") if e['thrid'] else None
+    if t and e['title'] and tscore(e, t) < 1.0:
+        # Gmail threads by subject, so generic subjects ("Deloitte | Deine Bewerbung") put mails about different jobs
+        # in one thread; a row with exactly the mail's title wins over the thread (Deloitte, 2026-11-13)
+        exact = [r for r in rows + created if e['company'] and same_company(e['company'], r['company']) and tscore(e, r) == 1.0]
+        r = pick(exact, e)
+        if r: return r, 'company+title'
     if t: return t, 'thread'
     pool = [r for r in rows + created if e['company'] and same_company(e['company'], r['company'])]
     if pool:
