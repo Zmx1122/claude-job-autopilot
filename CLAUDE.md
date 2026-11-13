@@ -14,7 +14,7 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 - "I have no CV", "what jobs fit me", "求职方向", "career advice", first job / Werkstudent → **job-career-coach**.
 - "backup", "restore my data", "备份", "恢复数据", new computer → `tools/backup.py` (save / status / history / restore).
 - "reply to my interview invitations", "回复面试邀请" → **job-mail-sync**, section "Replying to interview invitations" (templates in `standards/de/interview-replies.md`).
-- A scheduled daily run → job-mail-sync (daily mode), then the scan phase of job-scan-apply. Never submit or reply in a scheduled run.
+- A scheduled daily run → job-mail-sync (daily mode, including `tools/prune_shortlisted.py --apply`: rows Shortlisted > 2 days go to the Notion trash), then the scan phase of job-scan-apply. Never submit or reply in a scheduled run.
 
 ## Non-negotiable rules
 1. **Nothing is submitted without the user.** Scan → shortlist table → user picks → prefill → user confirms once → submit.
@@ -53,6 +53,7 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 | `dashboard/index.html` | page of the interactive claude.ai dashboard |
 | `docs/platforms.md` | how each platform and portal behaves, search URLs, file uploads |
 | `docs/pitfalls.md` | problems we hit and how they were solved |
+| `docs/BACKLOG.md` | what to build next (open problems from real runs) |
 | `docs/file-uploads.md` | how files reach company portals on macOS and Windows |
 | `~/Documents/Job Autopilot Data` (`BACKUP_DIR`) | the user's backup: a mirror of all personal files with version history (`tools/backup.py`) |
 

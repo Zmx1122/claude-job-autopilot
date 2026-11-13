@@ -180,3 +180,20 @@ identical title at the same company even when that row is closed. Always read "S
 - **Fix (`tools/sync_mail.py`):** a row whose title equals the mail's title beats the thread row; `pick()` prefers the literal title before token-equal ones.
 - **Also:** an updated calendar invite (`SEQUENCE:1`) can move an interview, and the classifier sees only the first ~1500 characters of the body.
   When there are several invites in one thread, read the `.ics` `DTSTART` of the latest one (ServiceNow moved from 11:00 to 15:00 that way).
+
+## Replies to SAP SuccessFactors recruiter mails need the quoted original (2026-11-13)
+- **Symptom:** SuccessFactors mails ("Bitte fügen Sie Ihre Antwort oberhalb dieser Zeile ein … löschen Sie bitte den CorrespondenceCode nicht")
+  are answered to a `correspondence…@…successfactors.eu` Reply-To address; the system reads the `CorrespondenceCode #…$` from the quoted original.
+  `send_reply.py` sent only the new text, so such a reply would not be processed. Their subjects are also folded over two lines, which crashed the script.
+- **Fix (`tools/send_reply.py`):** `--quote` appends the original verbatim (no `> ` prefixes) below the reply; subjects are unfolded.
+  Use `--quote` for every SuccessFactors / ATS reply that asks to keep the code.
+
+## LinkedIn external apply links in one call; StepStone "Ich bin interessiert" can be an external link (2026-11-13)
+- **External apply URL without opening each job:** on any linkedin.com page (logged in), `fetch('/voyager/api/jobs/jobPostings/<id>', {headers:{'csrf-token': <JSESSIONID cookie value>, accept:'application/json'}})`
+  and read `"companyApplyUrl"`. 20 jobs in a few seconds; the guest API (`jobs-guest/jobs/api/jobPosting`) does not carry the apply URL.
+- **StepStone one-click is not always one-click:** on HDI the "Ich bin interessiert" button opened the company site in a new tab (blocked by the pane) and
+  landed on "Hat mit deiner Bewerbung alles geklappt? Falls nicht … Unternehmenswebsite" — nothing was sent. Treat that page as *not applied*;
+  find the job on the company portal (HDI: job.hdi.group search → QuickApply `Reqid=<id>`).
+- **HDI QuickApply refuses an email that already has an HDI candidate account** ("Sie haben bereits ein Bewerberkonto") — the user must log in.
+- **Ashby public-official question** (Doctolib): "Have you or a close family member been a Public Official in the last 5 years? … public institution …".
+  A university research job is a public institution — ask the user, do not answer "No" by default.

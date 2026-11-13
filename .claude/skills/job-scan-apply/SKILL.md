@@ -98,7 +98,9 @@ for each platform), the salary rule, the fit threshold, the startup rule and the
    `salary_estimated: true` when the platform only estimates it, e.g. StepStone "geschätzt"), `posted`
    (ISO date if the page shows one, else the platform's text, e.g. "vor 3 Tagen"), `reposted` (true when marked
    "reposted" / "erneut gepostet"), `apply_type` (easy_apply | one_click | platform_form | external), `needs` (cv, cover_letter, degree_certificate, …),
-   `size` (large | mid | startup | unknown — check the company page or headcount when unsure), `fit` 0–100, `why` (one line).
+   `size` (large | mid | startup | unknown — check the company page or headcount when unsure), `agency` (true when the poster is a
+   recruiting agency, headhunter, staffing / Zeitarbeit firm or job aggregator posting for another company; consultancies that hire
+   their own staff are employers), `fit` 0–100, `why` (one line).
    **Record every posting you opened. Do not drop anything for salary, age, size or fit yourself** — `dedupe.py` applies the
    filters, so a wider run can be answered from the same file.
 3. Save the list to `data/inbox/YYYY-MM-DD.json` and run `python3 tools/dedupe.py data/inbox/YYYY-MM-DD.json [--preset NAME] [--set key=value]`.

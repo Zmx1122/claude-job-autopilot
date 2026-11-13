@@ -15,7 +15,7 @@ Presets (built in; the profile may override or add some under `scan_presets:`)
   wide        salary filter off · posting window 7 days · fit_medium 60 · jobs shortlisted on earlier days show again
   everything  wide, plus window 14 days · fit_medium 50 · startups allowed · no seniority hint
 
-Never widened by a preset (only by an explicit --set): blacklist_companies, exclude_titles, skip_title_keywords,
+Never widened by a preset (only by an explicit --set): blacklist_companies, exclude_titles, skip_title_keywords, skip_agencies,
 and jobs already Applied / Rejected / Confirmed in the tracker.
 
 Keys that the filters understand (all optional):
@@ -172,7 +172,7 @@ def show(profile, preset, sets):
     print(f"shortlisted before: {'shown again' if s.get('resurface_shortlisted') else 'hidden'}")
     print(f"titles ({len(s.get('titles') or [])}) × locations ({len(s.get('locations') or [])}): "
           f"{', '.join((s.get('titles') or [])[:6])}{' …' if len(s.get('titles') or []) > 6 else ''}  |  {', '.join(s.get('locations') or [])}")
-    print('always on:          blacklist, exclude_titles, skip_title_keywords, already Applied/Rejected in the tracker')
+    print('always on:          blacklist, exclude_titles, skip_title_keywords, ' + ('no recruiting agencies, ' if s.get('skip_agencies') else '') + 'already Applied/Rejected in the tracker')
 
 
 def main(argv):

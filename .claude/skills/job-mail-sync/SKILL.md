@@ -26,7 +26,10 @@ reply to an interview invitation (section "Replying to interview invitations"). 
    - **Weak matches**: matched only by company or by platform+title; check that they make sense.
    If a match is wrong, fix the classification (company/title) in `classified_N.json` or add an alias to `config/overrides.json`, and re-run.
 5. `python3 tools/sync_mail.py --apply` → writes Notion and labels the emails.
-6. Tell the user, briefly: new interviews (with date/time from the note), rejections, offers, and the **Please confirm** table.
+6. **Clean up old shortlist rows:** `python3 tools/prune_shortlisted.py` (dry run) → then `--apply`. It moves rows that are still
+   `Shortlisted` more than 2 days after First Seen to the Notion trash (restorable for 30 days). The user asked for this (2026-11-13):
+   a job not picked within 2 days is dropped. Mention the count in the report.
+7. Tell the user, briefly: new interviews (with date/time from the note), rejections, offers, and the **Please confirm** table.
    When the user answers: "yes, I applied" → keep the row (Source=manual). "No" → set Status Skipped with note "not an application".
 
 ## Replying to interview invitations (on request, or offered after a daily sync)
