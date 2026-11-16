@@ -182,7 +182,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
 - **Windows?** Built for it, but exercised end to end on macOS only. Notes: PDF writing needs Chrome, Edge or Brave (set `CHROME_PATH`
   if it is not found); file uploads on company sites use **Claude in Chrome** (no system permission, but its upload tool has had
   reliability reports in 2026) or the path Claude copies for you to paste — see [docs/file-uploads.md](docs/file-uploads.md).
-  `tools/refresh_dashboards.sh` is a zsh script; on Windows Claude runs the four Python commands it contains one by one.
+  `tools/refresh_dashboards.sh` is a zsh script; on Windows Claude runs the Python commands it contains one by one.
 - **Is the file uploader a separate app?** No. On macOS it is a short AppleScript in this repo (`tools/upload_file.sh`)
   run by the built-in `osascript`; it only needs the Accessibility permission for Claude.
 - **Other inboxes than Gmail?** The scripts use IMAP plus Gmail labels; other providers need small changes in `tools/common.py`.
@@ -294,8 +294,8 @@ sequenceDiagram
 | 扫描与投递 | `.claude/skills/job-scan-apply`、`tools/filters.py` 等 | 精选表 → 挑选 → 预填 → 确认 → 提交 |
 | JD 存档 | `tools/jd_snapshot.py` | 每个岗位 → `data/applications/<日期>_<公司>_<职位>/`（`jd.md`、`jd.pdf`、网页副本）；`--backfill` 补存以前的申请 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/gmail_*.py`、`sync_mail.py`、`label_mail.py`、`merge.py`、`split_for_classify.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
-| Notion 申请表 | `tools/notion_setup.py`、`log_application.py`、`notion_upsert.py` | 自动建表（[字段说明](docs/data-model.md)），每个岗位一行，记录并更新状态 |
-| 看板 | `.claude/skills/job-dashboard`、`tools/refresh_dashboards.sh`、`dashboard_data.py`、`charts_png.py`、`notion_page.py`、`dashboard/index.html` | Notion 图表 + claude.ai 交互看板 |
+| 申请表 | `tools/notion_setup.py`、`log_application.py`、`notion_upsert.py`、`tracker_local.py`、`tracker.py` | Notion 数据库（[字段说明](docs/data-model.md)）或本地 `data/tracker.csv`（`TRACKER_BACKEND=local`），每个岗位一行，记录并更新状态 |
+| 看板 | `.claude/skills/job-dashboard`、`tools/refresh_dashboards.sh`、`local_dashboard.py`、`dashboard/local.html`、`dashboard_data.py`、`charts_png.py`、`notion_page.py`、`dashboard/index.html` | 本地看板页面（所有人）+ Notion 图表 + claude.ai 交互看板 |
 | 文件上传 | `tools/upload_file.sh`、`tools/copy_path.py`、`tools/upload_test.html`、[docs/file-uploads.md](docs/file-uploads.md)、[docs/macos-permissions.md](docs/macos-permissions.md) | macOS：操作"打开"对话框 · Windows：Claude in Chrome 的上传工具 · 通用：粘贴复制好的路径 |
 | 备份 | `tools/backup.py` | 个人数据备份到本地文件夹，带版本历史；重新下载后一键恢复 |
 | 隐私保护 | `tools/check_public.py`、`.githooks/` | 提交前自动拦截会公开你姓名、联系方式、雇主或 token 的改动 |
