@@ -143,6 +143,25 @@ def next_stage(stage, e, interview_date=''):
         return withdrawn_stage(stage), interview_date
     return stage, interview_date
 
+# ---------- dashboard funnel (dashboard_data.py, local_dashboard.py) ----------
+FUNNEL = ['Applied', 'Confirmed', 'Interview', 'Offer']
+# every application passed through Applied; Confirmed/Interview/Offer are cumulative stages
+def reached(r, stage):
+    if r.get('stage'):   # detailed stage: a documents request is not an interview, an interview rejected later still counts
+        p = parse(r['stage']); applied = p['phase'] not in ('pre', 'skipped', 'failed', '')
+        return {'Applied': True, 'Confirmed': applied and (p['phase'] != 'applied' or 'ats confirmation' in r['events']),
+                'Interview': p['round'] > 0 or p['phase'] in ('assess', 'offer') or r['stage'].startswith('测评'),
+                'Offer': p['phase'] == 'offer'}[stage]
+    s = r['status']; i = FUNNEL.index(stage)
+    if s in FUNNEL: return FUNNEL.index(s) >= i
+    ev = r['events']
+    if stage == 'Applied': return True
+    if stage == 'Confirmed': return 'ats confirmation' in ev or 'interview' in ev or 'offer' in ev
+    if stage == 'Interview': return 'interview' in ev or 'offer' in ev
+    if stage == 'Offer': return 'offer' in ev
+    return False
+def ended(r): return r['status'] in ('Rejected', 'Withdrawn', 'Skipped')
+
 
 if __name__ == '__main__':
     d = lambda s: date.fromisoformat(s)

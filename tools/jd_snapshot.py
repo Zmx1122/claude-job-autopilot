@@ -35,7 +35,11 @@ CLOSED = [r'no longer accepting applications', r'nimmt keine bewerbungen mehr an
           r'nicht mehr verfügbar', r'nicht mehr online', r'stellenanzeige ist abgelaufen', r'bewerbungsfrist ist abgelaufen',
           r'diese stelle ist (?:leider )?(?:bereits )?besetzt', r'page (?:was )?not found', r'seite wurde nicht gefunden']
 BLOCKED = [r'authwall', r'linkedin login', r'einloggen \| linkedin', r'sign in \| linkedin', r'sign in to view',
-           r'captcha', r'access denied', r'are you a robot', r'unusual activity', r'passwort vergessen', r'forgot password']
+           r'captcha', r'access denied', r'are you a robot', r'unusual activity', r'passwort vergessen', r'forgot password',
+           # Cloudflare / bot-check interstitials (5 Indeed + LinkedIn snapshots were saved as "online" before 2026-11-16)
+           r'security check - indeed', r'zusätzliche verifizierung erforderlich', r'additional verification required',
+           r'ray-id', r'ray id:', r'just a moment\.\.\.', r'verify you are human', r'checking your browser',
+           r'überprüfung, ob sie ein mensch sind', r'bestätigen sie, dass sie ein mensch sind']
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'}
 BLOCK = {'p', 'div', 'li', 'ul', 'ol', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'section', 'article', 'tr', 'table', 'header', 'footer'}
 

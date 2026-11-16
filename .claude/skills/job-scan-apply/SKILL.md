@@ -183,6 +183,7 @@ After the confirmation: submit each, wait for the success page or message, then
 (`--posted` = today minus `age_days` from the shortlist JSON). No snapshot yet (it failed, or the job was submitted in a
 hurry) → take it right after submitting; the confirmation page often still links to the posting. Mode and posting date feed the dashboard's
 "which applications get interviews" table — the evidence for the strategy.
+Then `python3 tools/local_dashboard.py` so the local dashboard shows the new applications.
 Report: submitted, skipped (with reason), waiting on the user (CAPTCHA, verification link, missing file).
 Respect the daily cap; the user may lift it explicitly for one day.
 

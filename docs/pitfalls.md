@@ -204,3 +204,15 @@ identical title at the same company even when that row is closed. Always read "S
   tabs with "LinkedIn verknüpfen" / "Lade deinen CV hoch" buttons that shift while it loads.
 - Rule: do not click around the StepStone profile page. Replacing the stored CV is the user's job (it is an account change);
   ask them to do it in the profile, then apply.
+
+## JD snapshots that are really a Cloudflare page (2026-11-16)
+- 5 snapshots in `data/applications/*/jd.md` held "Security Check - Indeed.com · Zusätzliche Verifizierung erforderlich · Ray-ID"
+  instead of the posting, marked `page_status: online`. They came from the anonymous headless fetch, which Indeed and LinkedIn
+  answer with a bot check.
+- Fixed: `BLOCKED` in `tools/jd_snapshot.py` knows the Cloudflare / Indeed texts, so such a page is saved as `blocked` and the local
+  dashboard warns on it. Rule: snapshot from the signed-in browser pane (`--text-file`), never anonymously, for Indeed and LinkedIn.
+
+## sync_mail.py crashed on two emails for one new application (2026-11-16)
+- `KeyError: '_stage'` when one sync held e.g. "application sent" and "confirmation" for an application not yet in the tracker:
+  the row created for the first email lacked the working fields that loaded rows get. Likely with an empty tracker (new users,
+  local tracker). Fixed: new rows get `_stage`, `_idate`, `_old` when created.

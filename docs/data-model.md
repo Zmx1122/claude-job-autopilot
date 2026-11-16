@@ -3,6 +3,11 @@
 ## Notion database "Job Applications"
 Created by `tools/notion_setup.py`. One row per job (seen, shortlisted, applied or skipped).
 
+**Local tracker** (`TRACKER_BACKEND=local`, no Notion): the same columns as `data/tracker.csv`, written by `tools/tracker_local.py`
+(column names are the row fields: `title, company, city, salary, platform, status, source, applied_text, stage, interview_date,
+first_seen, last_email, url, evidence, thread, job_id, events, notes, mode, cv_version, cover_letter, posted`, plus `id`,
+`created`, `updated`). Deleted rows go to `data/tracker_trash.csv`. Everything below applies to both.
+
 | Column | Type | Filled by |
 |---|---|---|
 | Title | title | scan / mail sync |

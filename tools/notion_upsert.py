@@ -1,22 +1,12 @@
-"""Backfill upload: create or update Notion rows from apps.json (output of merge.py). Key: Email Evidence URL.
+"""Backfill upload: create or update tracker rows (Notion or local CSV) from apps.json (output of merge.py). Key: Email Evidence URL.
 
 usage: python3 tools/notion_upsert.py data/mail/apps.json
 """
-import json, sys, time, requests
-from common import *   # applied_value: text or date column
-env = load_env(); H = {'Authorization': f"Bearer {env['NOTION_TOKEN']}", 'Notion-Version': '2022-06-28', 'Content-Type': 'application/json'}
-DB = env['NOTION_DATABASE_ID']
-def rt(s): return {'rich_text': [{'text': {'content': (s or '')[:1900]}}]}
-def existing():
-    rows, cursor = {}, None
-    while True:
-        body = {'page_size': 100, **({'start_cursor': cursor} if cursor else {})}
-        d = requests.post(f'https://api.notion.com/v1/databases/{DB}/query', headers=H, json=body).json()
-        for p in d.get('results', []):
-            ev = (p['properties'].get('Email Evidence') or {}).get('url')
-            if ev: rows[ev] = p['id']
-        if not d.get('has_more'): return rows
-        cursor = d['next_cursor']
+import json, sys, time
+from common import *   # applied_value: text or date column; notion_rows / notion_call serve both backends
+env = load_env(); LOCAL = is_local(env)
+DB = env.get('NOTION_DATABASE_ID', '')
+def existing(): return {r['evidence']: r['id'] for r in notion_rows(env) if r['evidence']}
 def props(a):
     p = {'Title': {'title': [{'text': {'content': a['title'] or '(title unknown)'}}]}, 'Company': rt(a['company']), 'City': rt(a.get('city','')), 'Salary Range': rt(a.get('salary','')),
          'First Seen': {'date': {'start': a['applied']}}, 'Applied On': applied_value(env, a['applied']), 'Last Email': {'date': {'start': a['last_email']}},
@@ -28,8 +18,8 @@ def props(a):
 apps = json.load(open(sys.argv[1])); have = existing(); created = updated = 0
 for a in apps:
     pid = have.get(a['evidence'])
-    if pid: r = requests.patch(f'https://api.notion.com/v1/pages/{pid}', headers=H, json={'properties': props(a)}); updated += 1
-    else: r = requests.post('https://api.notion.com/v1/pages', headers=H, json={'parent': {'database_id': DB}, 'properties': props(a)}); created += 1
+    if pid: r = notion_call('PATCH', f'https://api.notion.com/v1/pages/{pid}', env, json={'properties': props(a)}); updated += 1
+    else: r = notion_call('POST', 'https://api.notion.com/v1/pages', env, json={'parent': {'database_id': DB}, 'properties': props(a)}); created += 1
     if r.status_code != 200: print('ERR', r.status_code, r.text[:200], a['company'], a['title'])
-    time.sleep(0.34)
+    if not LOCAL: time.sleep(0.34)
 print(f'created {created}, updated {updated}')

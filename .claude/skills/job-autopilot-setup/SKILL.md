@@ -1,12 +1,12 @@
 ---
 name: job-autopilot-setup
-description: Guided zero-to-running setup of the job autopilot for a non-technical user — knowledge base (CVs, certificates; no CV → career coaching and a first CV), questionnaire → config/profile.yaml, Notion token + database, Gmail app password + "applications" label, platform logins in Claude's built-in browser, macOS upload permission, dashboards and the daily schedule. Use when the user says "set up", "get started", "配置", "开始", "onboard", when .env or config/profile.yaml is missing, or when tools/check_setup.py fails.
+description: Guided zero-to-running setup of the job autopilot for a non-technical user — knowledge base (CVs, certificates; no CV → career coaching and a first CV), questionnaire → config/profile.yaml, tracker (Notion token + database, or a local table with a local dashboard for users without Notion), Gmail app password + "applications" label, platform logins in Claude's built-in browser, macOS upload permission, dashboards and the daily schedule. Use when the user says "set up", "get started", "配置", "开始", "onboard", when .env or config/profile.yaml is missing, or when tools/check_setup.py fails.
 ---
 
 # Job Autopilot setup
 
 You are onboarding someone who may never have used a terminal. You run every command yourself; the user only
-clicks in Notion, Gmail, System Settings and the browser pane, and answers questions. Speak the user's language
+clicks in Notion (if they use it), Gmail, System Settings and the browser pane, and answers questions. Speak the user's language
 (Chinese, German or English, whatever they write in). Keep each message short: one step, what to click, what to send back.
 
 Track progress with the task list. Steps 1–9 below. Skip a step that `python3 tools/check_setup.py` already shows as done.
@@ -14,7 +14,7 @@ Never paste secrets back into chat, never type a password or solve a CAPTCHA, ne
 
 ## Where secrets live (tell the user once, before step 3)
 Standard: the **`.env`** file in the repo folder (git-ignored; template `.env.example`; read by `tools/common.py`). It holds
-`NOTION_TOKEN`, `NOTION_PARENT_PAGE_ID`, `NOTION_DATABASE_ID`, `IMAP_USER`, `IMAP_APP_PASSWORD`, `GMAIL_LABEL`, `DASHBOARD_URL`,
+`TRACKER_BACKEND`, `NOTION_TOKEN`, `NOTION_PARENT_PAGE_ID`, `NOTION_DATABASE_ID` (Notion users only), `IMAP_USER`, `IMAP_APP_PASSWORD`, `GMAIL_LABEL`, `DASHBOARD_URL`,
 `BACKUP_DIR`. It is not part of the backup (keep the tokens in a password manager) and `tools/check_public.py` blocks any commit
 that contains them. There is no keychain integration: the file is plain text on this Mac.
 Two ways to enter a secret, say both, in this order:
@@ -75,8 +75,20 @@ Copy `config/profile.example.yaml` to `config/profile.yaml`, then fill it **bloc
   - `search.max_applications_per_day: 10`.
 - Address, salary, notice period, start date and work permit are asked by most German portals — make sure they are filled.
 
-## 3. Notion (tracker + dashboard page)
-Walk the user through `docs/credentials.md#notion` one click at a time:
+## 3. Tracker: Notion or local
+Ask with AskUserQuestion: "Where should your applications table live?"
+- **Notion (recommended if you already use Notion)**: a Notion database plus a dashboard section on a Notion page; you can open
+  it on your phone and edit rows there.
+- **Only on this computer (no account)**: a table file `data/tracker.csv` and a dashboard page you open by double-click.
+  Nothing to sign up for; the table is in the backup. Good for anyone who does not have or want Notion.
+
+**Local** → `set_env_value('TRACKER_BACKEND', 'local')` (or write the line into `.env`), skip the rest of this step, and say:
+"Your applications are recorded in `data/tracker.csv` on this computer. You can open it in Excel or Numbers to look at it,
+but close it before I sync, and change things by telling me rather than editing it." Run `python3 tools/tracker.py status`.
+The user can switch to Notion later (step 3 below, then `TRACKER_BACKEND=notion`); a Notion user can switch to local with
+`python3 tools/tracker.py import-notion` and `TRACKER_BACKEND=local`.
+
+**Notion** → `set_env_value('TRACKER_BACKEND', 'notion')`, then walk the user through `docs/credentials.md#notion` one click at a time:
 1. notion.so/profile/integrations → **New integration** → type Internal → name `Job Autopilot` → copy the **Internal Integration Secret** (`ntn_…`).
 2. Create a page "Job Search" in their workspace (top level). Page → `•••` → **Connections** → add `Job Autopilot`.
 3. Copy the page link.
@@ -123,15 +135,22 @@ macOS dialog script, see `docs/macos-permissions.md`:
    Never build a helper .app with osacompile as a workaround: each rebuild is a new identity and loses the permission.
 
 ## 7. Dashboards
-- Notion: after the first rows exist, run the **job-dashboard** skill (adds charts to the "Job Search" page).
-- Interactive: the same skill creates a claude.ai artifact dashboard and stores its link as `DASHBOARD_URL`.
+- **Everyone**: the local dashboard. Run `python3 tools/local_dashboard.py --open` (it opens in the default browser), then reveal
+  `data/dashboard/Job-Dashboard.html` in Finder / Explorer and suggest dragging it to the Dock or desktop, or bookmarking it in the browser.
+  Explain: numbers and charts at the top; the table shows title, company, status and applied date; ⋯ on a row shows its emails,
+  the job description snapshot and the documents sent. The page is rebuilt after every sync and every batch of applications;
+  reload it in the browser to see the new state. Works with no data yet (shows an empty state).
+- **Notion users** in addition: after the first rows exist, run the **job-dashboard** skill (charts on the "Job Search" page) and,
+  if they want it, the claude.ai artifact dashboard (link stored as `DASHBOARD_URL`).
 
 ## 8. Schedule (Claude desktop scheduled tasks)
 Create two scheduled tasks with the scheduled-tasks tool (ask the user for times; defaults from `schedule:` in the profile):
 - **job-autopilot-daily** (e.g. weekdays 08:00): prompt =
   "In the job-autopilot repo: run the job-mail-sync skill (daily mode, apply after reviewing the report), then the
-  scan phase of the job-scan-apply skill, and leave the shortlist table for me. Do not submit any application."
-- **job-autopilot-weekly-dashboard** (e.g. Monday 08:00): prompt = "In the job-autopilot repo: run the job-dashboard skill (refresh)."
+  scan phase of the job-scan-apply skill, rebuild the local dashboard (python3 tools/local_dashboard.py), and leave the
+  shortlist table for me. Do not submit any application."
+- **job-autopilot-weekly-dashboard** (e.g. Monday 08:00, Notion users only; the local dashboard is rebuilt by the daily task):
+  prompt = "In the job-autopilot repo: run the job-dashboard skill (refresh)."
 Explain: tasks run only while the Mac is awake and the Claude app is open. Submitting always happens in a session with the user.
 
 ## 8b. Backup of personal data
@@ -143,5 +162,5 @@ every change to documents, fact bank or applications. Tokens and passwords are n
 
 ## 9. Final check and hand-over
 Run `python3 tools/check_setup.py` until everything required is ✅. Then tell the user, in 5 lines, how a normal day works:
-"Each morning I sync your mail and Notion and prepare a shortlist. Open Claude, say 'show today's jobs' / '看看今天的岗位',
+"Each morning I sync your mail and your tracker (Notion or the local table) and prepare a shortlist. Open Claude, say 'show today's jobs' / '看看今天的岗位',
 pick the ones you like, I fill them in, you confirm once, I submit and log everything."

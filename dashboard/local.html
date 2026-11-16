@@ -1,0 +1,402 @@
+<!doctype html>
+<!-- Template for tools/local_dashboard.py, which inlines the data and writes data/dashboard/Job-Dashboard.html.
+     No data lives in this file. No external scripts: the page works offline. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Search Dashboard</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f6f6f4; --panel:#fcfcfb; --line:#e3e2dd; --fg:#0b0b0b; --fg2:#52514e; --muted:#7a7974; --hover:#efeee9;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s7:#6250d6;
+  --good:#0ca30c; --bad:#d03b3b; --grey:#a3a29b; --warnbg:#fff4dc; --warnfg:#7a5300;
+  --radius:10px; --shadow:0 10px 40px rgba(0,0,0,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121211; --panel:#1a1a19; --line:#33332f; --fg:#f0efec; --fg2:#c3c2b7; --muted:#8f8e86; --hover:#24241f;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s7:#9085e9;
+    --good:#0ca30c; --bad:#e66767; --grey:#6b6a65; --warnbg:#3a2e12; --warnfg:#f3c766; --shadow:0 10px 40px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121211; --panel:#1a1a19; --line:#33332f; --fg:#f0efec; --fg2:#c3c2b7; --muted:#8f8e86; --hover:#24241f;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s7:#9085e9;
+  --good:#0ca30c; --bad:#e66767; --grey:#6b6a65; --warnbg:#3a2e12; --warnfg:#f3c766; --shadow:0 10px 40px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 24px 64px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:20px}
+h1{font-size:26px;line-height:1.2;margin:0;font-weight:650;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px}
+h2{font-size:15px;margin:0 0 2px;font-weight:600}
+.note{color:var(--muted);font-size:13px;margin:0 0 12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:12px}
+.tile,.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;min-width:0}
+.tile .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.tile .v{font-size:30px;font-weight:650;line-height:1.15;margin-top:4px;font-variant-numeric:tabular-nums}
+.tile .h{font-size:12px;color:var(--fg2)}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:12px;margin-bottom:12px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+svg text{font-size:12px;fill:var(--fg2)}
+svg text.strong{fill:var(--fg);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--fg2);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.donutwrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.donutwrap .legend{flex-direction:column;flex:1;min-width:150px}
+.donutwrap .legend span{display:flex;justify-content:space-between;gap:10px}
+.donutwrap .legend b{font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums}
+#tip{position:fixed;pointer-events:none;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;box-shadow:var(--shadow);opacity:0;transition:opacity .08s;z-index:50;max-width:260px}
+#tip b{display:block;font-weight:600}
+/* table */
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.search{flex:1;min-width:200px;max-width:340px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--fg2);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip .n{opacity:.7;margin-left:4px;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+th button{all:unset;cursor:pointer}
+th button:focus-visible,.more:focus-visible,.chip:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--hover)}
+td.t{font-weight:550;min-width:220px}
+td.c{color:var(--fg2);min-width:140px}
+td.d{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--fg2)}
+td.m{width:44px;text-align:right}
+.more{border:0;background:transparent;color:var(--fg2);font-size:20px;line-height:1;padding:2px 8px;border-radius:6px;cursor:pointer}
+.more:hover{background:var(--line)}
+.pill{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;color:var(--fg)}
+.pill i{width:8px;height:8px;border-radius:50%;flex:none}
+.pill small{color:var(--muted);font-size:12px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+/* drawer */
+#veil{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .15s;z-index:20}
+#veil.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(100%);transition:transform .2s ease;z-index:30;display:flex;flex-direction:column}
+#drawer.on{transform:none}
+.dh{padding:18px 20px 14px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.dh h3{margin:0;font-size:18px;line-height:1.3}
+.dh .sub{margin-top:3px}
+.close{margin-left:auto;border:0;background:transparent;color:var(--fg2);font-size:24px;line-height:1;cursor:pointer;padding:0 4px;border-radius:6px}
+.db{padding:16px 20px 40px;overflow-y:auto}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.btn{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:6px 12px;color:var(--fg);text-decoration:none;font-size:13px;background:var(--bg)}
+.btn:hover{background:var(--hover)}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0 0 18px;font-size:14px}
+dt{color:var(--muted)}
+dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.sec{margin-top:20px}
+.sec h4{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.timeline{list-style:none;margin:0;padding:0;font-size:13px}
+.timeline li{padding:3px 0 3px 16px;position:relative;color:var(--fg2)}
+.timeline li:before{content:"";position:absolute;left:3px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--s1)}
+details.mail{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--bg)}
+details.mail summary{cursor:pointer;padding:9px 12px;list-style:none;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px}
+details.mail summary::-webkit-details-marker{display:none}
+details.mail summary .when{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+details.mail summary .subj{font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+details.mail summary .from{grid-column:2;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-right:6px;color:var(--fg2);font-weight:500}
+.mailbody{padding:0 12px 12px;font-size:13px;white-space:pre-wrap;color:var(--fg2);overflow-wrap:anywhere}
+.mailbody a{color:var(--s1)}
+.jd{white-space:pre-wrap;font-size:13px;color:var(--fg2);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;max-height:380px;overflow:auto;overflow-wrap:anywhere}
+.warn{background:var(--warnbg);color:var(--warnfg);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:8px}
+.files{list-style:none;padding:0;margin:0;font-size:14px}
+.files li{padding:3px 0}
+.files a{color:var(--s1)}
+.path{font-size:12px;color:var(--muted);margin-top:8px;overflow-wrap:anywhere}
+.none{color:var(--muted);font-size:13px}
+@media (max-width:600px){.wrap{padding:20px 16px 48px}td.c{min-width:110px}td.t{min-width:170px}.hide-s{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Job Search Dashboard</h1>
+      <div class="sub" id="gen"></div>
+    </div>
+  </header>
+
+  <section class="tiles" id="tiles" aria-label="Headline numbers"></section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Where applications stand</h2>
+      <p class="note">Current status of every application sent</p>
+      <div class="donutwrap"><svg id="donut" width="180" height="180" viewBox="0 0 180 180" role="img" aria-label="Status of applications"></svg><div class="legend" id="donutLegend"></div></div>
+    </div>
+    <div class="card">
+      <h2>How far applications got</h2>
+      <p class="note">Each bar counts applications that reached the step at some point, also those rejected later</p>
+      <svg id="funnel" width="100%" height="180" role="img" aria-label="Application funnel"></svg>
+    </div>
+  </section>
+
+  <section class="card" style="margin-bottom:12px">
+    <h2>Applications per week</h2>
+    <p class="note">By platform, by the week the application was sent</p>
+    <svg id="weekly" width="100%" height="230" role="img" aria-label="Applications per week by platform"></svg>
+    <div class="legend" id="weeklyLegend"></div>
+  </section>
+
+  <section class="card">
+    <h2>Applications</h2>
+    <p class="note">Click a row or ⋯ for emails, the job description and documents</p>
+    <div class="tools">
+      <input class="search" id="q" type="search" placeholder="Search title or company" aria-label="Search title or company">
+      <div id="chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th><button data-sort="title">Title</button></th>
+          <th><button data-sort="company">Company</button></th>
+          <th><button data-sort="status">Status</button></th>
+          <th><button data-sort="applied">Applied</button></th>
+          <th class="m"><span class="hide-s" style="position:absolute;left:-9999px">Details</span></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div id="tip" role="status"></div>
+<div id="veil"></div>
+<aside id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" aria-hidden="true">
+  <div class="dh">
+    <div><h3 id="dTitle"></h3><div class="sub" id="dSub"></div></div>
+    <button class="close" id="dClose" aria-label="Close">×</button>
+  </div>
+  <div class="db" id="dBody"></div>
+</aside>
+
+<script>
+const DATA = /*__DATA__*/null;
+(function () {
+  if (!DATA) { document.querySelector('.wrap').innerHTML = '<p class="empty">No data. Build this page with <code>python3 tools/local_dashboard.py</code>.</p>'; return; }
+  const rows = DATA.rows;
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const fmtDate = (d) => d ? new Date(d.length <= 10 ? d + 'T12:00:00' : d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '–';
+
+  const STATUS = {
+    Shortlisted: { c: '--s4', label: 'Shortlisted' }, Seen: { c: '--s4', label: 'Seen' },
+    Applied: { c: '--s1', label: 'Applied' }, Confirmed: { c: '--s7', label: 'Confirmed' },
+    Interview: { c: '--s3', label: 'Interview' }, Offer: { c: '--good', label: 'Offer' },
+    Rejected: { c: '--bad', label: 'Rejected' }, Withdrawn: { c: '--grey', label: 'Withdrawn' }, Skipped: { c: '--grey', label: 'Not applied' },
+  };
+  const PLATFORMS = ['LinkedIn', 'StepStone', 'Indeed', 'Xing', 'Other'];
+  const PCOL = { LinkedIn: '--s1', StepStone: '--s2', Indeed: '--s3', Xing: '--s4', Other: '--s5' };
+  const sent = rows.filter((r) => r.applied);
+
+  $('#gen').textContent = `Updated ${fmtDate(DATA.generated)} · ${new Date(DATA.generated).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })} · data from ${DATA.backend === 'local' ? 'data/tracker.csv' : 'Notion'}`;
+
+  // tooltip
+  const tip = $('#tip');
+  const showTip = (ev, html) => { tip.innerHTML = html; tip.style.opacity = 1; const x = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8); tip.style.left = x + 'px'; tip.style.top = (ev.clientY + 14) + 'px'; };
+  const hideTip = () => { tip.style.opacity = 0; };
+  const hover = (node, html) => { node.addEventListener('mousemove', (e) => showTip(e, html)); node.addEventListener('mouseleave', hideTip); };
+
+  // ---------- tiles ----------
+  const reachedN = (s) => sent.filter((r) => r.funnel.includes(s)).length;
+  const open = sent.filter((r) => !r.ended && !['Offer'].includes(r.status));
+  const upcoming = rows.filter((r) => r.interview_date && r.interview_date.slice(0, 10) >= new Date().toISOString().slice(0, 10));
+  const tiles = [
+    ['Applications sent', sent.length, `${rows.length - sent.length} more tracked, not sent`],
+    ['Got an interview', reachedN('Interview'), `${pct(reachedN('Interview'), sent.length)} of applications`],
+    ['Waiting for an answer', open.length, 'not rejected, withdrawn or offered'],
+    ['Offers', reachedN('Offer'), upcoming.length ? `${upcoming.length} interview${upcoming.length > 1 ? 's' : ''} coming up` : 'no interview scheduled'],
+  ];
+  $('#tiles').innerHTML = tiles.map(([k, v, h]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="h">${esc(h)}</div></div>`).join('');
+
+  // ---------- donut ----------
+  function drawDonut() {
+    const svg = $('#donut'); svg.innerHTML = '';
+    const order = ['Applied', 'Confirmed', 'Interview', 'Offer', 'Rejected', 'Withdrawn'];
+    const counts = order.map((s) => [s, sent.filter((r) => r.status === s).length]).filter(([, n]) => n);
+    const other = sent.length - counts.reduce((a, [, n]) => a + n, 0);
+    if (other) counts.push(['Other', other]);
+    const total = sent.length || 1, R = 84, r0 = 54, cx = 90, cy = 90;
+    let a0 = -Math.PI / 2;
+    const gap = counts.length > 1 ? 0.012 : 0;
+    counts.forEach(([s, n]) => {
+      const a1 = a0 + 2 * Math.PI * n / total;
+      const s0 = a0 + gap, s1 = Math.max(a1 - gap, s0 + 0.001), large = s1 - s0 > Math.PI ? 1 : 0;
+      const P = (rad, a) => `${cx + rad * Math.cos(a)},${cy + rad * Math.sin(a)}`;
+      const d = counts.length === 1
+        ? `M${cx},${cy - R}A${R},${R} 0 1 1 ${cx - 0.01},${cy - R}L${cx - 0.01},${cy - r0}A${r0},${r0} 0 1 0 ${cx},${cy - r0}Z`
+        : `M${P(R, s0)}A${R},${R} 0 ${large} 1 ${P(R, s1)}L${P(r0, s1)}A${r0},${r0} 0 ${large} 0 ${P(r0, s0)}Z`;
+      const path = el('path', { d, fill: css((STATUS[s] || { c: '--grey' }).c) }, svg);
+      hover(path, `<b>${(STATUS[s] || { label: s }).label}</b>${n} · ${pct(n, total)}`);
+      a0 = a1;
+    });
+    el('text', { x: cx, y: cy - 2, 'text-anchor': 'middle', class: 'strong', style: 'font-size:24px' }, svg).textContent = sent.length;
+    el('text', { x: cx, y: cy + 16, 'text-anchor': 'middle' }, svg).textContent = 'sent';
+    $('#donutLegend').innerHTML = counts.map(([s, n]) => `<span><span><i style="background:var(${(STATUS[s] || { c: '--grey' }).c})"></i>${(STATUS[s] || { label: s }).label}</span><b>${n}</b></span>`).join('');
+  }
+
+  // ---------- funnel ----------
+  function drawFunnel() {
+    const svg = $('#funnel'); svg.innerHTML = '';
+    const W = svg.clientWidth || 600, steps = ['Applied', 'Confirmed', 'Interview', 'Offer'];
+    const labels = { Applied: 'Sent', Confirmed: 'Receipt confirmed', Interview: 'Interview', Offer: 'Offer' };
+    const vals = steps.map(reachedN), max = Math.max(1, vals[0]);
+    const lw = Math.min(150, W * 0.3), vw = 70, bw = Math.max(40, W - lw - vw), bh = 26, gap = 14;
+    steps.forEach((s, i) => {
+      const y = 10 + i * (bh + gap), w = Math.max(vals[i] ? 4 : 0, bw * vals[i] / max);
+      el('text', { x: 0, y: y + bh / 2 + 4 }, svg).textContent = labels[s];
+      el('rect', { x: lw, y, width: bw, height: bh, rx: 4, fill: css('--line'), opacity: 0.45 }, svg);
+      const bar = el('rect', { x: lw, y, width: w, height: bh, rx: 4, fill: css('--s1') }, svg);
+      const t = el('text', { x: lw + w + 8, y: y + bh / 2 + 4, class: 'strong' }, svg);
+      t.textContent = vals[i] + (i ? ` · ${pct(vals[i], vals[0])}` : '');
+      hover(bar, `<b>${labels[s]}</b>${vals[i]} applications${i ? ' · ' + pct(vals[i], vals[0]) + ' of sent' : ''}`);
+    });
+  }
+
+  // ---------- weekly ----------
+  const isoWeek = (d) => { const t = new Date(d + 'T12:00:00'); const day = (t.getDay() + 6) % 7; t.setDate(t.getDate() - day + 3); const y = t.getFullYear(); const w1 = new Date(y, 0, 4); return `${y}-W${String(1 + Math.round(((t - w1) / 864e5 - 3 + ((w1.getDay() + 6) % 7)) / 7)).padStart(2, '0')}`; };
+  const weekStart = (d) => { const t = new Date(d + 'T12:00:00'); t.setDate(t.getDate() - (t.getDay() + 6) % 7); return t; };
+  function drawWeekly() {
+    const svg = $('#weekly'); svg.innerHTML = '';
+    if (!sent.length) { $('#weeklyLegend').innerHTML = '<span class="none">No applications yet</span>'; return; }
+    const byW = {};
+    sent.forEach((r) => { const k = isoWeek(r.applied); (byW[k] ||= { start: weekStart(r.applied), n: {} }); const p = PLATFORMS.includes(r.platform) ? r.platform : 'Other'; byW[k].n[p] = (byW[k].n[p] || 0) + 1; });
+    // continuous weeks from the first to the last, at most the last 26
+    const first = weekStart(sent.map((r) => r.applied).sort()[0]), last = weekStart(sent.map((r) => r.applied).sort().at(-1));
+    let weeks = [];
+    for (let t = new Date(first); t <= last; t.setDate(t.getDate() + 7)) { const k = isoWeek(t.toISOString().slice(0, 10)); weeks.push([k, byW[k] || { start: new Date(t), n: {} }]); }
+    weeks = weeks.slice(-26);
+    const W = svg.clientWidth || 800, H = 230, L = 32, B = 26, T = 8;
+    const tot = weeks.map(([, w]) => Object.values(w.n).reduce((a, b) => a + b, 0)), max = Math.max(1, ...tot);
+    const nice = max <= 5 ? 1 : max <= 12 ? 2 : max <= 30 ? 5 : 10, top = Math.ceil(max / nice) * nice;
+    const y = (v) => T + (H - T - B) * (1 - v / top);
+    for (let v = 0; v <= top; v += nice) {
+      el('line', { x1: L, x2: W, y1: y(v), y2: y(v), stroke: css('--line'), 'stroke-width': 1 }, svg);
+      el('text', { x: L - 6, y: y(v) + 4, 'text-anchor': 'end' }, svg).textContent = v;
+    }
+    const slot = (W - L) / weeks.length, bw = Math.max(4, Math.min(34, slot * 0.66));
+    const used = new Set();
+    weeks.forEach(([k, w], i) => {
+      const x = L + i * slot + (slot - bw) / 2;
+      let acc = 0;
+      const present = PLATFORMS.filter((p) => w.n[p]);
+      present.forEach((p, j) => {
+        used.add(p);
+        const v = w.n[p], y1 = y(acc + v), y0 = y(acc), h = Math.max(1, y0 - y1 - (j < present.length - 1 ? 2 : 0));
+        const yy = j < present.length - 1 ? y1 + 2 : y1;
+        const isTop = j === present.length - 1, r = Math.min(4, bw / 2, h);
+        const d = isTop
+          ? `M${x},${yy + h}V${yy + r}Q${x},${yy} ${x + r},${yy}H${x + bw - r}Q${x + bw},${yy} ${x + bw},${yy + r}V${yy + h}Z`
+          : `M${x},${yy}H${x + bw}V${yy + h}H${x}Z`;
+        el('path', { d, fill: css(PCOL[p]) }, svg);
+        acc += v;
+      });
+      const hit = el('rect', { x: L + i * slot, y: T, width: slot, height: H - T - B, fill: 'transparent' }, svg);
+      const lines = PLATFORMS.filter((p) => w.n[p]).map((p) => `${p}: ${w.n[p]}`).join('<br>') || 'none';
+      hover(hit, `<b>Week of ${w.start.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} · ${tot[i]}</b>${lines}`);
+      const every = Math.ceil(weeks.length / Math.max(1, Math.floor((W - L) / 60)));
+      if (i % every === 0) el('text', { x: L + i * slot + slot / 2, y: H - 8, 'text-anchor': 'middle' }, svg).textContent = w.start.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    });
+    $('#weeklyLegend').innerHTML = PLATFORMS.filter((p) => used.has(p)).map((p) => `<span><i style="background:var(${PCOL[p]})"></i>${p}</span>`).join('');
+  }
+
+  // ---------- table ----------
+  const FILTERS = [
+    ['all', 'All', () => true],
+    ['active', 'Waiting', (r) => r.applied && !r.ended && r.status !== 'Offer'],
+    ['interview', 'Interviews', (r) => r.funnel.includes('Interview')],
+    ['offer', 'Offers', (r) => r.funnel.includes('Offer')],
+    ['closed', 'Rejected / withdrawn', (r) => r.applied && ['Rejected', 'Withdrawn'].includes(r.status)],
+    ['notsent', 'Not sent', (r) => !r.applied],
+  ];
+  let filter = 'all', sortKey = 'applied', sortDir = -1, query = '';
+  $('#chips').innerHTML = FILTERS.map(([k, label, f]) => `<button class="chip" data-f="${k}" aria-pressed="${k === filter}">${label}<span class="n">${rows.filter(f).length}</span></button>`).join('');
+  $('#chips').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (!b) return; filter = b.dataset.f; document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', c === b)); renderTable(); });
+  $('#q').addEventListener('input', (e) => { query = e.target.value.trim().toLowerCase(); renderTable(); });
+  document.querySelectorAll('th button').forEach((b) => b.addEventListener('click', () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'applied' ? -1 : 1); sortKey = k; renderTable(); }));
+  const statusCell = (r) => { const s = STATUS[r.status] || { c: '--grey', label: r.status || '—' }; return `<span class="pill"><i style="background:var(${s.c})"></i>${esc(r.stage || s.label)}${r.stage && r.stage !== s.label ? ` <small>${esc(s.label)}</small>` : ''}</span>`; };
+  function renderTable() {
+    const f = FILTERS.find((x) => x[0] === filter)[2];
+    const list = rows.filter(f).filter((r) => !query || (r.title + ' ' + r.company).toLowerCase().includes(query));
+    const key = (r) => sortKey === 'applied' ? (r.applied || r.first_seen || '') : String(r[sortKey] || '').toLowerCase();
+    list.sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0) * sortDir);
+    $('#rows').innerHTML = list.length ? list.map((r) => `<tr data-id="${esc(r.id)}">
+      <td class="t">${esc(r.title || '(no title)')}</td><td class="c">${esc(r.company || '—')}</td>
+      <td>${statusCell(r)}</td><td class="d">${r.applied ? fmtDate(r.applied) : '<span class="none">' + esc(r.applied_text || '—') + '</span>'}</td>
+      <td class="m"><button class="more" aria-label="Details for ${esc(r.title)}">⋯</button></td></tr>`).join('')
+      : '<tr><td colspan="5" class="empty">Nothing matches</td></tr>';
+  }
+  $('#rows').addEventListener('click', (e) => { const tr = e.target.closest('tr[data-id]'); if (tr) openDrawer(tr.dataset.id); });
+
+  // ---------- drawer ----------
+  const CAT = { application_sent: 'sent', ats_confirmation: 'confirmation', interview: 'interview', rejection: 'rejection', offer: 'offer', withdrawn: 'withdrawn', own_message: 'your reply', delivery_failed: 'not delivered' };
+  const linkify = (s) => esc(s).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${u.length > 60 ? u.slice(0, 57) + '…' : u}</a>`);
+  let lastFocus = null;
+  function openDrawer(id) {
+    const r = rows.find((x) => x.id === id); if (!r) return;
+    lastFocus = document.activeElement;
+    $('#dTitle').textContent = r.title || '(no title)';
+    $('#dSub').textContent = [r.company, r.city].filter(Boolean).join(' · ');
+    const facts = [
+      ['Status', statusCell(r)], ['Applied', r.applied ? fmtDate(r.applied) : esc(r.applied_text || '—')],
+      ['Interview', r.interview_date ? esc(new Date(r.interview_date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: r.interview_date.length > 10 ? 'short' : undefined })) : ''],
+      ['Platform', esc(r.platform)], ['Found', fmtDate(r.first_seen)], ['Posted', fmtDate(r.posted)],
+      ['Salary', esc(r.salary)], ['CV', esc(r.cv) + (r.mode ? ` <span class="none">(${esc(r.mode)})</span>` : '')], ['Cover letter', r.cover_letter ? 'yes' : ''],
+      ['Last email', fmtDate(r.last_email)], ['Recorded by', esc(r.source)],
+    ].filter(([, v]) => v);
+    const events = (r.events || '').split(/\s*;\s*/).filter(Boolean);
+    const mails = r.mails || [];
+    let h = '<div class="btns">';
+    if (r.url) h += `<a class="btn" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">Open posting ↗</a>`;
+    if (r.notion_url) h += `<a class="btn" href="${esc(r.notion_url)}" target="_blank" rel="noopener noreferrer">Open in Notion ↗</a>`;
+    const pdf = (r.files || []).find((f) => f.name === 'jd.pdf');
+    if (pdf) h += `<a class="btn" href="${pdf.href}" target="_blank">Job description PDF</a>`;
+    h += '</div>';
+    h += '<dl>' + facts.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('') + '</dl>';
+    if (r.notes) h += `<div class="sec"><h4>Notes</h4><div style="font-size:14px;white-space:pre-wrap">${linkify(r.notes.replace(/ \| /g, '\n'))}</div></div>`;
+    if (events.length) h += `<div class="sec"><h4>History</h4><ul class="timeline">${events.map((e) => `<li>${esc(e)}</li>`).join('')}</ul></div>`;
+    h += `<div class="sec"><h4>Emails (${mails.length})</h4>`;
+    h += mails.length ? mails.map((m) => `<details class="mail"><summary><span class="when">${fmtDate(m.date)}</span><span class="subj">${m.category ? `<span class="cat">${esc(CAT[m.category] || m.category.replace(/_/g, ' '))}</span>` : ''}${esc(m.subject)}</span><span class="from">${esc(m.frm)}</span></summary>
+      <div class="mailbody">${linkify(m.body)}${m.link ? `\n\n<a href="${m.link}" target="_blank" rel="noopener noreferrer">Open in Gmail ↗</a>` : ''}</div></details>`).join('')
+      : '<div class="none">No email found for this application yet.</div>';
+    h += '</div>';
+    h += '<div class="sec"><h4>Job description snapshot</h4>';
+    if (r.jd && r.jd.text) {
+      if (r.jd.status === 'blocked') h += '<div class="warn">This snapshot shows a login wall or a bot check, not the posting. Ask Claude to take it again from the browser.</div>';
+      if (r.jd.status === 'closed') h += '<div class="warn">The posting was already closed when this snapshot was taken.</div>';
+      h += `<div class="jd">${esc(r.jd.text)}</div>`;
+    } else h += '<div class="none">No snapshot. Snapshots are taken right before each application.</div>';
+    h += '</div>';
+    const other = (r.files || []).filter((f) => f.name !== 'jd.md');
+    if (other.length) h += `<div class="sec"><h4>Files</h4><ul class="files">${other.map((f) => `<li><a href="${f.href}" target="_blank">${esc(f.label)}</a> <span class="none">${f.label !== f.name ? esc(f.name) : ''}</span></li>`).join('')}</ul><div class="path">data/applications/${esc(r.folder)}/</div></div>`;
+    $('#dBody').innerHTML = h; $('#dBody').scrollTop = 0;
+    $('#drawer').classList.add('on'); $('#drawer').setAttribute('aria-hidden', 'false'); $('#veil').classList.add('on');
+    $('#dClose').focus();
+  }
+  function closeDrawer() { $('#drawer').classList.remove('on'); $('#drawer').setAttribute('aria-hidden', 'true'); $('#veil').classList.remove('on'); if (lastFocus) lastFocus.focus(); }
+  $('#dClose').addEventListener('click', closeDrawer); $('#veil').addEventListener('click', closeDrawer);
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+  const drawAll = () => { drawDonut(); drawFunnel(); drawWeekly(); };
+  drawAll(); renderTable();
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 120); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawAll);
+})();
+</script>
+</body>
+</html>

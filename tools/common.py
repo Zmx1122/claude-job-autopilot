@@ -1,4 +1,4 @@
-"""Shared helpers: paths, .env / profile loading, Notion + IMAP clients, company/title matching."""
+"""Shared helpers: paths, .env / profile loading, tracker (Notion or local CSV) + IMAP clients, company/title matching."""
 import os, re, json, time, imaplib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,6 +23,9 @@ def load_env():
             if line and not line.startswith('#') and '=' in line:
                 k, v = line.split('=', 1)
                 env[k.strip()] = v.strip().strip('"').strip("'")
+    if backend(env) == 'local':
+        env['TRACKER_BACKEND'] = 'local'
+        env.setdefault('NOTION_DATABASE_ID', 'local')   # scripts pass it as the page parent; tracker_local ignores it
     return env
 
 
@@ -47,7 +50,22 @@ def load_profile():
     return yaml.safe_load(open(p))
 
 
+# ---------- tracker backend: Notion or local CSV ----------
+def backend(env):
+    """'notion' or 'local'. TRACKER_BACKEND in .env decides; without it, Notion when a token and database are configured."""
+    b = (env.get('TRACKER_BACKEND') or '').strip().lower()
+    if b in ('notion', 'local'):
+        return b
+    return 'notion' if env.get('NOTION_TOKEN') and env.get('NOTION_DATABASE_ID') else 'local'
+
+
+def is_local(env):
+    return backend(env) == 'local'
+
+
 # ---------- Notion ----------
+# notion_rows / notion_call / db_props serve both backends: with the local backend they read and edit data/tracker.csv
+# (tools/tracker_local.py), so every script that records applications works with or without Notion.
 def notion_headers(env, json_body=True):
     h = {'Authorization': f"Bearer {env['NOTION_TOKEN']}", 'Notion-Version': NOTION_VERSION}
     if json_body:
@@ -56,7 +74,10 @@ def notion_headers(env, json_body=True):
 
 
 def notion_rows(env):
-    """All pages of the Job Applications database as flat dicts."""
+    """All pages of the Job Applications database (or rows of data/tracker.csv) as flat dicts."""
+    if is_local(env):
+        import tracker_local
+        return tracker_local.rows()
     import requests
     H = notion_headers(env)
     rows, cursor = [], None
@@ -105,6 +126,9 @@ _DB_PROPS = {}
 
 def db_props(env):
     """{column name: type} of the applications database (cached)."""
+    if not _DB_PROPS and is_local(env):
+        import tracker_local
+        _DB_PROPS.update(tracker_local.schema())
     if not _DB_PROPS:
         r = notion_call('GET', f"https://api.notion.com/v1/databases/{env['NOTION_DATABASE_ID']}", env)
         _DB_PROPS.update({k: v['type'] for k, v in r.json().get('properties', {}).items()})
@@ -119,6 +143,9 @@ def applied_value(env, v):
 
 
 def notion_call(method, url, env, **kw):
+    if is_local(env):
+        import tracker_local
+        return tracker_local.call(method, url, kw.get('json'))
     import requests
     for attempt in range(4):
         r = requests.request(method, url, headers=notion_headers(env), **kw)

@@ -1,4 +1,4 @@
-"""Export the Notion database to data/dashboard/data.json (aggregates) and data/dashboard/applications.json (rows for the artifact).
+"""Export the tracker (Notion database or local data/tracker.csv) to data/dashboard/data.json (aggregates) and data/dashboard/applications.json (rows for the artifact).
 
 usage: python3 tools/dashboard_data.py
 """
@@ -13,24 +13,7 @@ def ttl(p): return ''.join(t['plain_text'] for t in p.get('title', [])) if p els
 def sel(p): return (p.get('select') or {}).get('name', '') if p else ''
 def dt(p): return ((p.get('date') or {}).get('start') or '') if p else ''
 rows = notion_rows(env)
-# funnel: every application passed through Applied; Confirmed/Interview/Offer are cumulative stages
-ORDER = ['Applied', 'Confirmed', 'Interview', 'Offer']
-from stage import parse
-def reached(r, stage):
-    if r.get('stage'):   # detailed stage: a documents request is not an interview, an interview rejected later still counts
-        p = parse(r['stage']); applied = p['phase'] not in ('pre', 'skipped', 'failed', '')
-        return {'Applied': True, 'Confirmed': applied and (p['phase'] != 'applied' or 'ats confirmation' in r['events']),
-                'Interview': p['round'] > 0 or p['phase'] in ('assess', 'offer') or r['stage'].startswith('测评'),
-                'Offer': p['phase'] == 'offer'}[stage]
-    s = r['status']; i = ORDER.index(stage)
-    if s in ORDER: return ORDER.index(s) >= i
-    ev = r['events']
-    if stage == 'Applied': return True
-    if stage == 'Confirmed': return 'ats confirmation' in ev or 'interview' in ev or 'offer' in ev
-    if stage == 'Interview': return 'interview' in ev or 'offer' in ev
-    if stage == 'Offer': return 'offer' in ev
-    return False
-def ended(r): return r['status'] in ('Rejected', 'Withdrawn', 'Skipped')
+from stage import reached, ended, FUNNEL as ORDER   # funnel: Applied -> Confirmed -> Interview -> Offer (cumulative)
 # Sankey nodes: Applied -> Confirmed -> Interview -> Offer, with exits (Rejected/Withdrawn/Skipped) and "Waiting" (still open at that stage)
 links = collections.Counter()
 for r in rows:
@@ -73,7 +56,7 @@ data = dict(generated=datetime.now().isoformat(timespec='minutes'), total=len(ro
             sankey=[dict(source=a, target=b, value=v) for (a, b), v in links.items()],
             weekly=[dict(week=w, total=by_week[w], **by_week_plat[w]) for w in weeks],
             response_days=sorted(resp), by_mode=by_mode, by_age=by_age, open_rows=[r for r in rows if not ended(r)], rows=rows,
-            notion_db=f"https://www.notion.so/{env['NOTION_DATABASE_ID'].replace('-', '')}")
+            notion_db=f"https://www.notion.so/{env['NOTION_DATABASE_ID'].replace('-', '')}" if env.get('NOTION_DATABASE_ID') and not is_local(env) else '')
 json.dump(data, open(out, 'w'), ensure_ascii=False, indent=1)
 print(f"{len(rows)} rows -> {out}; status={data['by_status']}; funnel={data['funnel']}; sankey links={len(links)}; weeks={len(weeks)}; response samples={len(resp)}")
 print(f"interview rate by mode: {by_mode}\ninterview rate by posting age at application: {by_age}")
