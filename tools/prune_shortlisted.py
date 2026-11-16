@@ -2,7 +2,8 @@
 
 usage: python3 tools/prune_shortlisted.py [--days 2] [--apply]
 Without --apply it only lists the rows it would delete (dry run).
-"Delete" = move the Notion page to the trash (Notion keeps it 30 days, restorable from Trash); data/applied.csv keeps its log line.
+"Delete" = move the Notion page to the trash (Notion keeps it 30 days, restorable from Trash), or with the local tracker move the row
+to data/tracker_trash.csv; data/applied.csv keeps its log line.
 Age is counted from "First Seen" (the scan date). Rows without First Seen are left alone.
 Runs in the daily routine right after the mail sync (job-mail-sync skill, daily mode), before the scan.
 
@@ -12,7 +13,7 @@ posting window; with the default 2-day window it is already too old by then.
 """
 import argparse
 from datetime import date, timedelta
-from common import load_env, notion_rows, notion_call
+from common import load_env, notion_rows, notion_call, is_local
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--days', type=int, default=2)
@@ -33,4 +34,4 @@ for r in old:
     if res.status_code != 200:
         failed += 1
         print(f"failed: {r['company']} · {r['title']}: {res.status_code} {res.text[:200]}")
-print(f"\nmoved {len(old) - failed} rows to the Notion trash" + (f", {failed} failed" if failed else ''))
+print(f"\nmoved {len(old) - failed} rows to the " + ('local trash (data/tracker_trash.csv)' if is_local(env) else 'Notion trash') + (f", {failed} failed" if failed else ''))

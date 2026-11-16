@@ -1,20 +1,22 @@
 # Job Autopilot — instructions for Claude
 
 This repo turns Claude (desktop app, Code tab) into a job-application assistant: daily scan of LinkedIn, StepStone,
-Indeed and Xing, batch applying with one user confirmation, a Notion tracker kept up to date from Gmail, and dashboards.
+Indeed and Xing, batch applying with one user confirmation, a tracker kept up to date from Gmail, and dashboards.
+**Tracker** = a Notion database, or `data/tracker.csv` for users without Notion (`TRACKER_BACKEND=local` in `.env`). The scripts
+are the same for both (`tools/common.py` routes them); where skills say "Notion row", read "tracker row" for local users.
 The user is usually **not a programmer**. You run all commands; they click, log in, and decide.
 
 ## Where to start
 - `.env` or `config/profile.yaml` missing, or `python3 tools/check_setup.py` fails → use the **job-autopilot-setup** skill.
 - "show today's jobs", "scan", "apply", "投递" → **job-scan-apply**.
 - "sync mail", "check inbox", "邮件", "backfill" → **job-mail-sync**.
-- "dashboard", "charts", "看板" → **job-dashboard**.
+- "dashboard", "charts", "看板", "open my dashboard" → **job-dashboard** (local page: `python3 tools/local_dashboard.py --open`).
 - new documents, "整理材料", "知识库", "which files to upload" → **job-knowledge-base**.
 - "write / tailor my CV", "cover letter", "Anschreiben", "简历", "求职信", "does my CV fit this job" → **job-application-writer**.
 - "I have no CV", "what jobs fit me", "求职方向", "career advice", first job / Werkstudent → **job-career-coach**.
 - "backup", "restore my data", "备份", "恢复数据", new computer → `tools/backup.py` (save / status / history / restore).
 - "reply to my interview invitations", "回复面试邀请" → **job-mail-sync**, section "Replying to interview invitations" (templates in `standards/de/interview-replies.md`).
-- A scheduled daily run → job-mail-sync (daily mode, including `tools/prune_shortlisted.py --apply`: rows Shortlisted > 2 days go to the Notion trash), then the scan phase of job-scan-apply. Never submit or reply in a scheduled run.
+- A scheduled daily run → job-mail-sync (daily mode, including `tools/prune_shortlisted.py --apply`: rows Shortlisted > 2 days go to the trash), then the scan phase of job-scan-apply, then `tools/local_dashboard.py`. Never submit or reply in a scheduled run.
 
 ## Non-negotiable rules
 1. **Nothing is submitted without the user.** Scan → shortlist table → user picks → prefill → user confirms once → submit.
@@ -47,9 +49,11 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 | `knowledge/` | `inbox/` (drop files) → `library/<kind>/` unit files + `manifest.yaml` + `PROFILE.md`; `career/` fact bank, interviews, DIRECTION.md, CV content (all git-ignored) |
 | `standards/<country>/` | CV and cover-letter rules, when to tailor, market notes for newcomers (default `de`) |
 | `templates/document.css` | look of generated CVs and letters (rendered by `tools/doc_render.py`) |
-| `.env` | Notion token, Gmail app password, ids (git-ignored); template `.env.example` |
+| `.env` | tracker choice, Notion token, Gmail app password, ids (git-ignored); template `.env.example` |
+| `data/tracker.csv` | the local tracker (`TRACKER_BACKEND=local`; `tools/tracker_local.py`, `tools/tracker.py status / import-notion`) |
 | `tools/` | Python and shell scripts; every script has usage in its docstring. `tools/stage.py` = the Notion **Stage** labels (一面邀请, 参加一面后被拒, 一面邀请后撤回 …) and how mail moves them |
 | `data/` | runtime files: inbox, mail dumps, applied.csv, dashboard data, `applications/<date>_<company>_<title>/` per application: JD snapshot (`tools/jd_snapshot.py`, taken before every submit) and tailored documents (git-ignored) |
+| `dashboard/local.html` | template of the local dashboard → `data/dashboard/Job-Dashboard.html` (`tools/local_dashboard.py`) |
 | `dashboard/index.html` | page of the interactive claude.ai dashboard |
 | `docs/platforms.md` | how each platform and portal behaves, search URLs, file uploads |
 | `docs/pitfalls.md` | problems we hit and how they were solved |

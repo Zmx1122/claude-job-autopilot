@@ -16,6 +16,18 @@ When an item is done, delete it here and mention it in the PR.
   - One "hand-off queue": bring each waiting tab to the front in turn and wait for the user's tick, instead of a list of tabs.
   - Personio Turnstile fails in the built-in browser: try the same form in Claude in Chrome (the user's real browser),
     where the user can pass it; or offer the company's e-mail application address when the posting gives one.
+  - Send a push notification when a tab waits on a human check, so the user can tick it while the batch goes on.
+- **Fewer checks in the first place (2026-11-16 review):** challenges come from anonymous, fast or headless traffic, not from
+  a signed-in user reading at human speed. So:
+  - **Scan from sources that have no challenge page.** (a) The job-alert emails LinkedIn, StepStone, Indeed and Xing already
+    send: the mail sync classifies them as `job_alert` and ignores them; parse their job links into the scan input instead of
+    opening search pages. (b) Official feeds: the Bundesagentur für Arbeit job search API (public, documented on bund.dev),
+    and the public job JSON of the ATS systems many target companies use (Greenhouse, Lever, Ashby, Personio XML,
+    SmartRecruiters) for a watch list of companies. Check each source's terms before building it.
+  - **Never fetch Indeed / LinkedIn anonymously.** 5 JD snapshots (4 Indeed, 1 LinkedIn) were Cloudflare pages saved as the
+    posting (fixed: `jd_snapshot.py` now marks them blocked). Take snapshots only from the signed-in browser pane (`--text-file`);
+    redo the blocked ones with `jd_snapshot.py --backfill --redo` from the pane.
+  - **Pace the browser:** one tab at a time per platform during a scan, a few seconds between page loads, no burst of 20 tabs.
 
 ### 2. Account registration and e-mail verification codes
 - **Seen:** NTT DATA (SuccessFactors register), Dräger (portal login), Wolters Kluwer (new Workday tenant), AWS (amazon.jobs),

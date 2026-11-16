@@ -9,7 +9,8 @@ usage:
 Folder: --to / --from, else BACKUP_DIR in .env, else ~/Documents/Job Autopilot Data (saved to .env on the first save).
 
 Backed up: config/profile.yaml, config/overrides.json, knowledge/ (documents, manifest, PROFILE.md, career/ fact bank,
-interviews, CV content), data/applications/ (tailored CVs and letters), data/drafts/, data/applied.csv.
+interviews, CV content), data/applications/ (tailored CVs and letters), data/drafts/, data/applied.csv, data/tracker.csv
+(the local tracker, when Notion is not used).
 Not backed up: .env (passwords and tokens — keep them in a password manager), caches that can be rebuilt (data/mail,
 data/kb, data/dashboard, data/inbox, data/bundles, previews), and documents marked sensitive (passport, residence permit…)
 unless --include-sensitive.
@@ -20,7 +21,7 @@ from datetime import datetime
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 DEFAULT = os.path.join(os.path.expanduser('~'), 'Documents', 'Job Autopilot Data')
-FILES = ['config/profile.yaml', 'config/overrides.json', 'data/applied.csv']
+FILES = ['config/profile.yaml', 'config/overrides.json', 'data/applied.csv', 'data/tracker.csv', 'data/tracker_trash.csv']
 DIRS = ['knowledge', 'data/applications', 'data/drafts']
 SKIP_PARTS = {'.preview', '__pycache__', '.DS_Store'}
 TRACKED = {'knowledge/README.md', 'knowledge/manifest.example.yaml', 'knowledge/inbox/.gitkeep', 'knowledge/career/facts.example.yaml'}

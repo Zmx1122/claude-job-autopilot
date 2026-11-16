@@ -1,4 +1,4 @@
-"""Record one job in Notion and data/applied.csv (create or update, keyed by job URL, then company+title).
+"""Record one job in the tracker (Notion, or data/tracker.csv with TRACKER_BACKEND=local) and data/applied.csv (create or update, keyed by job URL, then company+title).
 
 usage: python3 tools/log_application.py --title "AI Engineer (m/w/d)" --company "ACME AG" --platform LinkedIn \
           --status Applied --url https://... [--city Munich] [--salary "80-95k"] [--notes "..."] [--source auto]
@@ -11,7 +11,7 @@ Use it right after every submit, and for every job you shortlist or skip during 
 """
 import argparse, csv, os
 from datetime import date
-from common import DATA, load_env, notion_rows, notion_call, rt, same_company, title_sim, url_key, db_props, applied_value, NOT_APPLIED
+from common import DATA, load_env, notion_rows, notion_call, is_local, rt, same_company, title_sim, url_key, db_props, applied_value, NOT_APPLIED
 from stage import from_status, withdrawn_stage, parse, STAGES, status_of
 
 ap = argparse.ArgumentParser()
@@ -66,7 +66,7 @@ else:
     props['First Seen'] = {'date': {'start': a.date}}
     r = notion_call('POST', 'https://api.notion.com/v1/pages', env, json={'parent': {'database_id': env['NOTION_DATABASE_ID']}, 'properties': props}); what = 'created'
 if r.status_code != 200:
-    raise SystemExit(f'Notion {r.status_code}: {r.text[:300]}')
+    raise SystemExit(f'tracker {r.status_code}: {r.text[:300]}')
 path = os.path.join(DATA, 'applied.csv'); new = not os.path.exists(path)
 if not new:   # older logs have 7 columns: add mode and cv once
     old = list(csv.reader(open(path)))
@@ -77,4 +77,4 @@ with open(path, 'a', newline='') as f:
     w = csv.writer(f)
     if new: w.writerow(['date', 'platform', 'company', 'title', 'url', 'status', 'notes', 'mode', 'cv'])
     w.writerow([a.date, a.platform, a.company, a.title, a.url, a.status.lower(), a.notes, a.mode, a.cv])
-print(f'{what} Notion row ({a.status}) and logged to data/applied.csv: {a.company} · {a.title}')
+print(f'{what} {"tracker" if is_local(env) else "Notion"} row ({a.status}) and logged to data/applied.csv: {a.company} · {a.title}')

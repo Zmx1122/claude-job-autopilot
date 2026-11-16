@@ -25,7 +25,10 @@ line(os.path.exists(prof), 'config/profile.yaml exists', 'answer the questionnai
 env = {}
 if os.path.exists(env_path()):
     from common import load_env; env = load_env()
-for k in ('NOTION_TOKEN', 'NOTION_PARENT_PAGE_ID', 'NOTION_DATABASE_ID', 'IMAP_USER', 'IMAP_APP_PASSWORD'):
+from common import backend
+TRACKER = backend(env) if env else 'notion'
+line(True, f"tracker: {'Notion database' if TRACKER == 'notion' else 'local file data/tracker.csv (TRACKER_BACKEND=local)'}")
+for k in (('NOTION_TOKEN', 'NOTION_PARENT_PAGE_ID', 'NOTION_DATABASE_ID') if TRACKER == 'notion' else ()) + ('IMAP_USER', 'IMAP_APP_PASSWORD'):
     line(bool(env.get(k)), f'.env has {k}', 'see docs/credentials.md')
 
 # 3. knowledge base files referenced by the profile
@@ -66,7 +69,7 @@ except SystemExit as e:
     line(None, 'Chromium browser for writing CV / cover-letter PDFs (optional)', str(e))
 
 # 4. Notion
-if env.get('NOTION_TOKEN') and env.get('NOTION_DATABASE_ID'):
+if TRACKER == 'notion' and env.get('NOTION_TOKEN') and env.get('NOTION_DATABASE_ID'):
     import requests
     from common import notion_headers
     r = requests.get(f"https://api.notion.com/v1/databases/{env['NOTION_DATABASE_ID']}", headers=notion_headers(env))

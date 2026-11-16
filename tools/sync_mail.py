@@ -182,6 +182,8 @@ for e in events:
                 new['notes'] = (new['notes'] + ' | ' if new['notes'] else '') + f"company missing: the {new['platform']} receipt does not name it"
             new['stage'], new['interview_date'] = next_stage('', e)
             new['status'] = status_of(new['stage']) or new['status']
+            # a later email in this run can match the new row: it needs the same working fields as loaded rows (KeyError '_stage' before 2026-11-16)
+            new['_stage'], new['_idate'], new['_old'] = new['stage'], new['interview_date'], {}
             created.append(new)
             if e['thrid']: by_thread[f"{int(e['thrid']):x}"] = new
             confirm.append(new)
