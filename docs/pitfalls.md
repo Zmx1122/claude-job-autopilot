@@ -216,3 +216,29 @@ identical title at the same company even when that row is closed. Always read "S
 - `KeyError: '_stage'` when one sync held e.g. "application sent" and "confirmation" for an application not yet in the tracker:
   the row created for the first email lacked the working fields that loaded rows get. Likely with an empty tracker (new users,
   local tracker). Fixed: new rows get `_stage`, `_idate`, `_old` when created.
+
+## Batch run 2026-11-17: uploads, redirects and walls
+- **macOS file sheet, newer macOS:** Go-to-folder (Cmd+Shift+G) with a full *file* path only opens the folder; the file stays
+  unselected and "Öffnen" is grey. `tools/upload_file.sh` now falls back to focusing the column browser, type-selecting the file
+  name and clicking Öffnen/Open. It sometimes ends with AppleEvent error -10000 although the file was attached — always check the
+  page (file name shown / `input.files[0].name`) before retrying.
+- **Uploads need the pane visible and the tab in front.** A hidden pane (viewport 0×0) opens no file sheet; a closed pane loses every
+  open tab and its form state. Front the tab with `tabs_select` before clicking a choose-file control.
+- **The pane holds at most ~9 tabs.** Reuse tabs whose state is cheap to rebuild (login pages, job pages) before opening more.
+- **StepStone "Ich bin interessiert" without "Schnelle Bewerbung"** goes to the company site: the button tries to open a new tab
+  (blocked), the page shows "Hat mit deiner Bewerbung alles geklappt?". Clicking its "Unternehmenswebsite" button from a script
+  navigates the same tab to the company form (SoftProject → HRworks form, Porsche → jobs.porsche.com, adesso → SuccessFactors).
+  Nothing is sent by StepStone in that flow.
+- **Links with `target=_blank`** (BWI "Jetzt bewerben") are blocked by the pane and `navigate` to the portal host may be denied:
+  remove the `target` attribute and click the link for real.
+- **Personio forms (`*.jobs.personio.de`, also behind `t.gohiring.com`) end in a Cloudflare Turnstile** after "Submit". Fill and
+  upload everything, click submit, and leave the "Bestätigen Sie, dass Sie ein Mensch sind" box to the user; then click submit again.
+  On 2026-11-17 the user could not pass that Turnstile in the built-in browser at all (4 of 4 forms) and chose to skip the jobs.
+  Before prefilling a Personio job, tell the user it ends in a Cloudflare check; it may only work in Claude in Chrome.
+- **Xing "Einfach bewerben" / external apply needs a Xing login** in the built-in browser. Without it, apply on the company site.
+- **LinkedIn `offsiteApplyUrl`** is in the logged-in `/jobs/view/<id>/` HTML (`offsiteApplyUrl\":\"…\"`); appcast.io links can
+  answer 403 — then find the posting on the employer's own career page (IHK → ihk-muenchen.de/ueber-uns/karriere/Stellenanzeigen).
+- **Account walls (user's step):** SuccessFactors at HDI, Zurich and adesso ("Ein Nutzer mit dieser Email existiert bereits"),
+  Siemens (jobs.siemens.com ApplicationMethods), join.com (email login), umantis at LVM (form asks for a password = creates an account),
+  Porsche (math "Sicherheitsabfrage").
+- **onlyfy (Aenova)** rejects phone numbers with spaces; its "Hiermit willige ich ein … weiteren Berücksichtigung" box is optional.

@@ -52,6 +52,33 @@ on run argv
 				delay 0.25
 			end repeat
 		end tell
+		-- Newer macOS: Go-to with a file path only opens the folder and leaves the file unselected (Öffnen greyed).
+		-- Fallback: focus the column browser, type-select the file name, click Öffnen/Open.
+		set AppleScript's text item delimiters to "/"
+		set fileName to last text item of filePath
+		set AppleScript's text item delimiters to ""
+		tell process appName
+			if exists sheet 1 of sheet 1 of window 1 then key code 53
+			delay 0.5
+			set g to splitter group 1 of sheet 1 of window 1
+			set focused of (browser 1 of splitter group 1 of g) to true
+		end tell
+		delay 0.4
+		keystroke fileName
+		delay 1.0
+		tell process appName
+			set b to missing value
+			repeat with bt in (buttons of g)
+				if (name of bt) is in {"Öffnen", "Open", "Hochladen", "Upload", "Auswählen", "Choose"} then set b to bt
+			end repeat
+			if b is missing value then error "no Open button in the file sheet"
+			if not (enabled of b) then error "file not selectable in the sheet: " & fileName
+			click b
+			repeat 20 times
+				if not (exists sheet 1 of window 1) then return "uploaded (type-select): " & filePath
+				delay 0.25
+			end repeat
+		end tell
 		error "file sheet still open after confirming"
 	end tell
 end run
