@@ -242,3 +242,14 @@ identical title at the same company even when that row is closed. Always read "S
   Siemens (jobs.siemens.com ApplicationMethods), join.com (email login), umantis at LVM (form asks for a password = creates an account),
   Porsche (math "Sicherheitsabfrage").
 - **onlyfy (Aenova)** rejects phone numbers with spaces; its "Hiermit willige ich ein … weiteren Berücksichtigung" box is optional.
+- **PPI (ppi-group.eu) form is a web component with a closed shadow root** (`<application-form-ppi>`): it only renders after
+  cookies are accepted (consent-manager fingerprint icon bottom left → "Alle akzeptieren"), `read_page` / `find` see nothing inside,
+  and native selects ignore typed keys (keystrokes land in other fields). Working approach: patch `Element.prototype.attachShadow`
+  to force `mode: 'open'`, replace the element with a fresh `document.createElement('application-form-ppi')` carrying the same
+  attributes, then fill fields through `shadowRoot` with value setter + input/change events. The upload dropzone takes a real click +
+  `upload_file.sh`; the Friendly Captcha ("I am human") solved itself without a click. Success text: "Vielen Dank für die Bewerbung".
+- **Constantin (StepStone → portal.recruiting-gruppe.de)**: requires Anschreiben and asks Gehaltswunsch; the vita list is prefilled
+  from the StepStone CV and can carry outdated titles ("PhD candidate") and wrong dates — correct them before submitting.
+- **Lever after a 400 reload** keeps typed fields but drops the resume and may glue text into the wrong field (LinkedIn URL got the
+  notice-period text). Re-check every field and re-attach the resume before submitting again.
+- **Liebherr careers (SuccessFactors "YourLiebherrCareer")**: Schnellbewerbung creates an account with password = account wall.
