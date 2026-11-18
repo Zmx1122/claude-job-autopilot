@@ -13,6 +13,14 @@ All dashboards read only the tracker: the Notion database, or `data/tracker.csv`
 internet, no account). Template: `dashboard/local.html` (no data in it; change the design there, never in the generated file).
 - Top: tiles (sent, got an interview, waiting for an answer, offers), donut of current status, funnel (sent → receipt confirmed →
   interview → offer, cumulative), applications per week by platform.
+- Strategy table "Interview invitation rate vs. posting freshness" (between the weekly chart and the applications table):
+  applications grouped by the age of the posting on the day they were sent (same day, 1 day, 2–3 days, 4–7 days, older than
+  7 days, posting date unknown) with applications, invitations (reached the interview step at any time, also if rejected later),
+  invitation rate as a bar, and how many are still waiting. Groups under 10 applications are marked "small sample"; recent
+  applications may still get an answer, so their rate can rise. It is computed in the page from `posted`, `applied` and the
+  funnel of each row, so it updates by itself on every rebuild. It is only as good as the `posted` dates: `log_application.py`
+  must get `--posted <YYYY-MM-DD>` for every application (job-scan-apply Phase 3 passes today minus `age_days`); rows without it
+  land in "Posting date unknown". The Notion page has its own version (block 4 below); the claude.ai page does not show this table.
 - Table: title, company, status (Stage label + Status), applied date; search and filter chips (all, waiting, interviews, offers,
   rejected / withdrawn, not sent). A click on a row or on ⋯ opens the details: posting link, facts, notes, history (Events),
   the emails of this application (from `data/mail/archive.json`, matched by Gmail thread, else by company + title), the JD
