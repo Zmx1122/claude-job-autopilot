@@ -115,6 +115,19 @@ details.mail summary .from{grid-column:2;color:var(--muted);font-size:12px;overf
 .files a{color:var(--s1)}
 .path{font-size:12px;color:var(--muted);margin-top:8px;overflow-wrap:anywhere}
 .none{color:var(--muted);font-size:13px}
+/* freshness table */
+table.fresh td,table.fresh th{text-align:right;white-space:nowrap}
+table.fresh td:first-child,table.fresh th:first-child{text-align:left}
+table.fresh tbody tr{cursor:default}
+table.fresh tbody tr:hover{background:transparent}
+table.fresh th,table.fresh td{padding-left:8px;padding-right:8px}
+table.fresh td.bar{min-width:120px;text-align:left}
+.rbar{display:flex;align-items:center;gap:8px}
+.rbar .track{flex:1;height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.rbar .fill{display:block;height:100%;border-radius:5px;background:var(--s3)}
+.rbar b{font-variant-numeric:tabular-nums;min-width:38px;text-align:right;font-weight:600}
+tr.unk td{color:var(--muted)}
+td small.few{color:var(--warnfg);margin-left:6px}
 @media (max-width:600px){.wrap{padding:20px 16px 48px}td.c{min-width:110px}td.t{min-width:170px}.hide-s{display:none}}
 </style>
 </head>
@@ -147,6 +160,20 @@ details.mail summary .from{grid-column:2;color:var(--muted);font-size:12px;overf
     <p class="note">By platform, by the week the application was sent</p>
     <svg id="weekly" width="100%" height="230" role="img" aria-label="Applications per week by platform"></svg>
     <div class="legend" id="weeklyLegend"></div>
+  </section>
+
+  <section class="card" style="margin-bottom:12px">
+    <h2>Interview invitation rate vs. posting freshness</h2>
+    <p class="note">How old the posting was on the day the application was sent. An application counts as an invitation if it ever reached the interview step. Recent applications may still get an answer, so their rate can rise.</p>
+    <div class="tablewrap">
+      <table class="fresh" aria-label="Interview invitation rate by posting age at application">
+        <thead><tr>
+          <th>Posting age</th><th>Sent</th><th>Invited</th><th class="bar" style="text-align:left">Invitation rate</th><th>Waiting</th>
+        </tr></thead>
+        <tbody id="freshRows"></tbody>
+      </table>
+    </div>
+    <div class="note" id="freshNote" style="margin:10px 0 0"></div>
   </section>
 
   <section class="card">
@@ -392,8 +419,34 @@ const DATA = /*__DATA__*/null;
   $('#dClose').addEventListener('click', closeDrawer); $('#veil').addEventListener('click', closeDrawer);
   addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
+  // ---------- interview rate vs. posting freshness ----------
+  function renderFresh() {
+    const day = (s) => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(s || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 86400000 : null; };
+    const BUCKETS = [['Same day', (n) => n <= 0], ['1 day old', (n) => n === 1], ['2–3 days old', (n) => n >= 2 && n <= 3], ['4–7 days old', (n) => n >= 4 && n <= 7], ['Older than 7 days', (n) => n > 7]];
+    const groups = BUCKETS.map(([label, test]) => ({ label, test, apps: [] })), unknown = { label: 'Posting date unknown', apps: [], unk: true };
+    sent.forEach((r) => {
+      const a = day(r.applied), p = day(r.posted);
+      if (a === null || p === null) { unknown.apps.push(r); return; }
+      const g = groups.find((x) => x.test(a - p)); (g || unknown).apps.push(r);
+    });
+    const stat = (g) => { const n = g.apps.length, i = g.apps.filter((r) => r.funnel.includes('Interview')).length, w = g.apps.filter((r) => !r.ended && !r.funnel.includes('Interview')).length; return { n, i, w, rate: n ? i / n : 0 }; };
+    const all = [...groups, unknown], st = all.map(stat);
+    const known = groups.reduce((a, g) => a + g.apps.length, 0), knownI = groups.reduce((a, g) => a + stat(g).i, 0);
+    const max = Math.max(0.0001, ...st.filter((_, k) => !all[k].unk).map((s) => s.rate));
+    const FEW = 10;
+    const line = (g, s, label) => `<tr class="${g && g.unk ? 'unk' : ''}"><td>${esc(label)}${s.n && s.n < FEW ? '<small class="few" title="Fewer than 10 applications: the rate is not reliable yet">small sample</small>' : ''}</td>
+      <td>${s.n}</td><td>${s.i}</td>
+      <td class="bar">${s.n ? `<div class="rbar"><span class="track"><span class="fill" style="width:${Math.round(100 * s.rate / max)}%"></span></span><b>${pct(s.i, s.n)}</b></div>` : '<span class="none">–</span>'}</td>
+      <td>${s.w}</td></tr>`;
+    const body = all.map((g, k) => line(g, st[k], g.label));
+    const tot = { n: sent.length, i: reachedN('Interview'), w: sent.filter((r) => !r.ended && !r.funnel.includes('Interview')).length };
+    body.push(`<tr style="font-weight:600"><td>All applications</td><td>${tot.n}</td><td>${tot.i}</td><td class="bar"><div class="rbar"><span class="track"><span class="fill" style="width:${Math.round(100 * (tot.n ? tot.i / tot.n : 0) / max)}%;background:var(--s1)"></span></span><b>${pct(tot.i, tot.n)}</b></div></td><td>${tot.w}</td></tr>`);
+    $('#freshRows').innerHTML = body.join('');
+    $('#freshNote').textContent = known ? `${known} of ${sent.length} applications have a posting date (overall rate among them: ${pct(knownI, known)}). The bars are scaled to the best group; rows with fewer than ${FEW} applications are marked.` : 'No application has a posting date yet; new applications record it automatically.';
+  }
+
   const drawAll = () => { drawDonut(); drawFunnel(); drawWeekly(); };
-  drawAll(); renderTable();
+  drawAll(); renderTable(); renderFresh();
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawAll, 120); });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawAll);
 })();
