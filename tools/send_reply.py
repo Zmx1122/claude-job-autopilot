@@ -1,10 +1,12 @@
 """Send ONE approved reply to an email in the application inbox (Gmail SMTP with the same app password as IMAP).
 
-usage: python3 tools/send_reply.py --gm-msgid <X-GM-MSGID from data/mail/dump.json> --body-file reply.txt [--to addr] [--subject "Re: …"] [--yes | --draft]
+usage: python3 tools/send_reply.py --gm-msgid <X-GM-MSGID from data/mail/dump.json> --body-file reply.txt [--to addr] [--subject "Re: …"] [--attach file.pdf[=Name-in-mail.pdf] ...] [--yes | --draft]
 Without --yes it only prints the complete message that WOULD be sent (dry run). With --yes it sends it.
 With --draft it saves the reply in Gmail's Drafts folder (IMAP APPEND, threaded) and sends nothing: the user edits and sends it in Gmail.
 Threading: In-Reply-To / References are taken from the original message; recipient = its Reply-To, else From (override with --to).
 From: IMAP_USER in .env, display name = candidate.full_name. Gmail keeps the copy in "Sent".
+--attach adds a file (repeatable; "path=Name.pdf" renames it in the mail). Use it for "please send us your documents" requests; only files the user
+approved (knowledge/library unit files, approved documents in data/applications/). Dry run and draft list every attachment with its size.
 --quote appends the original message below the reply, verbatim (no "> " prefixes). Use it for ATS mails that say
 "Bitte fügen Sie Ihre Antwort oberhalb dieser Zeile ein" / "do not delete the CorrespondenceCode" (SAP SuccessFactors):
 their system reads the code from the quoted original, and a reply without it is not processed.
@@ -20,6 +22,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--gm-msgid', required=True); ap.add_argument('--body-file', required=True)
 ap.add_argument('--to'); ap.add_argument('--subject'); ap.add_argument('--yes', action='store_true')
 ap.add_argument('--draft', action='store_true'); ap.add_argument('--quote', action='store_true')
+ap.add_argument('--attach', action='append', default=[])
 a = ap.parse_args()
 
 
@@ -61,6 +64,21 @@ if a.quote:
     body += f"\n\nAm {dec(full['Date'])} schrieb {dec(full['From'])}:\n\n{full_text(full)}\n"
 msg.set_content(body)
 print(msg.as_string())
+if a.attach:
+    import mimetypes, os
+    total = 0
+    print('Attachments:')
+    for spec in a.attach:
+        path, _, shown = spec.partition('=')
+        path = os.path.expanduser(path)
+        if not os.path.isfile(path): sys.exit(f'attachment not found: {path}')
+        data = open(path, 'rb').read(); total += len(data)
+        shown = shown or os.path.basename(path)
+        mt = (mimetypes.guess_type(shown)[0] or 'application/octet-stream').split('/', 1)
+        msg.add_attachment(data, maintype=mt[0], subtype=mt[1], filename=shown)
+        print(f'  - {shown}  ({len(data) / 1e6:.2f} MB)')
+    print(f'  total {total / 1e6:.2f} MB (Gmail limit 25 MB)')
+    if total > 24e6: sys.exit('attachments too large for one mail')
 if a.draft:
     import imaplib, time
     D = imap_login(env, readonly=False)
