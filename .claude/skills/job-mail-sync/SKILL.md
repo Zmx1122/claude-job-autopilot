@@ -55,7 +55,11 @@ Triggers: "reply to my interview invitations", "回复面试邀请", or an unans
    browser and press Send. Verify the message appears / the script prints "sent".
 6. **Log**: `python3 tools/log_application.py --company … --title … --platform … --notes "replied <date>: template N"`; template 3 adds `--status Withdrawn`.
 7. Documents requested by a recruiter (certificates, transcripts) are not an invitation: list them for the user, attach only files from
-   `knowledge/library/` that the user approves, and send them the same way (approved text, approved files).
+   `knowledge/library/` that the user approves, and send them the same way (approved text, approved files). Add each file with
+   `--attach "<path>=<Name in the mail>.pdf"` (repeatable; the dry run lists every attachment with its size, total under 25 MB).
+   `--draft` saves the mail with its attachments in Gmail's Drafts folder instead of sending, for the user to check and send in Gmail.
+   A required Motivationsschreiben is written first with job-application-writer ("cover letter only") and approved like any other text.
+   Only attach what the mail asks for; extra certificates only when the user names them.
 
 ## Backfill mode (once, e.g. "everything since 1 June")
 1. `python3 tools/gmail_dump.py data/mail/dump.json --since 2026/06/01`
