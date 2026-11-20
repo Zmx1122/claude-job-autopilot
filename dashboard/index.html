@@ -36,6 +36,10 @@ table.js-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size
 .js-pill.js-good{color:var(--color-ok);border-color:currentColor}
 .js-pill.js-warn{color:var(--color-warn);border-color:currentColor}
 .js-search{display:block;width:100%;max-width:22rem;margin:0 0 var(--cds-gap-sm);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg);font:inherit}
+.js-filters{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cds-gap-sm);margin:0 0 var(--cds-gap-sm)}
+.js-filters .js-search{margin:0;flex:1 1 14rem}
+.js-filter{display:flex;align-items:center;gap:var(--cds-gap-xs);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.js-select{padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg);font:inherit;font-size:var(--cds-font-size-body,1rem);max-width:12rem}
 .js-hide-narrow{display:none}
 @media (min-width:48rem){.js-hide-narrow{display:table-cell}}
 [data-dash-source-state=empty]{color:transparent}
@@ -86,7 +90,11 @@ table.js-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size
     <div class="js-card js-wide" id="pipeline">
       <h2>Open pipeline</h2>
       <p class="js-note">Every application without a final answer, newest first. Quiet days counts from the last email in its thread. The company link opens the row in Notion.</p>
-      <input class="js-search" id="pipeline-search" type="search" placeholder="Filter by company, title or platform" aria-label="Filter the open pipeline">
+      <div class="js-filters">
+        <input class="js-search" id="pipeline-search" type="search" placeholder="Filter by company, title or platform" aria-label="Filter the open pipeline">
+        <label class="js-filter">Status <select class="js-select" id="pipeline-status" data-draw="pipeline-status" data-source="open_pipeline" aria-label="Filter by status"></select></label>
+        <label class="js-filter">Platform <select class="js-select" id="pipeline-platform" data-draw="pipeline-platform" data-source="open_pipeline" aria-label="Filter by platform"></select></label>
+      </div>
       <div class="js-scroll">
       <table class="js-table" data-source="open_pipeline" data-row-key="id">
         <thead><tr><th data-field="company"><button type="button" data-sort="company">Company</button></th><th data-field="title"><button type="button" data-sort="title">Title</button></th><th class="js-hide-narrow" data-field="platform"><button type="button" data-sort="platform">Platform</button></th><th data-field="status"><button type="button" data-sort="status">Status</button></th><th class="js-n" data-field="applied"><button type="button" data-sort="applied">Applied</button></th><th class="js-n" data-field="quiet_days"><button type="button" data-sort="quiet_days">Quiet days</button></th></tr></thead>
@@ -332,7 +340,19 @@ dash.draw('platform-rows', (tb) => {
 });
 
 // ---- open pipeline table with search and sort ----
-window.jsPipeline = { q: '', sort: 'applied', dir: -1 };
+window.jsPipeline = { q: '', status: '', platform: '', sort: 'applied', dir: -1 };
+// Status and platform choices come from the open rows; each select is its own drawing.
+['status', 'platform'].forEach((field) => dash.draw('pipeline-' + field, (sel) => {
+  const g = dash.data('open_pipeline');
+  const order = ['Interview', 'Offer', 'Confirmed', 'Applied', 'Shortlisted'];
+  const vals = g.status === 'ok' ? [...new Set(g.data.map((r) => r[field]).filter(Boolean))] : [];
+  vals.sort((a, b) => field === 'status' ? ((order.indexOf(a) + 99) % 99) - ((order.indexOf(b) + 99) % 99) || a.localeCompare(b) : a.localeCompare(b));
+  const count = (v) => g.data.filter((r) => r[field] === v).length;
+  sel.replaceChildren(new Option(field === 'status' ? 'All statuses' : 'All platforms', ''), ...vals.map((v) => new Option(`${v} (${count(v)})`, v)));
+  if (jsPipeline[field] && !vals.includes(jsPipeline[field])) jsPipeline[field] = '';
+  sel.value = jsPipeline[field];
+  sel.onchange = () => { jsPipeline[field] = sel.value; dash.draw('pipeline-rows'); };
+}));
 document.querySelectorAll('#pipeline-search').forEach((inp) => inp.addEventListener('input', () => { jsPipeline.q = inp.value.trim().toLowerCase(); dash.draw('pipeline-rows'); }));
 document.querySelectorAll('#pipeline [data-sort]').forEach((btn) => btn.addEventListener('click', () => {
   const k = btn.dataset.sort; jsPipeline.dir = jsPipeline.sort === k ? -jsPipeline.dir : (k === 'applied' || k === 'quiet_days' ? -1 : 1); jsPipeline.sort = k;
@@ -343,7 +363,8 @@ dash.draw('pipeline-rows', (tb) => {
   const g = dash.data('open_pipeline'); tb.replaceChildren();
   if (g.status !== 'ok') return;
   const q = jsPipeline.q; const k = jsPipeline.sort, dir = jsPipeline.dir;
-  const rows = g.data.filter((r) => !q || `${r.company} ${r.title} ${r.platform}`.toLowerCase().includes(q))
+  const rows = g.data.filter((r) => (!q || `${r.company} ${r.title} ${r.platform}`.toLowerCase().includes(q))
+      && (!jsPipeline.status || r.status === jsPipeline.status) && (!jsPipeline.platform || r.platform === jsPipeline.platform))
     .sort((a, b) => { const va = a[k], vb = b[k]; if (va === vb) return 0; if (va === null || va === undefined) return 1; if (vb === null || vb === undefined) return -1; return (typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb))) * dir; });
   const fmtDate = (d) => d ? d.slice(5).replace('-', '/') : '';
   rows.forEach((r) => {
