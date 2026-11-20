@@ -35,6 +35,7 @@ table.js-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size
 .js-pill{display:inline-block;padding:0 .5em;border-radius:999px;font-size:var(--cds-font-size-caption);border:1px solid var(--color-border-line);white-space:nowrap}
 .js-pill.js-good{color:var(--color-ok);border-color:currentColor}
 .js-pill.js-warn{color:var(--color-warn);border-color:currentColor}
+.js-pill.js-bad{color:var(--color-bad);border-color:currentColor}
 .js-search{display:block;width:100%;max-width:22rem;margin:0 0 var(--cds-gap-sm);padding:var(--cds-pad-xs) var(--cds-pad-sm);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg);font:inherit}
 .js-filters{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cds-gap-sm);margin:0 0 var(--cds-gap-sm)}
 .js-filters .js-search{margin:0;flex:1 1 14rem}
@@ -88,16 +89,18 @@ table.js-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size
       <div class="js-chart js-short dash-skeleton" data-draw="weekly" data-source="weekly"></div>
     </div>
     <div class="js-card js-wide" id="pipeline">
-      <h2>Open pipeline</h2>
-      <p class="js-note">Every application without a final answer, newest first. Quiet days counts from the last email in its thread. The company link opens the row in Notion.</p>
+      <h2>Applications</h2>
+      <p class="js-note">Pick a view to find groups such as every job that got an interview, or every job that passed the first round; narrow it further by stage and platform. Opens on the jobs still waiting for a final answer. Quiet days counts from the last email in its thread. The company link opens the row in Notion.</p>
       <div class="js-filters">
-        <input class="js-search" id="pipeline-search" type="search" placeholder="Filter by company, title or platform" aria-label="Filter the open pipeline">
-        <label class="js-filter">Status <select class="js-select" id="pipeline-status" data-draw="pipeline-status" data-source="open_pipeline" aria-label="Filter by status"></select></label>
-        <label class="js-filter">Platform <select class="js-select" id="pipeline-platform" data-draw="pipeline-platform" data-source="open_pipeline" aria-label="Filter by platform"></select></label>
+        <input class="js-search" id="pipeline-search" type="search" placeholder="Filter by company, title or platform" aria-label="Filter the applications">
+        <label class="js-filter">View <select class="js-select" id="pipeline-view" data-draw="pipeline-view" data-source="application_list" aria-label="Choose a view"></select></label>
+        <label class="js-filter">Stage <select class="js-select" id="pipeline-stage" data-draw="pipeline-stage" data-source="application_list" aria-label="Filter by stage"></select></label>
+        <label class="js-filter">Platform <select class="js-select" id="pipeline-platform" data-draw="pipeline-platform" data-source="application_list" aria-label="Filter by platform"></select></label>
       </div>
+      <p class="js-note" id="pipeline-count"><b data-draw="pipeline-count">—</b> shown</p>
       <div class="js-scroll">
-      <table class="js-table" data-source="open_pipeline" data-row-key="id">
-        <thead><tr><th data-field="company"><button type="button" data-sort="company">Company</button></th><th data-field="title"><button type="button" data-sort="title">Title</button></th><th class="js-hide-narrow" data-field="platform"><button type="button" data-sort="platform">Platform</button></th><th data-field="status"><button type="button" data-sort="status">Status</button></th><th class="js-n" data-field="applied"><button type="button" data-sort="applied">Applied</button></th><th class="js-n" data-field="quiet_days"><button type="button" data-sort="quiet_days">Quiet days</button></th></tr></thead>
+      <table class="js-table" data-source="application_list" data-row-key="id">
+        <thead><tr><th data-field="company"><button type="button" data-sort="company">Company</button></th><th data-field="title"><button type="button" data-sort="title">Title</button></th><th class="js-hide-narrow" data-field="platform"><button type="button" data-sort="platform">Platform</button></th><th data-field="stage"><button type="button" data-sort="stage">Stage</button></th><th class="js-n" data-field="applied"><button type="button" data-sort="applied">Applied</button></th><th class="js-n" data-field="quiet_days"><button type="button" data-sort="quiet_days">Quiet days</button></th></tr></thead>
         <tbody data-draw="pipeline-rows"></tbody>
       </table>
       </div>
@@ -197,14 +200,23 @@ dash.calc('by_platform', {
     return Object.values(by).map((b) => ({ ...b, rejection_rate: b.rejected / b.applications })).sort((a, b) => b.applications - a.applications);
   },
 });
-dash.calc('open_pipeline', {
-  inputs: ['applications'], title: 'Open pipeline',
-  description: 'Applications without a final answer, with days since the last email in their thread, newest application first.',
+dash.calc('application_list', {
+  inputs: ['applications'], title: 'Applications with stage',
+  description: 'Every tracked job with its detailed stage, the furthest interview round it reached, its outcome group and days since the last email, newest application first.',
   fn: (applications) => {
     const today = new Date(); const t0 = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-    return applications.filter((r) => !['Rejected', 'Withdrawn', 'Skipped'].includes(r.status))
-      .map((r) => ({ id: r.id, company: r.company || '(company not in email)', title: r.title || '(title unknown)', platform: r.platform, status: r.status, applied: r.applied, last_email: r.last_email, quiet_days: r.last_email ? Math.round((t0 - new Date(r.last_email + 'T00:00:00Z')) / 86400000) : null, notion_url: r.notion_url }))
-      .sort((a, b) => (b.applied || '').localeCompare(a.applied || ''));
+    const CN = { '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6 };
+    return applications.map((r) => {
+      const st = r.stage || ''; const m = st.match(/([一二三四五六])面/); const round = m ? CN[m[1]] : 0;
+      const offer = /Offer/.test(st) || r.status === 'Offer';
+      const invited = offer || round > 0 || r.status === 'Interview';
+      const attended = offer || /^已参加|参加.面后被拒|面后撤回/.test(st);
+      const outcome = offer ? 'offer' : /被拒/.test(st) || r.status === 'Rejected' ? 'rejected' : /撤回/.test(st) || r.status === 'Withdrawn' ? 'withdrawn'
+        : ['放弃投递', '待定', '投递失败'].includes(st) || ['Skipped', 'Shortlisted'].includes(r.status) ? 'not_sent' : 'open';
+      return { id: r.id, company: r.company || '(company not in email)', title: r.title || '(title unknown)', platform: r.platform || 'Other', status: r.status, stage: st || r.status,
+        round, invited, attended, passed_round1: offer || round >= 2, outcome, applied: r.applied,
+        quiet_days: r.last_email ? Math.round((t0 - new Date(r.last_email + 'T00:00:00Z')) / 86400000) : null, notion_url: r.notion_url };
+    }).sort((a, b) => (b.applied || '').localeCompare(a.applied || ''));
   },
 });
 </script>
@@ -339,42 +351,79 @@ dash.draw('platform-rows', (tb) => {
   });
 });
 
-// ---- open pipeline table with search and sort ----
-window.jsPipeline = { q: '', status: '', platform: '', sort: 'applied', dir: -1 };
-// Status and platform choices come from the open rows; each select is its own drawing.
-['status', 'platform'].forEach((field) => dash.draw('pipeline-' + field, (sel) => {
-  const g = dash.data('open_pipeline');
-  const order = ['Interview', 'Offer', 'Confirmed', 'Applied', 'Shortlisted'];
-  const vals = g.status === 'ok' ? [...new Set(g.data.map((r) => r[field]).filter(Boolean))] : [];
-  vals.sort((a, b) => field === 'status' ? ((order.indexOf(a) + 99) % 99) - ((order.indexOf(b) + 99) % 99) || a.localeCompare(b) : a.localeCompare(b));
-  const count = (v) => g.data.filter((r) => r[field] === v).length;
-  sel.replaceChildren(new Option(field === 'status' ? 'All statuses' : 'All platforms', ''), ...vals.map((v) => new Option(`${v} (${count(v)})`, v)));
-  if (jsPipeline[field] && !vals.includes(jsPipeline[field])) jsPipeline[field] = '';
-  sel.value = jsPipeline[field];
-  sel.onchange = () => { jsPipeline[field] = sel.value; dash.draw('pipeline-rows'); };
-}));
-document.querySelectorAll('#pipeline-search').forEach((inp) => inp.addEventListener('input', () => { jsPipeline.q = inp.value.trim().toLowerCase(); dash.draw('pipeline-rows'); }));
+// ---- applications table: views, stage and platform filters, search and sort ----
+// A view is a group of rows; the labels are the person's terms (Chinese) next to English.
+window.jsViews = [
+  ['open', 'Open · 进行中', (r) => r.outcome === 'open'],
+  ['sent', 'All sent · 全部已投', (r) => r.outcome !== 'not_sent'],
+  ['invited', 'Got an interview · 拿到过面试', (r) => r.invited],
+  ['attended', 'Had an interview · 参加过面试', (r) => r.attended],
+  ['passed1', 'Passed round 1 · 过了一面', (r) => r.passed_round1],
+  ['interview_now', 'Interviewing now · 面试中', (r) => r.invited && r.outcome === 'open'],
+  ['rej_interview', 'Rejected after interview · 面试后被拒', (r) => r.outcome === 'rejected' && r.round > 0],
+  ['rej_cv', 'Rejected on CV · 简历被拒', (r) => r.outcome === 'rejected' && r.round === 0],
+  ['withdrawn', 'Withdrawn · 撤回', (r) => r.outcome === 'withdrawn'],
+  ['offer', 'Offer', (r) => r.outcome === 'offer'],
+  ['not_sent', 'Not sent · 未投/放弃', (r) => r.outcome === 'not_sent'],
+  ['all', 'Everything · 全部', () => true],
+];
+window.jsStageOrder = ['待定', '放弃投递', '投递失败', '已投递', '已确认收到', '补交材料', '测评中', '测评后被拒', '测评后撤回', '简历被拒', '投递后撤回',
+  ...['一', '二', '三', '四'].flatMap((n) => [`${n}面邀请`, `已参加${n}面`, `${n}面邀请后撤回`, `${n}面后撤回`, `参加${n}面后被拒`]), '收到Offer', '接受Offer', '拒绝Offer'];
+window.jsStageRank = (s) => { const i = jsStageOrder.indexOf(s); return i < 0 ? 999 : i; };
+window.jsPipeline = { q: '', view: 'open', stage: '', platform: '', sort: 'applied', dir: -1 };
+window.jsPipelineRows = (except) => {
+  const g = dash.data('application_list'); if (g.status !== 'ok') return [];
+  const v = (jsViews.find((x) => x[0] === jsPipeline.view) || jsViews[0])[2]; const q = jsPipeline.q;
+  return g.data.filter((r) => (except === 'view' || v(r)) && (except === 'stage' || !jsPipeline.stage || r.stage === jsPipeline.stage)
+    && (except === 'platform' || !jsPipeline.platform || r.platform === jsPipeline.platform)
+    && (!q || `${r.company} ${r.title} ${r.platform} ${r.stage}`.toLowerCase().includes(q)));
+};
+window.jsPipelineRedraw = () => ['pipeline-view', 'pipeline-stage', 'pipeline-platform', 'pipeline-count', 'pipeline-rows'].forEach((n) => dash.draw(n));
+document.querySelectorAll('#pipeline-search').forEach((inp) => inp.addEventListener('input', () => { jsPipeline.q = inp.value.trim().toLowerCase(); jsPipelineRedraw(); }));
 document.querySelectorAll('#pipeline [data-sort]').forEach((btn) => btn.addEventListener('click', () => {
   const k = btn.dataset.sort; jsPipeline.dir = jsPipeline.sort === k ? -jsPipeline.dir : (k === 'applied' || k === 'quiet_days' ? -1 : 1); jsPipeline.sort = k;
   document.querySelectorAll('#pipeline th').forEach((th) => th.removeAttribute('aria-sort')); btn.closest('th').setAttribute('aria-sort', jsPipeline.dir > 0 ? 'ascending' : 'descending');
   dash.draw('pipeline-rows');
 }));
+// Each select counts what it would show with the other filters kept.
+dash.draw('pipeline-view', (sel) => {
+  const base = jsPipelineRows('view');
+  sel.replaceChildren(...jsViews.map(([id, label, f]) => new Option(`${label} (${base.filter(f).length})`, id)));
+  sel.value = jsPipeline.view; sel.onchange = () => { jsPipeline.view = sel.value; jsPipelineRedraw(); };
+});
+dash.draw('pipeline-stage', (sel) => {
+  const base = jsPipelineRows('stage'); const n = {}; base.forEach((r) => { n[r.stage] = (n[r.stage] || 0) + 1; });
+  const vals = Object.keys(n).sort((a, b) => jsStageRank(a) - jsStageRank(b) || a.localeCompare(b));
+  if (jsPipeline.stage && !vals.includes(jsPipeline.stage)) vals.push(jsPipeline.stage);
+  sel.replaceChildren(new Option('All stages', ''), ...vals.map((v) => new Option(`${v} (${n[v] || 0})`, v)));
+  sel.value = jsPipeline.stage; sel.onchange = () => { jsPipeline.stage = sel.value; jsPipelineRedraw(); };
+});
+dash.draw('pipeline-platform', (sel) => {
+  const base = jsPipelineRows('platform'); const n = {}; base.forEach((r) => { n[r.platform] = (n[r.platform] || 0) + 1; });
+  const vals = Object.keys(n).sort(); if (jsPipeline.platform && !vals.includes(jsPipeline.platform)) vals.push(jsPipeline.platform);
+  sel.replaceChildren(new Option('All platforms', ''), ...vals.map((v) => new Option(`${v} (${n[v] || 0})`, v)));
+  sel.value = jsPipeline.platform; sel.onchange = () => { jsPipeline.platform = sel.value; jsPipelineRedraw(); };
+});
+dash.draw('pipeline-count', (el) => { const g = dash.data('application_list'); el.textContent = g.status === 'ok' ? jsFmt(jsPipelineRows().length) : '—'; });
 dash.draw('pipeline-rows', (tb) => {
-  const g = dash.data('open_pipeline'); tb.replaceChildren();
+  const g = dash.data('application_list'); tb.replaceChildren();
   if (g.status !== 'ok') return;
-  const q = jsPipeline.q; const k = jsPipeline.sort, dir = jsPipeline.dir;
-  const rows = g.data.filter((r) => (!q || `${r.company} ${r.title} ${r.platform}`.toLowerCase().includes(q))
-      && (!jsPipeline.status || r.status === jsPipeline.status) && (!jsPipeline.platform || r.platform === jsPipeline.platform))
-    .sort((a, b) => { const va = a[k], vb = b[k]; if (va === vb) return 0; if (va === null || va === undefined) return 1; if (vb === null || vb === undefined) return -1; return (typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb))) * dir; });
+  const k = jsPipeline.sort, dir = jsPipeline.dir;
+  const val = (r) => k === 'stage' ? jsStageRank(r.stage) : r[k];
+  const rows = jsPipelineRows().sort((a, b) => { const va = val(a), vb = val(b); if (va === vb) return 0; if (va === null || va === undefined) return 1; if (vb === null || vb === undefined) return -1; return (typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb))) * dir; });
   const fmtDate = (d) => d ? d.slice(5).replace('-', '/') : '';
   rows.forEach((r) => {
     const tr = document.createElement('tr'); tr.dataset.key = r.id;
-    const tdC = document.createElement('td'); const a = document.createElement('a'); a.href = r.notion_url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.company; tdC.appendChild(a); tr.appendChild(tdC);
+    const tdC = document.createElement('td');
+    if (/^https?:/.test(r.notion_url || '')) { const a = document.createElement('a'); a.href = r.notion_url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.company; tdC.appendChild(a); } else tdC.textContent = r.company;
+    tr.appendChild(tdC);
     const tdT = document.createElement('td'); tdT.textContent = r.title; tr.appendChild(tdT);
     const tdP = document.createElement('td'); tdP.className = 'js-hide-narrow'; tdP.textContent = r.platform; tr.appendChild(tdP);
-    const tdS = document.createElement('td'); const pill = document.createElement('span'); pill.className = 'js-pill' + (r.status === 'Offer' ? ' js-good' : r.status === 'Interview' ? ' js-warn' : ''); pill.textContent = r.status; tdS.appendChild(pill); tr.appendChild(tdS);
+    const tdS = document.createElement('td'); const pill = document.createElement('span');
+    pill.className = 'js-pill' + (r.outcome === 'offer' ? ' js-good' : r.invited && r.outcome === 'open' ? ' js-warn' : r.outcome === 'rejected' ? ' js-bad' : '');
+    pill.textContent = r.stage; tdS.appendChild(pill); tr.appendChild(tdS);
     const tdA = document.createElement('td'); tdA.className = 'js-n'; tdA.textContent = fmtDate(r.applied); tr.appendChild(tdA);
-    const tdQ = document.createElement('td'); tdQ.className = 'js-n'; tdQ.textContent = r.quiet_days === null ? '' : String(r.quiet_days); tr.appendChild(tdQ);
+    const tdQ = document.createElement('td'); tdQ.className = 'js-n'; tdQ.textContent = r.quiet_days === null || r.outcome !== 'open' ? '' : String(r.quiet_days); tr.appendChild(tdQ);
     tb.appendChild(tr);
   });
 });
