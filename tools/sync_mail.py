@@ -147,6 +147,12 @@ def match(e):
             if r: return r, 'company+title'
             if e['category'] == 'application_sent':
                 return None, None  # a new application at a known company
+        if not e['title'] and e['category'] in ('ats_confirmation', 'viewed', 'incomplete_reminder'):
+            # a receipt that does not name the job (MLP, adesso …) belongs to one of the company's existing rows, never to a new one
+            # (2026-11-23: it created "(title unknown)" twins): the row without email evidence yet, then the closest in time
+            cands = [r for r in live if near(r, e, 7)] or live
+            r = pick(cands, e) or sorted(cands, key=lambda r: (bool(r['evidence']), abs((day_of(r) - e['day']).days) if day_of(r) else 999, r['title'] or ''))[0]
+            return r, 'company, receipt without job title'
         r = pick([r for r in live if near(r, e, 7)], e) or (live[0] if len(live) == 1 else None)
         return (r, 'company') if r else (None, None)
     if e['title'] and e['platform'] in PLAT:
@@ -170,6 +176,10 @@ for e in events:
     if not e['labeled'] and not REBUILD: to_label.append(e['msgid'])
     if row is None and REBUILD:
         confirm.append(dict(applied=str(e['day']), company=e['company'], title=f"{e['title']} ({e['category']}, not written: rebuild)", status=''))
+        continue
+    if row is None and not e['title'] and e['company'] and any(same_company(e['company'], r['company']) for r in rows + created):
+        # no job title and several candidate rows (e.g. an anonymous rejection): do not invent a new application, ask the user
+        unsure.append(({'company': e['company'], 'title': '(not assigned)'}, e, 'no job title in the email; several rows of this company'))
         continue
     if row is None:
         if e['category'] in ('application_sent', 'ats_confirmation') or e['category'] in STATUS:
