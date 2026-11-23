@@ -59,8 +59,8 @@ Each item: what went wrong → what fixed it. 每条：出了什么问题 → �
     **规则解析邮件效果差**：改为 LLM 分块分类 + 确定性匹配。
 17. **StepStone/Indeed receipts have no company; generic titles collide** ("AI Engineer" × 5). → Match by platform + exact title + date, prefer rows without evidence; compare company names without spaces ("Auto Scout24" = "AutoScout24"); aliases in `config/overrides.json`.
     **回执没有公司名、通用职位名撞车**：按平台 + 完全相同职位 + 日期匹配；公司名去空格比较；别名表。
-18. **Notion cannot embed claude.ai pages.** → PNG charts from `tools/charts_png.py` in Notion, interactive version linked. (Mermaid code blocks were dropped 2026-11-10: Notion shows their source code above every chart.)
-    **Notion 不能嵌入 claude.ai 页面**：Notion 里只放脚本生成的 PNG 图，交互版放链接（Mermaid 代码块会显示源码，已删除）。
+18. **Notion cannot embed claude.ai pages.** → PNG charts from `tools/charts_png.py` in Notion (the claude.ai interactive dashboard was removed 2026-11-23). (Mermaid code blocks were dropped 2026-11-10: Notion shows their source code above every chart.)
+    **Notion 不能嵌入 claude.ai 页面**：Notion 里只放脚本生成的 PNG 图（claude.ai 交互看板已于 2026-11-23 移除）（Mermaid 代码块会显示源码，已删除）。
     The Notion API cannot move a block or set a page to full width. The dashboard section is inserted with `after:` the
     "Dashboard" heading so it sits above the database; full width is a one-time click (••• → Full width) by the user.
     Notion API 不能移动块，也不能设置全宽：仪表盘用 `after:` 插在数据库上方；全宽由用户在页面菜单里点一次。
@@ -282,3 +282,10 @@ identical title at the same company even when that row is closed. Always read "S
   (incl. CI/CD, testing)" (verifiable from the fact bank, not "expert"); English / German = C1 option.
 - **Do not** use the pane for these pages, and do not log `Skipped` because of the check (BITS, Eraneos and VESTIGAS were wrongly logged 放弃投递 first and
   corrected after the Chrome run).
+
+## Claude in Chrome: file dialogs, tab groups and subagents · 2026-11-23
+- **`file_upload` does not reach custom upload widgets** (Dräger eRecruitment, SAP UI5 uploaders): it fills the `<input type=file>` but the page's own handler never runs. Workaround that worked: front the tab, click the page's real upload button (`computer left_click` by ref/coordinates), then `tools/upload_file.sh "<abs path>" "Google Chrome"` (it drives the macOS Open sheet of the named process; `osascript … count of sheets of window 1` must show 1). Never move a file input into `<body>` on SAP pages: it breaks the uploader (Browse does nothing until the page is reloaded).
+- **The native file sheet only opens in the FRONT tab of Chrome's window**: bring a background tab forward first, e.g. `osascript -e 'tell application "Google Chrome" to set active tab index of window 1 to <n>'` (find n by URL).
+- **The Claude-in-Chrome tab group is fragile**: a subagent that calls `tabs_context_mcp {createIfEmpty:true}` and then closes its blank tab destroys the group; tabs then stay open but are "not in Claude's tab group" and the user's signed-in tabs become unreachable. They are also not shared with subagents (separate sessions): do Chrome work that needs the user's signed-in tabs in the MAIN session, run at most one Chrome agent at a time, never close the last tab of a group, and keep tabs open until all rows are done.
+- **SuccessFactors apply flows (DKB, SIGNAL IDUNA, VW/CARIAD)** ask for their own "Anmelden" even when another tab is logged in (browser-prefilled credentials: the user clicks it). UI5 dropdowns ignore typed keys: real clicks only, no a11y tree (screenshots).
+

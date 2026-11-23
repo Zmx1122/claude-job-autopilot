@@ -43,7 +43,7 @@ NODES = [  # id, lane, y-centre, english, chinese, kind
     ('send_c', 'claude', 886, 'Submit all, log each row', '全部提交并逐条记录', 'claude'),
     ('send_s', 'svc', 886, 'Platforms + company portals\nNotion tracker', '平台与公司官网 · Notion', 'svc'),
     ('dash_c', 'claude', 994, 'Refresh charts + dashboard,\nback up your data', '刷新图表与看板，备份个人数据', 'claude'),
-    ('dash_s', 'svc', 994, 'Notion page · claude.ai', '', 'svc'),
+    ('dash_s', 'svc', 994, 'Notion page · local dashboard', '', 'svc'),
 ]
 EDGES = [  # from, to, label, dashed
     ('kb_u', 'kb_c', '', False), ('cred_u', 'cred_c', '', False), ('cred_c', 'cred_s', '', False), ('login_u', 'login_c', '', False),

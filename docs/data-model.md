@@ -42,7 +42,7 @@ first_seen, last_email, url, evidence, thread, job_id, events, notes, mode, cv_v
 | `data/inbox/YYYY-MM-DD.json` | raw scan results; `.shortlist.json` = after dedupe and filters |
 | `data/applied.csv` | append-only log of every logged action |
 | `data/mail/` | dump, chunks, classifications, `sync_report.md` |
-| `data/dashboard/` | aggregates (incl. interview rate by mode and posting age), rows for the artifact, chart PNGs |
+| `data/dashboard/` | aggregates (incl. interview rate by mode and posting age), chart PNGs |
 | `data/applications/<date>_<company>_<title>/` | one folder per application: job-description snapshot (`jd.md`, `jd.pdf`, `page.pdf`, `page.html` from `tools/jd_snapshot.py`); for tailored ones also `match.md`, `cv.yaml`, `letter.yaml`, PDFs, `changes.md` |
 
 ## Backup folder (`BACKUP_DIR`, default `~/Documents/Job Autopilot Data`)

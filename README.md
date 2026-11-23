@@ -48,7 +48,7 @@ set up and run by talking to the Claude desktop app. No coding needed.**
   algorithm (Double DQN)"), and a stack shared by several projects is named once per position, not repeated.
 - **Dashboards**: a local dashboard page you open by double-click — numbers, charts and a table of all applications; ⋯ on a
   row shows its emails, the saved job description and the documents you sent. Notion users also get a section on their
-  Notion page (stage pie, stage flow, applications per week, interview rate by mode and posting age) and an interactive claude.ai dashboard.
+  Notion page (stage pie, stage flow, applications per week, interview rate by mode and posting age).
 
 ### What you need
 | | |
@@ -84,7 +84,7 @@ set up and run by talking to the Claude desktop app. No coding needed.**
 | "save the job descriptions of my applications" | snapshots every tracked posting that is not saved yet (and marks closed ones) |
 | "sync my mail" | updates Notion from your inbox and labels application emails |
 | "reply to my interview invitations" | scans your inbox and LinkedIn messages for unanswered invitations, drafts an accept / reschedule / withdraw reply for each and sends it only after you approve the exact text |
-| "show the dashboard" | refreshes Notion charts and the interactive dashboard |
+| "show the dashboard" | refreshes the local dashboard and the Notion charts |
 | "back up my data" / "restore my data from …" | saves or restores your personal data folder |
 
 ### A normal day
@@ -135,7 +135,7 @@ For a 🎯 posting Claude first shows how you match, asks about the gaps, then w
 | Job-description snapshots | `tools/jd_snapshot.py` | each posting → `data/applications/<date>_<company>_<title>/` (`jd.md`, `jd.pdf`, page copy); `--from-shortlist` for all picked jobs in one call, `--backfill` for older applications |
 | Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py`, `label_mail.py`, `merge.py`, `split_for_classify.py`, `mail_cache.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
 | Tracker | `tools/notion_setup.py`, `log_application.py`, `notion_upsert.py`, `tracker_local.py`, `tracker.py` | Notion database ([schema](docs/data-model.md)) or local `data/tracker.csv` (`TRACKER_BACKEND=local`); logs and updates one row per job |
-| Dashboards | `.claude/skills/job-dashboard`, `tools/refresh_dashboards.sh`, `local_dashboard.py`, `dashboard/local.html`, `dashboard_data.py`, `charts_png.py`, `notion_page.py`, `dashboard/index.html` | local dashboard page (everyone) + Notion charts + interactive claude.ai dashboard |
+| Dashboards | `.claude/skills/job-dashboard`, `tools/refresh_dashboards.sh`, `local_dashboard.py`, `dashboard/local.html`, `dashboard_data.py`, `charts_png.py`, `notion_page.py` | local dashboard page (everyone) + Notion charts |
 | File uploads | `tools/upload_file.sh`, `tools/copy_path.py`, `tools/upload_test.html`, [docs/file-uploads.md](docs/file-uploads.md), [docs/macos-permissions.md](docs/macos-permissions.md) | macOS: drives the Open dialog · Windows: Claude in Chrome's upload tool · anywhere: paste a copied path |
 | Backup | `tools/backup.py` | your personal data → a local folder with version history; restore after a new download |
 | Privacy guard | `tools/check_public.py`, `.githooks/` | blocks commits that would publish your name, contacts, employers or tokens |
@@ -208,7 +208,7 @@ Platform-by-platform behaviour: **[docs/platforms.md](docs/platforms.md)**.
   （按岗位类别准备的简历）。精投包括：岗位要求对照表、几个补缺口的问题、为该岗位写的简历和德/英文求职信。
   所有内容只来自你确认过的事实库，自动核对日期和数字是否一致，PDF 能被招聘系统（ATS）正确读取。措辞先照顾 HR：冷僻的项目名、方法名、模型名都保留，但旁边加一句通用说明（如"强化学习算法（Double DQN）"）；多个项目共用的技术栈在一段经历里只写一次，不重复。
 - **看板**：一个双击就能打开的本地看板页面——数字、图表和全部申请的表格，每行的 ⋯ 能看到相关邮件、保存的 JD 和投递的材料。
-  用 Notion 的话，Notion 页面里还有图表区（阶段饼图、阶段流向图、每周投递数、按投递模式和岗位新鲜度的面试率）+ 一个 claude.ai 交互看板。
+  用 Notion 的话，Notion 页面里还有图表区（阶段饼图、阶段流向图、每周投递数、按投递模式和岗位新鲜度的面试率）。
 
 ### 需要准备
 | | |
@@ -295,7 +295,7 @@ sequenceDiagram
 | JD 存档 | `tools/jd_snapshot.py` | 每个岗位 → `data/applications/<日期>_<公司>_<职位>/`（`jd.md`、`jd.pdf`、网页副本）；`--from-shortlist` 一次存好所有选中的岗位，`--backfill` 补存以前的申请 |
 | 邮件同步与标签 | `.claude/skills/job-mail-sync`、`tools/gmail_*.py`、`sync_mail.py`、`label_mail.py`、`merge.py`、`split_for_classify.py`、`mail_cache.py` | 邮件分类、更新 Notion、打 `applications` 标签、发现手动申请、历史回填 |
 | 申请表 | `tools/notion_setup.py`、`log_application.py`、`notion_upsert.py`、`tracker_local.py`、`tracker.py` | Notion 数据库（[字段说明](docs/data-model.md)）或本地 `data/tracker.csv`（`TRACKER_BACKEND=local`），每个岗位一行，记录并更新状态 |
-| 看板 | `.claude/skills/job-dashboard`、`tools/refresh_dashboards.sh`、`local_dashboard.py`、`dashboard/local.html`、`dashboard_data.py`、`charts_png.py`、`notion_page.py`、`dashboard/index.html` | 本地看板页面（所有人）+ Notion 图表 + claude.ai 交互看板 |
+| 看板 | `.claude/skills/job-dashboard`、`tools/refresh_dashboards.sh`、`local_dashboard.py`、`dashboard/local.html`、`dashboard_data.py`、`charts_png.py`、`notion_page.py` | 本地看板页面（所有人）+ Notion 图表 |
 | 文件上传 | `tools/upload_file.sh`、`tools/copy_path.py`、`tools/upload_test.html`、[docs/file-uploads.md](docs/file-uploads.md)、[docs/macos-permissions.md](docs/macos-permissions.md) | macOS：操作"打开"对话框 · Windows：Claude in Chrome 的上传工具 · 通用：粘贴复制好的路径 |
 | 备份 | `tools/backup.py` | 个人数据备份到本地文件夹，带版本历史；重新下载后一键恢复 |
 | 隐私保护 | `tools/check_public.py`、`.githooks/` | 提交前自动拦截会公开你姓名、联系方式、雇主或 token 的改动 |

@@ -1,7 +1,7 @@
 """Rebuild the Dashboard section at the TOP of the Notion Job Search page (run dashboard_data.py and charts_png.py first).
 
 Layout, top to bottom (user decision 2026-11-10):
-  Dashboard heading · callout "Total applications: N" · link to the interactive dashboard
+  Dashboard heading · callout "Total applications: N"
   two columns: stage pie | flow between stages
   applications per week (full width, on its own)
   "Which applications get interviews" table
@@ -15,7 +15,7 @@ import json, os, sys, requests
 import datetime as _dt
 from common import *
 env = load_env(); H = {'Authorization': f"Bearer {env['NOTION_TOKEN']}", 'Notion-Version': '2022-06-28'}; HJ = {**H, 'Content-Type': 'application/json'}
-PAGE = env['NOTION_PARENT_PAGE_ID']; DASH_URL = env.get('DASHBOARD_URL', '')
+PAGE = env['NOTION_PARENT_PAGE_ID']
 OUTDIR = os.path.join(DATA, 'dashboard')
 d = json.load(open(os.path.join(OUTDIR, 'data.json')))
 MARK = 'Dashboard'
@@ -67,8 +67,6 @@ children += [
  {'object': 'block', 'type': 'callout', 'callout': {'icon': {'emoji': '📊'}, 'rich_text': [
    t(f'Total applications: {sent}', bold=True), t(f' since {since} ({total} jobs tracked, {not_sent} not applied)'), t(f' · {open_n} open · {f["Interview"]} reached interview · {f["Offer"]} offer · {rej} rejected ({rej/max(sent, 1):.0%})' + (f' · median {med} days to a first decision' if med is not None else '') + f'\nUpdated {today} by the job-autopilot sync.')]}},
 ]
-if DASH_URL:
-    children.append({'object': 'block', 'type': 'paragraph', 'paragraph': {'rich_text': [t('Interactive version with hover details, open pipeline table and search: '), {'type': 'text', 'text': {'content': 'Job Search Dashboard', 'link': {'url': DASH_URL}}}]}})
 # charts first: pie | flow side by side, weekly on its own (PNGs from tools/charts_png.py)
 def image(name, caption):
     return {'object': 'block', 'type': 'image', 'image': {'type': 'file_upload', 'file_upload': {'id': upload(os.path.join(OUTDIR, name))}, 'caption': [t(caption)]}}
