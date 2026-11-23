@@ -42,6 +42,28 @@ get every application **all the way to sent**, doing everything a person could d
   reCAPTCHA challenges, "what is 4+5"); passwords, logins, account creation and verification links that create an account;
   anything that needs a document or fact you do not have; a required cover letter when `rules.cover_letter_required` is `skip`
   (with `draft`, write it and use the user's batch OK).
+- **GOLDEN RULE — human-check pages (Personio, Dover, any Cloudflare Turnstile) are done in Chrome** (`CLAUDE.md` rule 11). The check
+  never passes in the built-in pane, even when the user clicks it, but the user's own Chrome shows none (2026-11-23: Eraneos, BITS and
+  VESTIGAS all submitted that way). So: recognise the portal up front (`*.jobs.personio.de`, often behind `t.gohiring.com` links;
+  `jobs.dover.com`; a LinkedIn "Bewerben" link whose `safety/go?url=` target is one of them), do NOT prefill it in the pane, and apply in
+  Chrome — see **Applying in Claude in Chrome** below. Never ask the user to tick a check in the pane, never give up a job because of it.
+  The user clicks a check only if one actually appears in Chrome. If Chrome is not connected, ask the user to connect it (setup step 5b);
+  until then the job stays `Shortlisted` with the note "needs Chrome" — it is not logged `Skipped`.
+
+### Applying in Claude in Chrome
+1. Load the tools once with ToolSearch (`select:mcp__claude-in-chrome__tabs_context_mcp,navigate,computer,read_page,form_input,file_upload,find,get_page_text,javascript_tool,tabs_close_mcp,switch_browser`).
+   If `tabs_context_mcp` says several Chrome browsers are connected, ask the user which one (AskUserQuestion, every browser as an option plus
+   "open a confirmation screen in every connected Chrome extension…") and call `switch_browser` / `select_browser`; the user clicks Connect.
+2. `tabs_context_mcp {createIfEmpty:true}`, then `navigate` to the apply URL (for Personio append `/apply` to the job URL
+   `https://<company>.jobs.personio.de/job/<id>`; for a LinkedIn external link read the real target from `a[href*="safety/go"]`).
+3. `read_page {filter:"all"}` lists every field with a `ref`. Fill with `form_input` (text, selects by visible option text), attach the CV with
+   `file_upload {ref: <"Upload CV" input>, paths:[<absolute CV path>]}` — never click the upload button. Several `form_input` calls can go in one turn.
+4. Answers come from `config/profile.yaml` and the standing rules (gender Female; salary, start date, language levels as in the profile; years of
+   experience and skill levels from the profile / fact bank, never inflated). A question the profile does not cover: stop and ask the user.
+5. Click the submit button (`computer left_click` with the `ref`), wait 3 s, screenshot. Success = a thank-you text ("We have received your
+   application", "Vielen Dank…") **or** the confirmation email; some portals (BITS) remove the form and show no text, then wait for the email
+   before logging `Applied`. An error keeps the form with red messages.
+6. `log_application.py --status Applied …` as in Phase 3, note "submitted via Claude in Chrome". Close the tab you opened (`tabs_close_mcp`).
 - **Still not ticked even in auto mode:** optional boxes (newsletter, talent pool, marketing, "keep my data for other jobs").
   Choose the privacy-preserving option.
 - **Never stall the whole batch on one blocker.** Open every job in its own tab, prefill all of them, collect the open

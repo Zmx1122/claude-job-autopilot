@@ -107,7 +107,8 @@ Then run `python3 tools/notion_setup.py` — it creates the **Job Applications**
 4. Optional backfill: if they applied before, ask from which date; run the **job-mail-sync** skill in backfill mode.
 
 ## 5. Platform logins in Claude's built-in browser
-Use the built-in browser pane (`mcp__Claude_Browser__*`), not Chrome. Logins persist in the pane.
+Use the built-in browser pane (`mcp__Claude_Browser__*`) for scanning, platform logins and ordinary applications. Logins persist in the pane.
+(Pages with a human check — Personio, Dover — are the one exception: they always go through Chrome, step 5b.)
 For each enabled platform open the login page with `preview_start {url}` and ask the user to sign in themselves
 (tick "keep me signed in"). Then verify by loading a page that needs login.
 - LinkedIn `https://www.linkedin.com/login` — afterwards upload every CV variant once to the resume library
@@ -118,13 +119,31 @@ For each enabled platform open the login page with `preview_start {url}` and ask
 - Indeed `https://secure.indeed.com/account/login` — Schnellbewerbung needs a login. Replace any stored multi-page PDF with the single CV.
 Company career portals (Porsche, SAP, Siemens …) are handled per application; some need an account — the user creates those.
 
+## 5b. Chrome + Claude in Chrome (required — golden rule, `CLAUDE.md` rule 11)
+Application pages with a human check (every Personio form, Dover, anything with Cloudflare Turnstile) never pass in the built-in browser,
+but go through in the user's own Chrome. So every user installs this once, whatever system they use:
+1. Install **Google Chrome** if missing (`https://www.google.com/chrome/`), then the **Claude in Chrome** extension from the Chrome Web Store
+   (search "Claude in Chrome", or open `https://claude.ai/chrome`). The user clicks "Add to Chrome" and signs in with the same Claude account.
+   Give them the screen to expect: the Claude side panel opens at the right edge of Chrome; the toolbar shows the Claude icon.
+2. Connect it to this session: load the tools (`ToolSearch select:mcp__claude-in-chrome__switch_browser,mcp__claude-in-chrome__tabs_context_mcp`),
+   call `switch_browser`, ask the user to click **Connect** in the Chrome that should be used (if several Chromes are open, the prompt appears in each;
+   they name the right one). `tabs_context_mcp {createIfEmpty:true}` must then return a tab.
+3. Test the full path on a local page: `tools/upload_test.html` — open it in Chrome with `navigate` (`file://<abs path>`; if Chrome blocks
+   `file://`, test on any Personio form of a real posting up to the submit button and do NOT submit), `read_page` to find the file input,
+   `file_upload` a CV from `knowledge/library/cv/`, check the file name shows. If `file_upload` is not offered or fails, say so and tell the user
+   that Personio / Cloudflare jobs cannot be submitted until it works (known issues: `docs/file-uploads.md`).
+4. Ask the user to sign in in Chrome to LinkedIn / Xing only if they want links to open there; career portals need no login.
+5. Record it: set `platforms.claude_in_chrome: true` in `config/profile.yaml` (`tools/check_setup.py` shows an optional line for it).
+Tell the user plainly why: "Some company forms use a robot check that only works in your own Chrome. With the extension I fill and send those
+there; you only click the check if one appears."
+
 ## 6. File uploads (one time)
 Company portals need real file uploads; the browser pane has no upload tool. Pick the method by system
 (`docs/file-uploads.md`) and store it as `platforms.upload_method` in the profile:
 - **Windows** → `chrome`: help the user install Google Chrome and the Claude in Chrome extension, connect it, log in to
   the career sites there; test `file_upload` on `tools/upload_test.html`. This tool has had 2026 reliability reports
   (see `docs/file-uploads.md`): if the test fails, fall back to `manual` (`tools/copy_path.py`) instead of debugging it for long.
-- **macOS** → `macos_dialog` (below). Fallback `manual`.
+- **macOS** → `macos_dialog` (below). Fallback `manual`. (Chrome from step 5b is installed on macOS as well, for the Personio / Cloudflare pages.)
 macOS dialog script, see `docs/macos-permissions.md`:
 1. Ask the user: System Settings → Privacy & Security → **Accessibility** → turn on **Claude** (add it with + if missing).
 2. Test: open `tools/upload_test.html` in the pane (`preview_start file://<abs path>`), make sure that tab is the **front** tab
@@ -161,6 +180,6 @@ then show the folder (reveal it in Finder / Explorer). The weekly dashboard task
 every change to documents, fact bank or applications. Tokens and passwords are not in the backup — suggest a password manager.
 
 ## 9. Final check and hand-over
-Run `python3 tools/check_setup.py` until everything required is ✅. Then tell the user, in 5 lines, how a normal day works:
+Run `python3 tools/check_setup.py` until everything required is ✅ (and the optional "Claude in Chrome" line, step 5b, is ✅ too). Then tell the user, in 5 lines, how a normal day works:
 "Each morning I sync your mail and your tracker (Notion or the local table) and prepare a shortlist. Open Claude, say 'show today's jobs' / '看看今天的岗位',
 pick the ones you like, I fill them in, you confirm once, I submit and log everything."

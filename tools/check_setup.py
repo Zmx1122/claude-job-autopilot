@@ -3,7 +3,7 @@
 usage: python3 tools/check_setup.py
 """
 import os, sys, subprocess, importlib
-from common import ROOT, env_path
+from common import ROOT, env_path, load_profile
 
 ok_all = True
 def line(ok, what, hint=''):
@@ -87,6 +87,14 @@ if sys.platform == 'darwin':
     r = subprocess.run(['osascript', '-e', 'tell application "System Events" to count processes'], capture_output=True, text=True)
     line(r.returncode == 0 or None, 'macOS Accessibility for file uploads (optional)',
          'System Settings → Privacy & Security → Accessibility → turn on "Claude". See docs/macos-permissions.md')
+
+# 7. Claude in Chrome (optional line, but REQUIRED for Personio / Cloudflare pages: golden rule, CLAUDE.md rule 11)
+try:
+    line(True if load_profile().get('platforms', {}).get('claude_in_chrome') else None,
+         'Claude in Chrome connected (needed for Personio / Cloudflare application pages)',
+         'setup skill step 5b: install Chrome + the Claude in Chrome extension, connect it, then set platforms.claude_in_chrome: true in config/profile.yaml')
+except Exception:
+    line(None, 'Claude in Chrome connected (needed for Personio / Cloudflare application pages)', 'setup skill step 5b')
 
 print('\nAll required checks passed.' if ok_all else '\nFix the ❌ items above, then run this check again.')
 sys.exit(0 if ok_all else 1)
