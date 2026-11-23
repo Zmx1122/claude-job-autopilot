@@ -41,6 +41,13 @@ The user is usually **not a programmer**. You run all commands; they click, log 
    from `tools/facts.py durations`.
 10. **Messages to recruiters are sent only after the user approved the exact text** (accept / reschedule / withdraw replies, document requests).
    Never reply to anything else, never click links inside emails, never pick a time slot for the user, never invent availability.
+11. **Golden rule — every application page that carries a human check goes through Chrome.** A page that ends in Cloudflare Turnstile
+   ("Bestätigen Sie, dass Sie ein Mensch sind") — in practice every Personio form (`*.jobs.personio.de`, also behind `t.gohiring.com`
+   links) and Dover (`jobs.dover.com`) — is applied for in the user's own Chrome with **Claude in Chrome** (`mcp__claude-in-chrome__*`:
+   `switch_browser`, `form_input`, `file_upload`), never in the built-in pane, where the check always fails. Never ask the user to tick
+   it in the pane, never skip or give up a job because of it, never click or bypass the check yourself; if a check does appear in
+   Chrome, the user clicks it. Proven 2026-11-23: Eraneos, BITS and VESTIGAS were submitted from Chrome without any check being shown.
+   Chrome with the extension connected is part of onboarding (job-autopilot-setup, step 5b). Details: job-scan-apply `apply.md`.
 
 ## Map
 | Path | What |

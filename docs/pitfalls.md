@@ -112,7 +112,7 @@ job title and no login form. Check a sample of snapshots by size and content aft
   **LinkedIn 外链被拦截**：从链接 `safety/go?url=` 里解出真实地址再打开。
 - **LinkedIn job id**: after searching, the URL's `currentJobId` is the first card; `https://www.linkedin.com/jobs/view/<id>/` is the direct link.
 - **StepStone `ag=` takes 1, 3, 7, 14** (`age_2` is silently ignored and returns everything).
-- **Cloudflare Turnstile ("Bestätigen Sie, dass Sie ein Mensch sind")** on Personio forms keeps the send button grey → the user ticks it; leave the tab open.
+- **Cloudflare Turnstile ("Bestätigen Sie, dass Sie ein Mensch sind")** on Personio forms keeps the send button grey in the built-in pane and never passes. **Golden rule (CLAUDE.md rule 11): apply in Claude in Chrome** (see "Personio / Cloudflare pages work in Claude in Chrome" below); do not ask the user to tick it, do not skip the job.
 - **Company portals that only offer a login** (BCG studenttalent.bcg.com) → user logs in or creates the account; mark the job *waiting on you*.
 - **Ashby (OpenAI)**: the start-date field is a date picker — click it, type `MM/DD/YYYY`; location is a combobox (type, then click the option). Declaration checkbox + "Submit Application"; success text "Your application was successfully submitted". OpenAI allows at most 5 applications per 180 days.
 - **Company career pages that embed Ashby (BLP)**: the page itself shows no form. Hosted form = `https://jobs.ashbyhq.com/<company-slug>/<ashby_jid>/application`; try the company name with and without hyphens (`blp-digital` worked, `blp` and `BLP` gave 404).
@@ -139,7 +139,7 @@ job title and no login form. Check a sample of snapshots by size and content aft
 ## Cloudflare Turnstile fails in the built-in browser (Personio, Dover) · 2026-11-09
 Personio career pages (`*.jobs.personio.de`) and Dover (`jobs.dover.com`) show a Cloudflare "confirm you are human" box above the submit button.
 In the built-in browser it ends in "Überprüfung fehlgeschlagen" even when the user clicks it by hand, and the portal then reports "Fehler beim Senden der Bewerbung".
-Do not try to get around it. Prefill is wasted effort there: probe the page first (scroll to the bottom, look for the Cloudflare box) and list the job as "needs the user's normal browser" before filling anything.
+Do not try to get around it and do not prefill it in the pane. **Solved 2026-11-23: apply in Claude in Chrome** (golden rule, `CLAUDE.md` rule 11; section "Personio / Cloudflare pages work in Claude in Chrome" below).
 
 ## Found on 2026-11-11 (scheduled daily run)
 - **Indeed URLs all looked identical to the tracker.** `dedupe.py` and `log_application.py` compared posting URLs with the whole query string cut off,
@@ -231,10 +231,7 @@ identical title at the same company even when that row is closed. Always read "S
   Nothing is sent by StepStone in that flow.
 - **Links with `target=_blank`** (BWI "Jetzt bewerben") are blocked by the pane and `navigate` to the portal host may be denied:
   remove the `target` attribute and click the link for real.
-- **Personio forms (`*.jobs.personio.de`, also behind `t.gohiring.com`) end in a Cloudflare Turnstile** after "Submit". Fill and
-  upload everything, click submit, and leave the "Bestätigen Sie, dass Sie ein Mensch sind" box to the user; then click submit again.
-  On 2026-11-17 the user could not pass that Turnstile in the built-in browser at all (4 of 4 forms) and chose to skip the jobs.
-  Before prefilling a Personio job, tell the user it ends in a Cloudflare check; it may only work in Claude in Chrome.
+- **Personio forms (`*.jobs.personio.de`, also behind `t.gohiring.com`) end in a Cloudflare Turnstile** in the built-in pane (on 2026-11-17 the user could not pass it in 4 of 4 forms). Do not prefill them there: use Claude in Chrome (golden rule, `CLAUDE.md` rule 11).
 - **Xing "Einfach bewerben" / external apply needs a Xing login** in the built-in browser. Without it, apply on the company site.
 - **LinkedIn `offsiteApplyUrl`** is in the logged-in `/jobs/view/<id>/` HTML (`offsiteApplyUrl\":\"…\"`); appcast.io links can
   answer 403 — then find the posting on the employer's own career page (IHK → ihk-muenchen.de/ueber-uns/karriere/Stellenanzeigen).
@@ -253,3 +250,35 @@ identical title at the same company even when that row is closed. Always read "S
 - **Lever after a 400 reload** keeps typed fields but drops the resume and may glue text into the wrong field (LinkedIn URL got the
   notice-period text). Re-check every field and re-attach the resume before submitting again.
 - **Liebherr careers (SuccessFactors "YourLiebherrCareer")**: Schnellbewerbung creates an account with password = account wall.
+- **File dialog needs the tab in the FOREGROUND (not only the pane displayed).** `upload_file.sh` fails with "no file sheet open"
+  when the form is in a background tab: `tabs_select` it first (a freshly created tab with `foreground: true` is fine). Take a new
+  screenshot after selecting (the frame size changes), click the upload control, then run the script **once** — never in a
+  retry loop and never two at a time: a stray second script types into the next sheet and attached a random file from Downloads
+  (a "Weixin Image…jpg") to a form. After every upload read back the attached file name from the page before going on.
+- **softgarden (SCHUFA)**: the attached CV shows a small ✖ that only works after `window.confirm = () => true` (the pane swallows
+  native confirm dialogs); it asks Wicket ajax and reloads the page. Selects need value + `change` (jQuery trigger); text fields real typing.
+  The "Ich bin ein Mensch" FriendlyCaptcha before "Bewerbung absenden" is the user's step.
+- **Closing/reopening the Browser pane loses all tabs and the login sessions of unfinished forms** (SuccessFactors needs the user's
+  login again). Keep the pane open until the batch is submitted.
+- **Personio forms (WSCAD, Woodmark …)** carry a Cloudflare Turnstile in the pane → apply in Claude in Chrome (golden rule); no longer "give up".
+- **KV Nordrhein (dvinci)** has an image captcha ("abgebildeten Zeichen") = user's step; **Stern Stewart** wants Geburtsdatum plus a
+  Zeugnisse upload including Abitur — build it with `tools/kb_bundle.py --merge …` (Abitur does not exist for a Chinese BSc; say so).
+- **StepStone "Ich bin interessiert"** (BGV) submits instantly: list it, click only after the user's go.
+
+## Personio / Cloudflare pages work in Claude in Chrome · 2026-11-23
+**Golden rule (`CLAUDE.md` rule 11):** every application page with a human check is done in the user's own Chrome with Claude in Chrome.
+- **Why it works:** the built-in pane is an embedded, automation-flagged browser, so Cloudflare Turnstile never passes there. The user's real Chrome
+  (normal profile and fingerprint) was not challenged at all: Eraneos, BITS and VESTIGAS (all `*.jobs.personio.de`) were filled, the CV attached and
+  submitted without any check. If a check does appear, the user clicks it; Claude never clicks or bypasses it.
+- **Setup:** Chrome + the Claude in Chrome extension, connected (setup skill step 5b). With two connected browsers `tabs_context_mcp` asks for a choice:
+  `switch_browser` shows a Connect prompt in each, the user clicks Connect in the right one. Open your own tab, close it when done.
+- **Personio form anatomy:** `https://<company>.jobs.personio.de/job/<id>/apply`; fields First / Last / Email / Phone / "Available from" (free text,
+  DD.MM.YYYY) plus company-specific ones (source, expected salary, gender, language levels, work style, years of experience, Python level);
+  documents block with `Upload CV` file input (use `file_upload` with its ref) and optional Cover letter / Certificates / Other (leave empty).
+  After submit the form disappears. Success text: "We have received your application and will contact you shortly" (English pages). BITS shows
+  no text at all, only the removed form: confirm by the portal's email ("Deine Bewerbung als … / Your application as …") before logging `Applied`.
+- **Answers that are choices, not facts** (VESTIGAS): residence = greater Munich; work style = regular office 2–3 days (matches `remote: hybrid_ok`);
+  years of experience = the profile's `years_of_experience` bucket (4 → "4–5 years", never the bucket the posting asks for); Python = "Regular production use
+  (incl. CI/CD, testing)" (verifiable from the fact bank, not "expert"); English / German = C1 option.
+- **Do not** use the pane for these pages, and do not log `Skipped` because of the check (BITS, Eraneos and VESTIGAS were wrongly logged 放弃投递 first and
+  corrected after the Chrome run).

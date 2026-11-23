@@ -12,7 +12,7 @@ has no upload tool, and a page on the internet may not read files from your comp
 | **B** | **Claude in Chrome** `file_upload` tool puts the file straight into the form | Windows, macOS | Google Chrome + the "Claude in Chrome" extension, connected to the Claude desktop app; log in to the career sites in Chrome | Claude |
 | **C** | Manual: Claude opens the dialog and copies the path (`tools/copy_path.py`), you paste and press Enter | any | none | you (2 keys) |
 
-**Recommendation · 推荐**: macOS → A (fallback C). **Windows → B** (fallback C). **B has had reliability reports in 2026** (see below):
+**Recommendation · 推荐**: macOS → A (fallback C). **Windows → B** (fallback C). **Every system also needs B for pages with a human check (Personio, Dover, Cloudflare): golden rule, `CLAUDE.md` rule 11 — those are never done in the built-in browser.** 所有系统都要装 B：Personio / Cloudflare 验证页一律在 Chrome 里投。 **B has had reliability reports in 2026** (see below):
 if its test fails, use C instead of debugging it. Method D lists maintained open-source alternatives we have not tried yet.
 macOS 用 A（备选 C）；**Windows 用 B**（备选 C）。**B 在 2026 年有过稳定性问题的报告**（见下）：测试不通过就改用 C，不要长时间排查。方法 D 是还没试过的开源替代方案。
 

@@ -102,6 +102,7 @@ platforms:                     # Q7 · Where to search / 平台（需要在 Clau
   indeed: {enabled: true}
   xing: {enabled: true}
   upload_method: "macos_dialog"   # how files reach company portals: macos_dialog | chrome (Windows) | manual — docs/file-uploads.md
+  claude_in_chrome: false         # set true after setup step 5b: Chrome + Claude in Chrome connected — REQUIRED for Personio / Cloudflare pages (golden rule, CLAUDE.md rule 11)
 
 schedule:                      # Q8 · When / 定时
   timezone: "Europe/Berlin"
