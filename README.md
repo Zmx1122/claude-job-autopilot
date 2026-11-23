@@ -131,7 +131,7 @@ For a 🎯 posting Claude first shows how you match, asks about the gaps, then w
 | Career coach | `.claude/skills/job-career-coach`, `tools/facts.py` | no CV → documents + interview → fact bank, target roles (`DIRECTION.md`), first CVs |
 | CV & cover-letter writer | `.claude/skills/job-application-writer`, `tools/doc_render.py`, `tools/doc_check.py`, `templates/` | master CV, one CV per role family, tailored CV + letter per posting; ATS-readable PDFs; consistency and screener-wording check |
 | Country standards | `standards/de/` | what a strong German CV and Anschreiben look like, when to tailor, market notes for newcomers |
-| Scan & apply | `.claude/skills/job-scan-apply`, `tools/dedupe.py`, `tools/filters.py`, `tools/log_application.py` | shortlist → pick → prefill → confirm → submit |
+| Scan & apply | `.claude/skills/job-scan-apply`, `tools/dedupe.py`, `tools/filters.py`, `tools/log_application.py`, `tools/form_helper.js` (+ `form_helper_test.html`) | shortlist → pick → prefill → confirm → submit |
 | Job-description snapshots | `tools/jd_snapshot.py` | each posting → `data/applications/<date>_<company>_<title>/` (`jd.md`, `jd.pdf`, page copy); `--from-shortlist` for all picked jobs in one call, `--backfill` for older applications |
 | Mail sync & label | `.claude/skills/job-mail-sync`, `tools/gmail_*.py`, `tools/sync_mail.py`, `label_mail.py`, `merge.py`, `split_for_classify.py`, `mail_cache.py` | classify emails, update Notion, label `applications`, detect manual applications, backfill |
 | Tracker | `tools/notion_setup.py`, `log_application.py`, `notion_upsert.py`, `tracker_local.py`, `tracker.py` | Notion database ([schema](docs/data-model.md)) or local `data/tracker.csv` (`TRACKER_BACKEND=local`); logs and updates one row per job |

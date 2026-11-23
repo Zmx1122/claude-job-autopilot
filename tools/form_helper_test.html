@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Form helper test</title>
+<style>
+body{font:15px system-ui,sans-serif;margin:2rem;max-width:760px;background:#fff;color:#1f1e1c}
+.field{margin:.7rem 0}label{display:block;font-weight:600;margin-bottom:.2rem}
+fieldset{border:1px solid #ccc;margin:.7rem 0}fieldset label{display:inline;font-weight:400;margin-right:1rem}
+.consent{position:relative}.consent input{position:absolute;opacity:0;width:1px;height:1px}
+.consent label{font-weight:400;padding-left:1.6rem;position:relative;cursor:pointer}
+.consent label:before{content:"";position:absolute;left:0;top:.1rem;width:1rem;height:1rem;border:1px solid #555}
+.consent input:checked+label:before{background:#1f1e1c}
+.error{color:#b00020;display:none}.error.on{display:block}iframe{border:1px dashed #aaa;height:70px;width:100%}
+</style></head><body>
+<h1>Bewerbung · Test form</h1>
+<p>Regression page for <code>tools/form_helper.js</code>: plain labels, aria-label, placeholder only, a password, a select, radios,
+a checkbox group, a hidden-input consent box, a shadow-DOM field, a same-origin iframe, a controlled input that behaves like React's,
+a file input and a section that appears after 1.5 s. <code>window.__check()</code> returns what the page itself received.</p>
+<form id="f" onsubmit="return false">
+  <div class="field"><label for="first">Vorname *</label><input id="first" name="first" required></div>
+  <div class="field"><label for="last">Nachname *</label><input id="last" name="last" required></div>
+  <div class="field"><input type="email" name="mail" aria-label="E-Mail-Adresse" required></div>
+  <div class="field"><input type="tel" name="phone" placeholder="Telefonnummer"></div>
+  <div class="field"><label for="pw">Passwort *</label><input id="pw" type="password" required></div>
+  <div class="field"><label for="anrede">Anrede *</label><select id="anrede" required><option value="">Bitte wählen</option><option value="m">Herr</option><option value="w">Frau</option><option value="d">Divers</option></select></div>
+  <div class="field"><label for="mot">Motivation</label><textarea id="mot"></textarea></div>
+  <div class="field"><label for="start">Frühester Eintrittstermin</label><input id="start" type="date"></div>
+  <fieldset><legend>Arbeitserlaubnis für Deutschland? *</legend>
+    <input type="radio" name="permit" id="p1" value="yes" required><label for="p1">Ja</label>
+    <input type="radio" name="permit" id="p2" value="no"><label for="p2">Nein</label></fieldset>
+  <fieldset><legend>Sprachen</legend>
+    <input type="checkbox" name="langs" id="l1" value="de"><label for="l1">Deutsch</label>
+    <input type="checkbox" name="langs" id="l2" value="en"><label for="l2">Englisch</label>
+    <input type="checkbox" name="langs" id="l3" value="zh"><label for="l3">Chinesisch</label></fieldset>
+  <div class="field consent"><input type="checkbox" id="dsgvo" required><label for="dsgvo">Ich habe die Datenschutzerklärung gelesen und akzeptiere sie. *</label></div>
+  <div class="field consent"><input type="checkbox" id="news"><label for="news">Newsletter abonnieren</label></div>
+  <city-field></city-field>
+  <iframe id="fr" srcdoc="<label for='li'>LinkedIn-Profil</label> <input id='li' name='li'>"></iframe>
+  <div class="field"><label for="salary">Gehaltsvorstellung (EUR) *</label><input id="salary" required> <small>app state: <span id="salaryEcho">–</span></small></div>
+  <div class="field"><label for="cv">Lebenslauf *</label><input id="cv" type="file" accept=".pdf" required></div>
+  <div id="later"></div>
+  <p class="error" id="err" role="alert">Bitte füllen Sie alle Pflichtfelder aus.</p>
+  <button type="button" id="next">Weiter</button> <button type="button" id="send">Bewerbung absenden</button> <button type="button" disabled>Zurück</button>
+  <p id="status"></p>
+</form>
+<script>
+const seen = {};
+document.addEventListener('input', e => { const k = e.target.id || e.target.name; seen[k] = (seen[k] || 0) + 1; }, true);
+customElements.define('city-field', class extends HTMLElement {
+  connectedCallback() { const r = this.attachShadow({ mode: 'open' }); r.innerHTML = '<div class="field"><label for="city">Stadt</label><input id="city"></div>'; }
+});
+setTimeout(() => { document.getElementById('later').innerHTML = '<h3>Weitere Angaben</h3><div class="field"><label for="notice">Kündigungsfrist</label><input id="notice"></div>'; }, 1500);
+document.getElementById('next').onclick = () => { document.getElementById('status').textContent = 'Weiter geklickt'; };
+document.getElementById('send').onclick = () => {
+  const f = document.getElementById('f'), ok = f.checkValidity();
+  document.getElementById('err').classList.toggle('on', !ok);
+  document.getElementById('status').textContent = ok ? 'Gesendet' : 'Fehler';
+};
+let reactSalary = '';
+window.__check = () => ({ react: reactSalary, inputEvents: seen, consent: document.getElementById('dsgvo').checked,
+  newsletter: document.getElementById('news').checked, status: document.getElementById('status').textContent });
+</script>
+<script>
+// Behaves like a React controlled input (React's inputValueTracking): a plain `el.value = x` is recorded by the tracker, so the
+// next input event looks like "no change" and the app state stays empty. Only the native setter + an input event (or real typing) work.
+const sal = document.getElementById('salary'), nat = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+let tracked = '';
+Object.defineProperty(sal, 'value', { configurable: true, get() { return nat.get.call(this); }, set(v) { tracked = String(v); nat.set.call(this, v); } });
+sal.addEventListener('input', () => { const v = nat.get.call(sal); if (v !== tracked) { tracked = v; reactSalary = v; document.getElementById('salaryEcho').textContent = v; } });
+</script>
+</body></html>

@@ -65,6 +65,9 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 Use Claude's built-in browser pane (`mcp__Claude_Browser__*`) — the user logs in there once and sessions persist.
 Do not switch to Chrome unless the user asks. Prefer `get_page_text` / `read_page` over screenshots.
 On a 2× display, screenshot coordinates = CSS pixels × 2.
+Every browser action re-reads the whole conversation, so: batch predictable steps (`browser_batch`), fill forms with
+`tools/form_helper.js`, take screenshots at `scale: 0.5`, prefill each job in its own subagent, and apply in a fresh session
+when the current one is long (job-scan-apply `apply.md`, "Work in small contexts").
 
 ## When something new is learned
 Add platform behaviour to `docs/platforms.md`, a solved problem to `docs/pitfalls.md`, a new standard answer to

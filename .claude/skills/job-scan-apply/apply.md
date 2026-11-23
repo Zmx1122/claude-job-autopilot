@@ -3,6 +3,34 @@
 Read this once the user has picked jobs, before touching any form. The interaction contract in `SKILL.md` still applies.
 Materials come from `knowledge/manifest.yaml` through the **job-knowledge-base** skill, section C.
 
+## Work in small contexts (every apply run)
+Every browser action re-reads the whole conversation: in past runs one submitted application took ~60 actions at ~500k tokens
+of context each. Keep both numbers down — this changes how, never what, is done:
+- **Fresh session for applying.** The scan's state lives in files (`data/inbox/YYYY-MM-DD.shortlist.json`, `.dropped.json`, the
+  tracker). When the scan conversation is already long, or the user comes back later, apply in a new session from those files.
+  Mail replies, dashboards and other work do not belong in the apply session.
+- **One subagent per job for the prefill**, one after another — never in parallel (they share the one browser pane and the
+  macOS file dialog). The main thread keeps the batch: pick, documents, questions to the user, ready list, report. Brief each
+  subagent with: the job (company, title, URL, shortlist row, mode), the files to upload (absolute paths, slot → file), where the
+  answers are (`config/profile.yaml` personal data and `screening_answers`), the user's standing answers from memory (gender,
+  disability, date of birth, essay rules, no agencies, Personio/Cloudflare — a subagent may not see memory), whether this batch
+  stops on the final review page or submits directly, and to follow this file and `tools/form_helper.js`.
+  It reports in at most ~10 lines: status (*ready for review* | *submitted* | *waiting on the user* | *skipped: reason*), tab id,
+  files uploaded, the open step, and screening questions the profile does not answer (question + options, never guessed).
+  After the user decides or answers, continue **the same subagent** with SendMessage (it keeps its context) to finish or
+  submit; it logs `Applied` with the Phase 3 command once it sees the success page. Passwords, CAPTCHAs and account creation
+  stay with the user exactly as in the main thread.
+- **Form helper first.** On a form page paste `tools/form_helper.js` (the code; the comment block can be left out) into
+  `javascript_tool` once — it defines `window.__jf`; after a page load `typeof __jf` tells whether it needs pasting again.
+  Then `__jf.fields()` → one `__jf.fill({...})` from the profile → check `requiredEmpty`: one call instead of a dozen
+  find / click / type steps. `__jf.click('Weiter')` and `await __jf.waitFor('<text on the next page>', 40)` in the same call
+  replace click → wait → screenshot. Real clicks and screenshots only for what the helper returns in `missing` (custom
+  dropdowns), for uploads, and for portals that hide the form from scripts (SuccessFactors, below).
+- **Batch what you can predict** with `browser_batch` (navigate → get_page_text; click → wait → screenshot; tabs_create →
+  navigate). A separate `computer wait` call is almost never needed: wait inside the batch or with `__jf.waitFor`.
+- **Screenshots at `scale: 0.5`** unless small text must be read — coordinates stay in the full-size frame, so clicks are
+  unaffected; `zoom` for a detail. When the form is in the DOM, `__jf.state()` or `get_page_text` answers "did it work" without an image.
+
 ## Best-effort automation (user rule — always follow)
 Once the user has picked jobs and said to apply directly ("直接投递", "全部投", "submit once filled", "尽可能自动化"), the job is to
 get every application **all the way to sent**, doing everything a person could do except what a machine must not or cannot do.
@@ -79,7 +107,7 @@ Put every job that hits a registration wall in one table and recommend:
    `strategy.cover_letter` says so). The writer reads the posting from `jd.md`. Prefill the 📄 template jobs while the user
    answers. The user approves the tailored documents' text before they are uploaded.
 
-For each picked job, in its own tab:
+For each picked job — in its own subagent and its own tab (see *Work in small contexts*):
 - **Choose the CV**: 🎯 the tailored PDF from `data/applications/<folder>/`; 📄 the `cv_variants` entry whose `use_for`
   keywords best match the title (default: the first variant). Never edit a template CV for one posting.
 - **Materials**: read the form's upload section (slot names, required marks, number of files, size limit), then choose and
