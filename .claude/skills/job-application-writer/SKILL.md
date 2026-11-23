@@ -86,9 +86,11 @@ Template CVs are not edited per posting. Rebuild them when the fact bank changes
 ## Mode J · Tailored application for one posting (🎯)
 Steps 2–4 are a conversation; keep each message short and batch questions. When several tailored jobs are open at once
 (from a scan), ask the questions for **all of them in one round**.
-1. **Intake.** Open the posting (built-in browser, `get_page_text`), write the text to a scratch file and run
-   `python3 tools/jd_snapshot.py --url … --company … --title … --text-file <file>`: it creates the application folder with
-   `jd.md` (text + header) and `jd.pdf` / `page.pdf` (copies to keep). Add to `jd.md`'s header: posted date, language,
+1. **Intake.** From a scan, job-scan-apply has already snapshotted the posting: read `data/applications/<folder>/jd.md`.
+   Otherwise run `python3 tools/jd_snapshot.py --url … --company … --title …` — it fetches the posting itself and creates the
+   application folder with `jd.md` (text + header) and `jd.pdf` / `page.pdf` (copies to keep). Only when it reports `blocked`:
+   open the posting in the built-in browser, `get_page_text`, write the text to a scratch file and rerun with
+   `--text-file <file> --force`. Add to `jd.md`'s header: posted date, language,
    contact person, reference number, upload slots if visible. Pick the base CV: the variant whose `use_for` fits best.
 2. **Match table** (`match.md`, and show it):
 

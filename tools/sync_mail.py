@@ -2,7 +2,8 @@
 
 usage: python3 tools/sync_mail.py [--apply] [--rebuild] [--mail-dir data/mail]
 reads  data/mail/dump.json + data/mail/classified_*.json (or those in --mail-dir)
-writes data/mail/sync_report.md (always) and, with --apply, updates Notion and labels the emails in Gmail.
+writes data/mail/sync_report.md (always) and, with --apply, updates Notion, labels the emails in Gmail and stores the
+classifications in data/mail/classification_cache.json (tools/mail_cache.py), so tomorrow's split skips these emails.
 Without --apply it is a dry run: read the report, then run again with --apply.
 
 Matching order for every email: same Gmail thread as a known row → same company (+ similar title) → same platform + title
@@ -302,3 +303,5 @@ for c in created:
 if to_label:
     subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'label_mail.py'), os.path.join(MAIL, 'to_label.json')])
 print(f'applied: {len(changes)} updates, {len(created)} new rows, label "{label_name(env)}" added to {len(to_label)} emails')
+import mail_cache
+print(f'classification cache: {mail_cache.store(MAIL)} emails stored ({os.path.relpath(mail_cache.PATH, ROOT)})')
