@@ -3,6 +3,7 @@
 usage:
   python3 tools/jd_snapshot.py --url URL --company "ACME AG" --title "AI Engineer" [--date YYYY-MM-DD]
                                [--text-file pane.txt] [--platform LinkedIn] [--force]
+  python3 tools/jd_snapshot.py --from-shortlist data/inbox/YYYY-MM-DD.shortlist.json --rows 1,3,5 [--date YYYY-MM-DD] [--delay 10]
   python3 tools/jd_snapshot.py --backfill [--status Applied,Confirmed,Interview,Offer] [--delay 20] [--limit N]
 
 One folder per application, the same one the writer uses for tailored documents:
@@ -13,6 +14,9 @@ One folder per application, the same one the writer uses for tailored documents:
     page.html   the page's DOM as loaded (raw evidence)
 --text-file: text you already read from the posting in the built-in browser (get_page_text) — best source, because the
 browser is logged in; the headless print is a second, anonymous copy. Without it the text is taken from the page's DOM.
+--from-shortlist: every picked job of a dedupe.py shortlist (--rows = the table's # numbers) in one call, fetched anonymously,
+so the posting text never has to pass through the chat. Prints one line per job; only the jobs it reports `blocked` need the
+--text-file route (open the posting in the built-in browser, get_page_text, rerun that one job with --text-file --force).
 --backfill: every Notion row with a job URL and one of --status, whose folder has no jd.md yet, one at a time with a pause
 (LinkedIn answers bulk requests with HTTP 429 — keep --delay ≥ 15). With --force it also redoes snapshots that hit a login
 wall. Prints one line per job and a summary.
@@ -218,6 +222,23 @@ def snapshot(url, company, title, date, text_file=None, platform='', force=False
     return out, st
 
 
+def from_shortlist(path, rows, date, delay, redo=False):
+    from common import shortlist_rows
+    tally, last_li = {}, False
+    for n, (i, j) in enumerate(shortlist_rows(path, rows)):
+        li = bool(linkedin_id(j.get('url')))
+        if n and li and last_li:
+            time.sleep(delay)  # LinkedIn answers bursts with HTTP 429
+        out, st = snapshot(j.get('url', ''), j.get('company', ''), j.get('title', ''), date, platform=j.get('platform', ''), force=redo)
+        last_li = li
+        tally[st] = tally.get(st, 0) + 1
+        print(f'#{i:<3} {st:8} {j.get("company", "")[:28]:28} {j.get("title", "")[:50]:50} → {os.path.relpath(out, ROOT)}', flush=True)
+    print('summary:', ', '.join(f'{k} {v}' for k, v in sorted(tally.items())) or 'nothing to do')
+    if tally.get('blocked'):
+        print('blocked = login wall / bot check: open that posting in the built-in browser, get_page_text to a file, then '
+              'rerun that job with --url … --company … --title … --text-file <file> --force')
+
+
 def needs_snapshot(r, redo):
     md = os.path.join(folder(r.get('applied') or r.get('first_seen') or 'undated', r['company'], r['title']), 'jd.md')
     if not os.path.exists(md):
@@ -248,11 +269,16 @@ if __name__ == '__main__':
     ap.add_argument('--url'); ap.add_argument('--company'); ap.add_argument('--title'); ap.add_argument('--platform', default='')
     ap.add_argument('--date', default=str(datetime.date.today())); ap.add_argument('--text-file'); ap.add_argument('--force', action='store_true')
     ap.add_argument('--backfill', action='store_true')
+    ap.add_argument('--from-shortlist'); ap.add_argument('--rows', default='')
     ap.add_argument('--status', default='Applied,Confirmed,Interview,Offer')
-    ap.add_argument('--delay', type=float, default=20); ap.add_argument('--limit', type=int, default=0)
+    ap.add_argument('--delay', type=float); ap.add_argument('--limit', type=int, default=0)
     a = ap.parse_args()
-    if a.backfill:
-        backfill(set(a.status.split(',')), a.delay, a.limit, redo=a.force)
+    if a.from_shortlist:
+        if not a.rows:
+            raise SystemExit('--from-shortlist needs --rows (the picked # numbers, e.g. --rows 1,3,5)')
+        from_shortlist(a.from_shortlist, a.rows, a.date, 10 if a.delay is None else a.delay, redo=a.force)
+    elif a.backfill:
+        backfill(set(a.status.split(',')), 20 if a.delay is None else a.delay, a.limit, redo=a.force)
     elif a.url and a.company and a.title:
         out, st = snapshot(a.url, a.company, a.title, a.date, a.text_file, a.platform, a.force)
         files = ', '.join(sorted(f for f in os.listdir(out) if f.startswith(('jd', 'page'))))

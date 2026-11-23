@@ -1,6 +1,6 @@
 """Turn raw scan results into the shortlist table shown to the user, with a Mode per job (🎯 tailored / 📄 template).
 
-usage: python3 tools/dedupe.py data/inbox/YYYY-MM-DD.json [--offline] [--preset wide|everything|<yours>] [--set key=value ...]
+usage: python3 tools/dedupe.py data/inbox/YYYY-MM-DD.json [--offline] [--preset wide|everything|<yours>] [--set key=value ...] [--show-dropped]
 Input: JSON list of jobs Claude collected while scanning — EVERY posting it opened, unfiltered (this script applies the filters) —
 each with title, company, platform, url, city, salary, posted (YYYY-MM-DD, or the platform's text such as "vor 3 Tagen" / "2 days ago"),
   reposted (true if the platform marks it reposted / erneut gepostet), apply_type (easy_apply | one_click | platform_form | external),
@@ -13,7 +13,8 @@ The filters are run-time inputs (tools/filters.py): the profile gives the defaul
 so a user who is not happy with the list can say "show more" and you just re-run on the SAME raw file with a wider preset.
 Decides the Mode with the table in standards/<country>/apply-strategy.md, sorts by fit and prints a markdown table, then what each
 filter dropped and the exact flag that would bring those jobs back.
-Writes the kept list (with mode, mode_reason, age_days) to data/inbox/YYYY-MM-DD.shortlist.json.
+Writes the kept list (with mode, mode_reason, age_days) to data/inbox/YYYY-MM-DD.shortlist.json and every dropped job with its
+reason to data/inbox/YYYY-MM-DD.dropped.json; --show-dropped also prints that list (one line per job) after the table.
 --offline skips the Notion lookup (testing).
 """
 import json, os, re, sys
@@ -80,6 +81,7 @@ def main():
     ap = argparse.ArgumentParser(description='shortlist builder')
     ap.add_argument('src'); ap.add_argument('--offline', action='store_true')
     ap.add_argument('--preset'); ap.add_argument('--set', action='append', default=[])
+    ap.add_argument('--show-dropped', action='store_true')
     args = ap.parse_args()
     src, offline = args.src, args.offline
     jobs = json.load(open(src))
@@ -165,12 +167,16 @@ def main():
         posted = '?' if j['age_days'] is None else ('today' if j['age_days'] == 0 else f"{j['age_days']}d")
         print(f"| {i} | {icon[j['mode']]} · {j['mode_reason']} | {j.get('company','')} | [{j.get('title','')}]({j.get('url','')}) | "
               f"{j.get('platform','')} | {posted} | {j.get('apply_type','')} | {needs} | {j.get('salary') or '–'} | {j.get('fit','')} | {j.get('why','')} |")
-    if dropped:
+    json.dump([dict(company=j.get('company', ''), title=j.get('title', ''), url=j.get('url', ''), filter=w[0], reason=w[1]) for j, w in dropped],
+              open(src.replace('.json', '.dropped.json'), 'w'), ensure_ascii=False, indent=1)
+    if dropped and args.show_dropped:
         print('\nDropped: ' + '; '.join(f"{j.get('company','?')} – {j.get('title','')[:40]} ({w[1]})" for j, w in dropped))
+    if dropped:
         by = {}
         for j, (cat, _) in dropped:
             by.setdefault(cat, []).append(j)
-        print('\nDropped by filter: ' + ' · '.join(f'{k} {len(v)}' for k, v in sorted(by.items(), key=lambda kv: -len(kv[1]))))
+        print('\nDropped by filter: ' + ' · '.join(f'{k} {len(v)}' for k, v in sorted(by.items(), key=lambda kv: -len(kv[1]))) +
+              ('' if args.show_dropped else f"  (which job and why: {os.path.basename(src.replace('.json', '.dropped.json'))} or --show-dropped)"))
         wants = []
         for cat, hint in HINTS.items():
             if cat in by:

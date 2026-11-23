@@ -247,3 +247,27 @@ def title_sim(a, b):
 
 def load_json(path, default=None):
     return json.load(open(path)) if os.path.exists(path) else default
+
+
+def parse_rows(spec, n):
+    """Row numbers of a dedupe.py table: 'all' | '1-12' | '1,3,5-7' → sorted 1-based numbers within 1..n."""
+    spec = (spec or '').strip().lower()
+    if spec == 'all':
+        return list(range(1, n + 1))
+    out = set()
+    for part in filter(None, re.split(r'[,\s]+', spec)):
+        m = re.fullmatch(r'(\d+)(?:-(\d+))?', part)
+        if not m:
+            raise SystemExit(f'bad row number "{part}" in "{spec}" (use e.g. all, 1-12, 1,3,5-7)')
+        out.update(range(int(m.group(1)), int(m.group(2) or m.group(1)) + 1))
+    bad = sorted(i for i in out if not 1 <= i <= n)
+    if bad:
+        raise SystemExit(f'rows {bad} are outside the shortlist (1-{n})')
+    return sorted(out)
+
+
+def shortlist_rows(path, rows, except_rows=''):
+    """[(number, job)] picked from a dedupe.py shortlist file by --rows / --except-rows."""
+    jobs = json.load(open(path))
+    skip = set(parse_rows(except_rows, len(jobs))) if except_rows else set()
+    return [(i, jobs[i - 1]) for i in parse_rows(rows, len(jobs)) if i not in skip]

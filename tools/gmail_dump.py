@@ -27,7 +27,9 @@ KW = ('(bewerbung OR bewerbungsunterlagen OR application OR applied OR applying 
 labeled = search(f'label:{label} after:{since}')
 unlabeled = search(f'after:{since} -label:{label} {KW}')
 # senders that only produce newsletters / alerts; never application events
+# (jobagent.stepstone.de and match.indeed.com: 800+ archived emails, every one a job alert)
 SKIP = re.compile(r'grammarly|researchgate|academia-mail|glassdoor|alert|jobleads|jobware|ziprecruiter|newsletter|em\.linkedin|invitations@|'
+                  r'jobagent\.stepstone|match\.indeed|'
                   r'notifications-noreply@linkedin|messages-noreply@linkedin|messaging-digest|mailrobot@|no-reply@indeed\.com', re.I)
 def dec(s): return ''.join(p.decode(c or 'utf-8', 'replace') if isinstance(p, bytes) else p for p, c in decode_header(s or ''))
 def body_text(msg):
