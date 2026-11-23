@@ -14,7 +14,7 @@ Never paste secrets back into chat, never type a password or solve a CAPTCHA, ne
 
 ## Where secrets live (tell the user once, before step 3)
 Standard: the **`.env`** file in the repo folder (git-ignored; template `.env.example`; read by `tools/common.py`). It holds
-`TRACKER_BACKEND`, `NOTION_TOKEN`, `NOTION_PARENT_PAGE_ID`, `NOTION_DATABASE_ID` (Notion users only), `IMAP_USER`, `IMAP_APP_PASSWORD`, `GMAIL_LABEL`, `DASHBOARD_URL`,
+`TRACKER_BACKEND`, `NOTION_TOKEN`, `NOTION_PARENT_PAGE_ID`, `NOTION_DATABASE_ID` (Notion users only), `IMAP_USER`, `IMAP_APP_PASSWORD`, `GMAIL_LABEL`,
 `BACKUP_DIR`. It is not part of the backup (keep the tokens in a password manager) and `tools/check_public.py` blocks any commit
 that contains them. There is no keychain integration: the file is plain text on this Mac.
 Two ways to enter a secret, say both, in this order:
@@ -159,8 +159,7 @@ macOS dialog script, see `docs/macos-permissions.md`:
   Explain: numbers and charts at the top; the table shows title, company, status and applied date; ⋯ on a row shows its emails,
   the job description snapshot and the documents sent. The page is rebuilt after every sync and every batch of applications;
   reload it in the browser to see the new state. Works with no data yet (shows an empty state).
-- **Notion users** in addition: after the first rows exist, run the **job-dashboard** skill (charts on the "Job Search" page) and,
-  if they want it, the claude.ai artifact dashboard (link stored as `DASHBOARD_URL`).
+- **Notion users** in addition: after the first rows exist, run the **job-dashboard** skill (charts on the "Job Search" page).
 
 ## 8. Schedule (Claude desktop scheduled tasks)
 Create two scheduled tasks with the scheduled-tasks tool (ask the user for times; defaults from `schedule:` in the profile):

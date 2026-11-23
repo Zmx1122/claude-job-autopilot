@@ -1,4 +1,4 @@
-"""Export the tracker (Notion database or local data/tracker.csv) to data/dashboard/data.json (aggregates) and data/dashboard/applications.json (rows for the artifact).
+"""Export the tracker (Notion database or local data/tracker.csv) to data/dashboard/data.json (aggregates).
 
 usage: python3 tools/dashboard_data.py
 """
@@ -61,6 +61,3 @@ json.dump(data, open(out, 'w'), ensure_ascii=False, indent=1)
 print(f"{len(rows)} rows -> {out}; status={data['by_status']}; funnel={data['funnel']}; sankey links={len(links)}; weeks={len(weeks)}; response samples={len(resp)}")
 print(f"interview rate by mode: {by_mode}\ninterview rate by posting age at application: {by_age}")
 
-KEEP = ('id', 'title', 'company', 'city', 'platform', 'status', 'stage', 'interview_date', 'source', 'applied', 'last_email', 'events', 'url', 'evidence', 'notion_url', 'salary', 'mode', 'posted')
-json.dump([{k: r.get(k, '') for k in KEEP} for r in rows], open(os.path.join(OUTDIR, 'applications.json'), 'w'), ensure_ascii=False)
-print('rows for the artifact dataset ->', os.path.join(OUTDIR, 'applications.json'))

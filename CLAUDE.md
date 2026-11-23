@@ -61,7 +61,6 @@ The user is usually **not a programmer**. You run all commands; they click, log 
 | `tools/` | Python and shell scripts; every script has usage in its docstring. `tools/stage.py` = the Notion **Stage** labels (一面邀请, 参加一面后被拒, 一面邀请后撤回 …) and how mail moves them |
 | `data/` | runtime files: inbox, mail dumps, applied.csv, dashboard data, `applications/<date>_<company>_<title>/` per application: JD snapshot (`tools/jd_snapshot.py`, taken before every submit) and tailored documents (git-ignored) |
 | `dashboard/local.html` | template of the local dashboard → `data/dashboard/Job-Dashboard.html` (`tools/local_dashboard.py`) |
-| `dashboard/index.html` | page of the interactive claude.ai dashboard |
 | `docs/platforms.md` | how each platform and portal behaves, search URLs, file uploads |
 | `docs/pitfalls.md` | problems we hit and how they were solved |
 | `docs/BACKLOG.md` | what to build next (open problems from real runs) |

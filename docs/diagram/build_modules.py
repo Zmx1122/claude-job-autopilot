@@ -40,7 +40,7 @@ ROWS = [
     ('svc', 'Online services', '在线服务', 'svc', 86, [
         None,
         ('LinkedIn · StepStone · Indeed · Xing', 'company career portals', '招聘平台 · 公司官网'),
-        ('Gmail · Notion · claude.ai', 'label "applications", tracker,\ninteractive dashboard', '邮箱 · 申请表 · 交互看板'),
+        ('Gmail · Notion', 'label "applications", tracker,\ncharts on the Notion page', '邮箱 · 申请表 · Notion 图表'),
         ('GitHub (shared repo)', 'code, skills, rules, empty templates —\nno personal data', '共享仓库：只有代码和模板'),
     ]),
 ]

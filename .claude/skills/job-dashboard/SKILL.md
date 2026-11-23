@@ -20,7 +20,7 @@ internet, no account). Template: `dashboard/local.html` (no data in it; change t
   applications may still get an answer, so their rate can rise. It is computed in the page from `posted`, `applied` and the
   funnel of each row, so it updates by itself on every rebuild. It is only as good as the `posted` dates: `log_application.py`
   must get `--posted <YYYY-MM-DD>` for every application (job-scan-apply Phase 3 passes today minus `age_days`); rows without it
-  land in "Posting date unknown". The Notion page has its own version (block 4 below); the claude.ai page does not show this table.
+  land in "Posting date unknown". The Notion page has its own version (block 4 below).
 - Table: title, company, status (Stage label + Status), applied date; search and filter chips (all, waiting, interviews, offers,
   rejected / withdrawn, not sent). A click on a row or on ⋯ opens the details: posting link, facts, notes, history (Events),
   the emails of this application (from `data/mail/archive.json`, matched by Gmail thread, else by company + title), the JD
@@ -30,21 +30,20 @@ internet, no account). Template: `dashboard/local.html` (no data in it; change t
 - The user opens it by double-click (or `--open`). To show it in Claude's browser pane, start the `local-dashboard` entry of
   `.claude/launch.json` (serves `data/` on 127.0.0.1:8765) and open `/dashboard/Job-Dashboard.html`; the pane cannot open
   `file://` pages without a permission prompt.
-- It holds personal data (emails, notes): it stays in git-ignored `data/dashboard/`; never publish it as an artifact or send it anywhere.
+- It holds personal data (emails, notes): it stays in git-ignored `data/dashboard/`; never publish it or send it anywhere (no claude.ai artifact).
 
-With `TRACKER_BACKEND=local` the sections below do not apply (no Notion page). The claude.ai artifact dashboard can still be
-made from `data/dashboard/applications.json` if the user asks for it.
+With `TRACKER_BACKEND=local` the section below does not apply (no Notion page).
 
 ## Notion page (Notion users, every refresh)
 `tools/refresh_dashboards.sh` runs:
-1. `tools/dashboard_data.py` → `data/dashboard/data.json` (aggregates) and `applications.json` (rows).
+1. `tools/dashboard_data.py` → `data/dashboard/data.json` (aggregates).
 2. `tools/charts_png.py` → `pie.png` (stage of every application), `flow.png` (Applied → Confirmed → Interview → Offer with exits),
    `weekly.png` (applications per ISO week by platform).
 3. `tools/notion_page.py` → replaces the "Dashboard" section at the **top** of the Notion page. Fixed layout (user decision 2026-11-10):
 
    | Order | Block |
    |---|---|
-   | 1 | "Dashboard" heading, callout starting with **Total applications: N** (sent; jobs tracked but never applied to counted separately), link to the interactive dashboard |
+   | 1 | "Dashboard" heading, callout starting with **Total applications: N** (sent; jobs tracked but never applied to counted separately) |
    | 2 | two columns side by side: `pie.png` (stage of every application) · `flow.png` (flow between stages) |
    | 3 | "Applications per week" heading + `weekly.png`, full width, on its own |
    | 4 | "Which applications get interviews" table (lower part, only once rows carry a mode or posting date) |
@@ -57,20 +56,4 @@ made from `data/dashboard/applications.json` if the user asks for it.
    For wider charts the user turns on ••• → **Full width** for the page once (the API cannot set it).
 Needs at least one row; with an empty database it stops with a message.
 
-## Interactive dashboard (claude.ai artifact)
-**First time** (no `DASHBOARD_URL` in `.env`):
-1. Artifact tool `action: "quickstart"`, `intent: "other"` — use the **Dashboard** type it offers.
-2. Create it from that type with the title "Job Search Dashboard". Follow the instructions the type returns; they are authoritative.
-   The usual shape: attach `data/dashboard/applications.json` as the dataset named **applications**, and use
-   `dashboard/index.html` from this repo as the page (it already defines the calcs `status_counts`, `kpis`, `flow`, `weekly`,
-   `by_platform`, `open_pipeline` and draws the donut, the Sankey, the weekly bars and the open-pipeline table).
-3. Save the artifact link to `.env` as `DASHBOARD_URL` and re-run `tools/notion_page.py` so the Notion page links to it.
-
-**Refresh** (weekly, or after a big sync):
-1. Run `tools/refresh_dashboards.sh` (zsh). On Windows run its commands one by one instead: `python3 tools/dashboard_data.py`,
-   `python3 tools/local_dashboard.py`, `python3 tools/charts_png.py`, `python3 tools/notion_page.py`, then `python3 tools/backup.py save -m "weekly backup"`.
-2. Upload `data/dashboard/applications.json` to `DASHBOARD_URL` as an asset (`asset: true`), then point the `applications`
-   dataset at the new file and update its `updated` time (ArtifactData on the dataset document). Do not rewrite the page.
-3. Optionally delete the previous asset.
-
-claude.ai pages cannot be embedded in Notion (iframe blocked), which is why Notion gets static charts plus a link.
+**There is no claude.ai artifact dashboard** (removed 2026-11-23: it cost many tokens on every refresh for little value). Every refresh is `tools/refresh_dashboards.sh` only: local page + Notion charts. Do not create or update artifacts for the dashboard.
