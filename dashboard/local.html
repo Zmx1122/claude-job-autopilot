@@ -423,14 +423,17 @@ const DATA = /*__DATA__*/null;
   function renderFresh() {
     const day = (s) => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(s || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 86400000 : null; };
     const BUCKETS = [['Same day', (n) => n <= 0], ['1 day old', (n) => n === 1], ['2–3 days old', (n) => n >= 2 && n <= 3], ['4–7 days old', (n) => n >= 4 && n <= 7], ['Older than 7 days', (n) => n > 7]];
-    const groups = BUCKETS.map(([label, test]) => ({ label, test, apps: [] })), unknown = { label: 'Posting date unknown', apps: [], unk: true };
+    const groups = BUCKETS.map(([label, test]) => ({ label, test, apps: [] })),
+      legacy = { label: 'Applied by hand or before 5 Nov (never scanned, no posting date)', apps: [], unk: true },
+      unknown = { label: 'Scanned, posting date missing', apps: [], unk: true };
+    const SCAN_START = day('2026-11-05');
     sent.forEach((r) => {
       const a = day(r.applied), p = day(r.posted);
-      if (a === null || p === null) { unknown.apps.push(r); return; }
+      if (a === null || p === null) { ((r.source === 'manual' || a === null || a < SCAN_START) ? legacy : unknown).apps.push(r); return; }
       const g = groups.find((x) => x.test(a - p)); (g || unknown).apps.push(r);
     });
     const stat = (g) => { const n = g.apps.length, i = g.apps.filter((r) => r.funnel.includes('Interview')).length, w = g.apps.filter((r) => !r.ended && !r.funnel.includes('Interview')).length; return { n, i, w, rate: n ? i / n : 0 }; };
-    const all = [...groups, unknown], st = all.map(stat);
+    const all = [...groups, legacy, unknown], st = all.map(stat);
     const known = groups.reduce((a, g) => a + g.apps.length, 0), knownI = groups.reduce((a, g) => a + stat(g).i, 0);
     const max = Math.max(0.0001, ...st.filter((_, k) => !all[k].unk).map((s) => s.rate));
     const FEW = 10;
@@ -442,7 +445,7 @@ const DATA = /*__DATA__*/null;
     const tot = { n: sent.length, i: reachedN('Interview'), w: sent.filter((r) => !r.ended && !r.funnel.includes('Interview')).length };
     body.push(`<tr style="font-weight:600"><td>All applications</td><td>${tot.n}</td><td>${tot.i}</td><td class="bar"><div class="rbar"><span class="track"><span class="fill" style="width:${Math.round(100 * (tot.n ? tot.i / tot.n : 0) / max)}%;background:var(--s1)"></span></span><b>${pct(tot.i, tot.n)}</b></div></td><td>${tot.w}</td></tr>`);
     $('#freshRows').innerHTML = body.join('');
-    $('#freshNote').textContent = known ? `${known} of ${sent.length} applications have a posting date (overall rate among them: ${pct(knownI, known)}). The bars are scaled to the best group; rows with fewer than ${FEW} applications are marked.` : 'No application has a posting date yet; new applications record it automatically.';
+    $('#freshNote').textContent = known ? `${known} of ${sent.length} applications have a posting date (overall rate among them: ${pct(knownI, known)}). ${legacy.apps.length} were applied by hand or before 5 Nov, so they never had a posting date; ${unknown.apps.length} were scanned but the date was missing. Only the first five rows are compared. Bars are scaled to the best group; rows with fewer than ${FEW} applications are marked.` : 'No application has a posting date yet; new applications record it automatically.';
   }
 
   const drawAll = () => { drawDonut(); drawFunnel(); drawWeekly(); };
